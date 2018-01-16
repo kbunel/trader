@@ -19,11 +19,10 @@ export class GraphComponent implements OnInit {
     this.options = {
       chart: {
         type: 'candlestickBarChart',
-        height: 450,
         margin: {
-          top: 20,
-          right: 20,
-          bottom: 66,
+          top: 0,
+          right: 0,
+          bottom: 20,
           left: 60
         },
         x: (d) => {
@@ -34,7 +33,6 @@ export class GraphComponent implements OnInit {
         },
         duration: 1000 / 30,
         xAxis: {
-          axisLabel: 'Dates',
           tickFormat: (d) => {
             return d3.time.format('%x')(new Date(Date.now() + d));
           },
@@ -42,7 +40,6 @@ export class GraphComponent implements OnInit {
         },
 
         yAxis: {
-          axisLabel: 'Stock Price',
           tickFormat: (d) => {
             return d3.format(',.2f')(d);
           },

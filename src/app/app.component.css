@@ -1,0 +1,41 @@
+html, body {
+  background-color: #1e1e1e;
+  color: #e2e0e9;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  border-bottom: 1px solid #3f3f3f;
+}
+
+main {
+  position: absolute;
+  top: 80px;
+  left: 0;
+  right: 500px;
+  bottom: 300px;
+}
+
+nav {
+  position: absolute;
+  top: 80px;
+  width: 500px;
+  right: 0;
+  bottom: 0;
+  border-left: 1px solid #3f3f3f;
+}
+
+footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 500px;
+  height: 300px;
+  border-top: 1px solid #3f3f3f;
+}
