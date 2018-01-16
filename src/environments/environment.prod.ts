@@ -1,7 +1,6 @@
 export const environment = {
   production: true,
-  binance: {
-    key: '',
-    secret: ''
+  url: {
+    webSocket: 'ws://localhost:8999'
   }
 };
