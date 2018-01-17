@@ -1,0 +1,11 @@
+.amcharts-chart-div > a {
+  display: none !important;
+}
+
+.amcharts-dataloader-curtain {
+  background-color: #1e1e1e !important;
+}
+
+.amChartsPeriodSelector{
+  margin: auto 10px;
+}

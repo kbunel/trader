@@ -1,16 +1,17 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { HttpClientModule } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 
-import { PriceMarketComponent } from './components/priceMarket/priceMarket.component';
-import { GraphComponent } from './components/graph/graph.component';
+import { NgxElectronModule } from 'ngx-electron';
 
-import { WebSocketService } from './services/webSocket.service';
+import { PriceMarketComponent } from '@components/priceMarket/priceMarket.component';
+import { GraphComponent } from '@components/graph/graph.component';
 
-import { NvD3Module } from 'ng2-nvd3';
-import 'd3';
-import 'nvd3';
+import { WebSocketService } from '@services/webSocket.service';
+
+import { AmChartsModule } from '@amcharts/amcharts3-angular';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,9 @@ import 'nvd3';
   ],
   imports: [
     BrowserModule,
-    NvD3Module
+    HttpClientModule,
+    NgxElectronModule,
+    AmChartsModule
   ],
   providers: [
     WebSocketService

@@ -6,6 +6,7 @@
 export const environment = {
   production: false,
   url: {
+    api: 'http://localhost:8999',
     webSocket: 'ws://localhost:8999'
   }
 };

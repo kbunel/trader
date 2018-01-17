@@ -3,6 +3,7 @@ html, body {
   color: #e2e0e9;
   margin: 0;
   padding: 0;
+  font-family: Arial;
 }
 
 header {
@@ -11,6 +12,7 @@ header {
   left: 0;
   right: 0;
   height: 80px;
+  background-color: #2f2f2f;
   border-bottom: 1px solid #3f3f3f;
 }
 
@@ -20,6 +22,7 @@ main {
   left: 0;
   right: 500px;
   bottom: 300px;
+  padding: 10px 0 2px 2px;
 }
 
 nav {
