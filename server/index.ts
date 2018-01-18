@@ -9,11 +9,11 @@ import * as cors from 'cors';
 import Bot from './bot';
 import Routes from './routes';
 
-const app = express();
-const server = http.createServer(app);
+const app: express = express();
+const server: http.Server = http.createServer(app);
 
-const bot = new Bot(server);
-const routes = new Routes(bot);
+const bot: Bot = new Bot(server);
+const routes: Routes = new Routes(bot);
 
 app.use(cors());
 

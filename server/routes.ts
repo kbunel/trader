@@ -1,21 +1,39 @@
 import 'dotenv/config';
-import * as api from 'binance';
 
 export default class Routes {
 
   private binanceRest = null;
   private bot = null;
 
+  /**
+   *
+   * @param bot
+   */
   constructor(bot) {
     this.bot = bot;
-    this.binanceRest = new api.BinanceRest({
-      key: String(process.env.APIKEY),
-      secret: String(process.env.APISECRET),
-    });
+    this.binanceRest = this.bot.binanceRest;
   }
 
-  public list() {
+  /**
+   *
+   * @returns {any[]}
+   */
+  public list(): any[] {
     return [
+      {
+        method: 'GET',
+        path: '/server/:startOrStop',
+        handlers: [
+          (req, res) => {
+            if (req.params.startOrStop === 'start') {
+              this.bot.start();
+            } else if (req.params.startOrStop === 'stop') {
+              this.bot.stop();
+            }
+            res.send(req.params.startOrStop);
+          }
+        ]
+      },
       {
         method: 'GET',
         path: '/config/:symbol/:interval',
@@ -35,10 +53,10 @@ export default class Routes {
         path: '/klines/:interval*?',
         handlers: [
           (req, res) => {
-            const data = {
+            const params = {
               interval: req.params.interval
             };
-            this.bot.changeConfig(data);
+            this.bot.changeConfig(params);
 
             this.binanceRest.klines({
               symbol: this.bot.symbol,

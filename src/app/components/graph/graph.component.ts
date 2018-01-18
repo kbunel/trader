@@ -11,7 +11,6 @@ import { AmChartsService, AmChart } from '@amcharts/amcharts3-angular';
   encapsulation: ViewEncapsulation.None
 })
 export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
-  public data: any[any] = [];
   private chart: AmChart;
 
   constructor(private AmCharts: AmChartsService,
@@ -47,7 +46,7 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
         compared: false,
         categoryField: 'openTime',
         dataLoader: {
-          url: environment.url.api + '/klines/1m',
+          url: environment.url.api + '/klines',
           format: 'json',
           async: true
         }
@@ -154,18 +153,7 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
       balloon: {
         textAlign: 'left',
         offsetY: 10
-      },
-      periodSelector: {
-        dateFormat: 'JJ:NN DD-MM-YYYY',
-        position: 'top',
-        listeners: [{
-          event: 'changed',
-          method: (e) => {
-            console.log(e);
-          }
-        }]
       }
-
     });
   }
 
@@ -187,8 +175,6 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.webSocketService.klineSubscribe.subscribe((data: any) => {
-      // console.log(data);
-    });
+    this.webSocketService.frontSubscribe.subscribe(console.log);
   }
 }

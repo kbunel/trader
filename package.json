@@ -30,6 +30,7 @@
     "@angular/router": "^5.1.0",
     "binance": "^1.2.2",
     "body-parser": "^1.18.2",
+    "bootstrap": "^4.0.0-beta.3",
     "core-js": "^2.4.1",
     "cors": "^2.8.4",
     "dotenv": "^4.0.0",
@@ -39,6 +40,7 @@
     "rxjs": "^5.5.6",
     "socket.io": "^2.0.4",
     "socket.io-client": "^2.0.4",
+    "technicalindicators": "^1.0.21",
     "zone.js": "^0.8.19"
   },
   "devDependencies": {

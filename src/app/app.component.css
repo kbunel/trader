@@ -42,3 +42,16 @@ footer {
   height: 300px;
   border-top: 1px solid #3f3f3f;
 }
+
+footer ul.tab {
+  margin: 0;
+  padding: 0;
+}
+
+footer ul.tab li {
+  width: 50%;
+  display: inline-block;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}

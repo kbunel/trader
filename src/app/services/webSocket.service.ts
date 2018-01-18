@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '@env/environment';
+import { FrontModel } from '@models/front.model';
 import { AggTradeModel } from '@models/aggTrade.model';
 import { DepthModel } from '@models/depth.model';
 import { DepthLevelModel } from '@models/depthLevel.model';
@@ -12,7 +13,7 @@ import * as io from 'socket.io-client';
 @Injectable()
 export class WebSocketService {
 
-  public logs: any[string] = [];
+  public front: FrontModel = new FrontModel();
   public trade: TradeModel = new TradeModel();
   public aggTrade: AggTradeModel = new AggTradeModel();
   public depth: DepthModel = new DepthModel();
@@ -21,7 +22,7 @@ export class WebSocketService {
   public ticker: TickerModel = new TickerModel();
   public allTickers: TickerModel[] = [];
 
-  public logsSubscribe: Subject<any[string]> = new Subject();
+  public frontSubscribe: Subject<any[string]> = new Subject();
   public tradeSubscribe: Subject<TradeModel> = new Subject();
   public aggTradeSubscribe: Subject<AggTradeModel> = new Subject();
   public depthSubscribe: Subject<DepthModel> = new Subject();
@@ -33,7 +34,7 @@ export class WebSocketService {
   constructor() {
     const socket = io(environment.url.webSocket);
 
-    socket.on('logs', (data: any[string]): void => this.logsSubscribe.next(this.logs = data));
+    socket.on('front', (data: any[string]): void => this.frontSubscribe.next(this.front = data));
     socket.on('trade', (data: TradeModel): void => this.tradeSubscribe.next(this.trade = data));
     socket.on('aggTrade', (data: AggTradeModel): void => this.aggTradeSubscribe.next(this.aggTrade = data));
     socket.on('depth', (data: DepthModel): void => this.depthSubscribe.next(this.depth = data));
