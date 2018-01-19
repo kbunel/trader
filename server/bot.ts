@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { BinanceEnum } from './enum';
 import Transactions from './transactions';
 import Indicators from './indicators';
+import Strategies from './strategies';
 
 export default class Bot extends Transactions {
 
@@ -10,6 +11,7 @@ export default class Bot extends Transactions {
 
   private active: boolean = process.env.AUTO_START_BOT === 'true';
   private indicators: Indicators = null;
+  private strategies: Strategies;
 
   /**
    *
@@ -19,6 +21,8 @@ export default class Bot extends Transactions {
     super(server);
 
     this.indicators = new Indicators();
+
+    this.strategies = new Strategies();
 
     this.loop();
   }
@@ -40,7 +44,17 @@ export default class Bot extends Transactions {
   /**
    *
    */
-  private execute(): void {
+  private execute(strategie?: string): void {
+    this.strategies.setCoinMargketCap(this.coinmarketcap);
+    switch(strategie) {
+      case 'getBestPercentChange':
+        this.strategies.getBestPercentChange();
+        break;
+      default:
+        this.strategies.flickFlack();
+        break;
+    }
+
     this.front.statusBot = this.active;
 
     if (!this.active) {
@@ -51,7 +65,6 @@ export default class Bot extends Transactions {
       this.priceCurrent = Number(this.trade.price);
     }
 
-    console.log(this.trade);
     this.haveOrder()
       .then((status: boolean) => {
         if (!status && this.indicators.validateOrder(this.priceCurrent, Number(this.trade.price), this.action)) {
@@ -77,6 +90,6 @@ export default class Bot extends Transactions {
    */
   private loop(): void {
     this.sendDataFront();
-    setTimeout(() => this.execute(), 1000);
+    setTimeout(() => this.execute(process.env.strategie), 1000);
   }
 }
