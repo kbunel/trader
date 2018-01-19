@@ -1,4 +1,4 @@
-export class CoinMarletCapModel {
+export class CoinMarketCapModel {
   public id: string = null;
   public name: string = null;
   public symbol: string = null;

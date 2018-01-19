@@ -7,7 +7,7 @@ import { DepthLevelModel } from '@models/depthLevel.model';
 import { KlineModel } from '@models/kline.model';
 import { TickerModel } from '@models/ticker.model';
 import { TradeModel } from '@models/trade.model';
-import { CoinMarletCapModel } from '@models/coinmarketcap.model.ts';
+import { CoinMarketCapModel } from '@models/coinmarketcap.model.ts';
 import { Subject } from 'rxjs/Subject';
 import * as io from 'socket.io-client';
 
@@ -21,7 +21,7 @@ export class WebSocketService {
   public kline: KlineModel = new KlineModel();
   public ticker: TickerModel = new TickerModel();
   public allTickers: TickerModel[] = [];
-  public coinmarketcap: CoinMarletCapModel[] = [];
+  public coinmarketcap: CoinMarketCapModel[] = [];
 
   public frontSubscribe: Subject<any[string]> = new Subject();
   public tradeSubscribe: Subject<TradeModel> = new Subject();
@@ -31,7 +31,7 @@ export class WebSocketService {
   public klineSubscribe: Subject<KlineModel> = new Subject();
   public tickerSubscribe: Subject<TickerModel> = new Subject();
   public allTickersSubscribe: Subject<TickerModel[]> = new Subject();
-  public coinmarketcapSubscribe: Subject<CoinMarletCapModel[]> = new Subject();
+  public coinmarketcapSubscribe: Subject<CoinMarketCapModel[]> = new Subject();
 
   constructor() {
     const socket = io(environment.url.webSocket);
@@ -44,7 +44,7 @@ export class WebSocketService {
     socket.on('kline', (data: KlineModel): void => this.klineSubscribe.next(this.kline = data));
     socket.on('ticker', (data: TickerModel): void => this.tickerSubscribe.next(this.ticker = data));
     socket.on('allTickers', (data: TickerModel[]): void => this.allTickersSubscribe.next(this.allTickers = data));
-    socket.on('coinmarketcap', (data: CoinMarletCapModel[]): void => this.coinmarketcapSubscribe.next(this.coinmarketcap = data));
+    socket.on('coinmarketcap', (data: CoinMarketCapModel[]): void => this.coinmarketcapSubscribe.next(this.coinmarketcap = data));
   }
 }
 

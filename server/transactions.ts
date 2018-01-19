@@ -12,7 +12,7 @@ import { DepthLevelModel } from './models/depthLevel.model';
 import { KlineModel } from './models/kline.model';
 import { TickerModel } from './models/ticker.model';
 import { TradeModel } from './models/trade.model';
-import { CoinMarletCapModel } from './models/coinmarketcap.model';
+import { CoinMarketCapModel } from './models/coinmarketcap.model';
 
 export default class Transactions {
   public symbol: string = String(process.env.SYMBOL);
@@ -28,7 +28,7 @@ export default class Transactions {
   public ticker: TickerModel = new TickerModel();
   public allTickers: TickerModel[] = [];
   public allKlines: KlineModel[] = [];
-  public coinmarketcap: CoinMarletCapModel[] = [];
+  public coinmarketcap: CoinMarketCapModel[] = [];
 
   private io = null;
   private request = null;

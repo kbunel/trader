@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { WebSocketService } from '@services/webSocket.service';
-import { CoinMarletCapModel } from '@models/coinmarketcap.model';
+import { CoinMarketCapModel } from '@models/coinmarketcap.model';
 
 @Component({
   selector: 'app-coinmarketcap',
@@ -24,7 +24,7 @@ export class CoinmarketcapComponent {
   }
 
   public onSorted() {
-    this.webSocketService.coinmarketcap.sort((a: CoinMarletCapModel, b: CoinMarletCapModel): number => {
+    this.webSocketService.coinmarketcap.sort((a: CoinMarketCapModel, b: CoinMarketCapModel): number => {
       if (this.sortColumn === 'price_btc' || this.sortColumn === 'percent_change_1h' || this.sortColumn === 'percent_change_24h') {
         if (this.sortDirection === 'desc') {
           return Number(a[this.sortColumn]) - Number(b[this.sortColumn]);
