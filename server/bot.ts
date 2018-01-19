@@ -51,6 +51,7 @@ export default class Bot extends Transactions {
       this.priceCurrent = Number(this.trade.price);
     }
 
+    console.log(this.trade);
     this.haveOrder()
       .then((status: boolean) => {
         if (!status && this.indicators.validateOrder(this.priceCurrent, Number(this.trade.price), this.action)) {
