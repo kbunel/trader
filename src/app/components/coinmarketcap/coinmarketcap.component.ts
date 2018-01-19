@@ -17,6 +17,7 @@ export class CoinmarketcapComponent {
   }
 
   public HandleClickSort(event) {
+    console.log(event);
     this.sortColumn = event.sortColumn;
     this.sortDirection = event.sortDirection;
 
@@ -39,9 +40,6 @@ export class CoinmarketcapComponent {
 
         return a[this.sortColumn] > b[this.sortColumn] ? 1 : -1;
       }
-
-
     });
-    console.log(this.webSocketService.coinmarketcap);
   }
 }

@@ -5,9 +5,14 @@
   <app-graph></app-graph>
 </main>
 <nav>
-  <app-server></app-server>
-  <app-bot></app-bot>
-  <app-coinmarketcap></app-coinmarketcap>
+  <ul>
+    <li (click)="tab = 0">Server</li>
+    <li (click)="tab = 1">Bot</li>
+    <li (click)="tab = 2">Coin market cap</li>
+  </ul>
+  <app-server *ngIf="tab === 0"></app-server>
+  <app-bot *ngIf="tab === 1"></app-bot>
+  <app-coinmarketcap *ngIf="tab === 2"></app-coinmarketcap>
 </nav>
 <footer>
   <ul class="tab">

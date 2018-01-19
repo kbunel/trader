@@ -167,7 +167,6 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this.http.get(environment.url.api + '/klines/1m')
       .subscribe((data: any) => {
         this.AmCharts.updateChart(this.chart, () => {
-          console.log(this.chart);
           this.chart.currentPeriod = 'mm';
           this.chart.dataSets[0].dataProvider = data;
         });
@@ -175,6 +174,6 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.webSocketService.coinmarketcapSubscribe.subscribe(console.log);
+    // this.webSocketService.coinmarketcapSubscribe.subscribe(console.log);
   }
 }

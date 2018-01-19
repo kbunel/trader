@@ -1,12 +1,12 @@
 <div>
-  <table sortable-table (sorted)="HandleClickSort($event)">
+  <table app-sortable-table (sorted)="HandleClickSort($event)">
     <thead>
     <tr>
-      <td sortable-column="name">name</td>
-      <td sortable-column="symbol">symbol</td>
-      <td sortable-column="price_btc">price_btc</td>
-      <td sortable-column="percent_change_1h">percent_change_1h</td>
-      <td sortable-column="percent_change_24h">percent_change_24h</td>
+      <td app-sortable-column="name">name</td>
+      <td app-sortable-column="symbol">symbol</td>
+      <td app-sortable-column="price_btc">price_btc</td>
+      <td app-sortable-column="percent_change_1h">percent_change_1h</td>
+      <td app-sortable-column="percent_change_24h">percent_change_24h</td>
     </tr>
     </thead>
     <tbody>

@@ -8,10 +8,12 @@ import { ElectronService } from 'ngx-electron';
   encapsulation: ViewEncapsulation.None
 })
 export class AppComponent {
+  public tab: number = 0;
+
   constructor(private _electronService: ElectronService) {
   }
 
-  private launchWindow() {
+  /*private launchWindow() {
     this._electronService.shell.openExternal('https://coursetro.com');
-  }
+  }*/
 }
