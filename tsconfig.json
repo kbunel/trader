@@ -31,6 +31,9 @@
       ],
       "@services/*": [
         "app/services/*"
+      ],
+      "@directives/*": [
+        "app/directives/*"
       ]
     }
   }

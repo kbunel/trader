@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import * as api from 'binance';
+import { Client } from 'node-rest-client';
 import * as socketio from 'socket.io';
 
 import { BinanceEnum } from './enum';
@@ -9,8 +10,9 @@ import { AggTradeModel } from './models/aggTrade.model';
 import { DepthModel } from './models/depth.model';
 import { DepthLevelModel } from './models/depthLevel.model';
 import { KlineModel } from './models/kline.model';
-import { TickerModel } from './models/Ticker.model';
+import { TickerModel } from './models/ticker.model';
 import { TradeModel } from './models/trade.model';
+import { CoinMarletCapModel } from './models/coinmarketcap.model';
 
 export default class Transactions {
   public symbol: string = String(process.env.SYMBOL);
@@ -26,8 +28,10 @@ export default class Transactions {
   public ticker: TickerModel = new TickerModel();
   public allTickers: TickerModel[] = [];
   public allKlines: KlineModel[] = [];
+  public coinmarketcap: CoinMarletCapModel[] = [];
 
   private io = null;
+  private request = null;
   private binanceWS = null;
   private binanceRest = null;
 
@@ -50,10 +54,13 @@ export default class Transactions {
 
     this.io = socketio(server);
 
+    this.request = new Client();
+
     this.front.symbol = this.symbol;
     this.front.interval = this.interval;
 
     this.socket();
+    this.dataGlobal();
   }
 
   /**
@@ -153,5 +160,12 @@ export default class Transactions {
         }
       }
     );
+  }
+
+  private dataGlobal(): void {
+    this.request.get(process.env.API_COINMARKETCAP, (data) => {
+      this.io.sockets.emit('coinmarketcap', this.coinmarketcap = data);
+      setTimeout(() => this.dataGlobal(), 5 * 1000);
+    });
   }
 }

@@ -66,6 +66,17 @@ export default class Routes {
               .catch((err) => res.send(err));
           }
         ]
+      },
+      {
+        method: 'GET',
+        path: '/allPrices',
+        handlers: [
+          (req, res) => {
+            this.binanceRest.allPrices()
+              .then((data) => res.send(data))
+              .catch((err) => res.send(err));
+          }
+        ]
       }
     ];
   }

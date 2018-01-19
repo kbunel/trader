@@ -5,9 +5,9 @@ import { environment } from '@env/environment';
 import { AmChartsService, AmChart } from '@amcharts/amcharts3-angular';
 
 @Component({
-  selector: 'graph',
+  selector: 'app-graph',
   templateUrl: './graph.component.html',
-  styleUrls: ['./graph.component.css'],
+  styleUrls: ['./graph.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
 export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -175,6 +175,6 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.webSocketService.frontSubscribe.subscribe(console.log);
+    this.webSocketService.coinmarketcapSubscribe.subscribe(console.log);
   }
 }

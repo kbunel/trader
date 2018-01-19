@@ -1,0 +1,22 @@
+<div>
+  <table sortable-table (sorted)="HandleClickSort($event)">
+    <thead>
+    <tr>
+      <td sortable-column="name">name</td>
+      <td sortable-column="symbol">symbol</td>
+      <td sortable-column="price_btc">price_btc</td>
+      <td sortable-column="percent_change_1h">percent_change_1h</td>
+      <td sortable-column="percent_change_24h">percent_change_24h</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let item of webSocketService.coinmarketcap">
+      <td>{{item.name}}</td>
+      <td>{{item.symbol}}</td>
+      <td>{{item.price_btc}} / {{item.price_usd | currency}}</td>
+      <td>{{item.percent_change_1h}}%</td>
+      <td>{{item.percent_change_24h}}%</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
