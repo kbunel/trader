@@ -1,24 +1,30 @@
+import { CoinMarketCapModel } from './models/coinmarketcap.model';
 import 'dotenv/config';
+import { FrontModel } from './models/front.model';
 import { BinanceEnum } from './enum';
 import Transactions from './transactions';
 import Indicators from './indicators';
+import StrategyManager from './strategies/strategyManager';
+import { StrategyConfig } from './interfaces/strategyConfig.interface';
 
-export default class Bot extends Transactions {
+export default class Bot {
 
-  public priceCurrent: number = null;
-  public action: string = BinanceEnum.SIDE_SELL;
+  private active: boolean = process.env.AUTO_START_BOT;
 
-  private active: boolean = process.env.AUTO_START_BOT === 'true';
+  private strategyManager: StrategyManager;
   private indicators: Indicators = null;
+  private transactions: Transactions;
+  private front: FrontModel;
 
   /**
    *
    * @param server
    */
   constructor(server) {
-    super(server);
-
+    this.front = new FrontModel();
     this.indicators = new Indicators();
+    this.transactions = new Transactions(server, this.front);
+    this.strategyManager = new StrategyManager(this.initStrategyConfig());
 
     this.loop();
   }
@@ -40,42 +46,31 @@ export default class Bot extends Transactions {
   /**
    *
    */
-  private execute(): void {
+  private execute(strategie?: string): void {
     this.front.statusBot = this.active;
 
     if (!this.active) {
       return this.loop();
     }
 
-    if (!this.priceCurrent) {
-      this.priceCurrent = Number(this.trade.price);
-    }
-
-    this.haveOrder()
-      .then((status: boolean) => {
-        if (!status && this.indicators.validateOrder(this.priceCurrent, Number(this.trade.price), this.action)) {
-          const price: number = this.indicators.price();
-
-          this.sendOrder(this.action, price)
-            .then(() => {
-              this.priceCurrent = price;
-              this.action = this.action === BinanceEnum.SIDE_SELL ? BinanceEnum.SIDE_BUY : BinanceEnum.SIDE_SELL;
-
-              this.loop();
-            })
-            .catch(() => this.loop());
-        } else {
-          this.loop();
-        }
-      })
-      .catch(() => this.loop());
+    this.strategyManager.execute(process.env.strategy)
+    .then(() => this.loop())
+    .catch(() => this.loop());
   }
 
   /**
    *
    */
   private loop(): void {
-    this.sendDataFront();
-    setTimeout(() => this.execute(), 1000);
+    this.transactions.sendDataFront();
+    setTimeout(() => this.execute(process.env.strategie), 1000);
+  }
+
+  private initStrategyConfig(): StrategyConfig {
+    return {
+      transactions: this.transactions,
+      front: this.front,
+      indicators: this.indicators
+    };
   }
 }
