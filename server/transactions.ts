@@ -18,7 +18,7 @@ export default class Transactions {
   public symbol: string = String(process.env.SYMBOL);
   public interval: string = String(process.env.INTERVAL);
 
-  public front: FrontModel = new FrontModel();
+  public front: FrontModel;
 
   public trade: TradeModel = new TradeModel();
   public aggTrade: AggTradeModel = new AggTradeModel();
@@ -39,7 +39,8 @@ export default class Transactions {
    *
    * @param server
    */
-  constructor(server) {
+  constructor(server, front: FrontModel) {
+    this.front = front;
     this.binanceRest = new api.BinanceRest({
       key: String(process.env.APIKEY),
       secret: String(process.env.APISECRET),
