@@ -9,9 +9,8 @@ export default class Routes {
    *
    * @param bot
    */
-  constructor(bot) {
+  constructor(server, bot) {
     this.bot = bot;
-    this.binanceRest = this.bot.binanceRest;
   }
 
   /**
@@ -43,7 +42,7 @@ export default class Routes {
               symbol: req.params.symbol,
               interval: req.params.interval
             };
-            this.bot.changeConfig(data);
+            this.bot.transactions.changeConfig(data);
             res.send(data);
           }
         ]
@@ -56,11 +55,11 @@ export default class Routes {
             const params = {
               interval: req.params.interval
             };
-            this.bot.changeConfig(params);
+            this.bot.transactions.changeConfig(params);
 
-            this.binanceRest.klines({
-              symbol: this.bot.symbol,
-              interval: this.bot.interval
+            this.bot.transactions.binanceRest.klines({
+              symbol: this.bot.transactions.symbol,
+              interval: this.bot.transactions.interval
             })
               .then((data) => res.send(data))
               .catch((err) => res.send(err));
@@ -72,7 +71,7 @@ export default class Routes {
         path: '/allPrices',
         handlers: [
           (req, res) => {
-            this.binanceRest.allPrices()
+            this.bot.transactions.binanceRest.allPrices()
               .then((data) => res.send(data))
               .catch((err) => res.send(err));
           }

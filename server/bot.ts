@@ -1,7 +1,5 @@
-import { CoinMarketCapModel } from './models/coinmarketcap.model';
 import 'dotenv/config';
 import { FrontModel } from './models/front.model';
-import { BinanceEnum } from './enum';
 import Transactions from './transactions';
 import Indicators from './indicators';
 import StrategyManager from './strategies/strategyManager';
@@ -54,8 +52,8 @@ export default class Bot {
     }
 
     this.strategyManager.execute(process.env.strategy)
-    .then(() => this.loop())
-    .catch(() => this.loop());
+      .then(() => this.loop())
+      .catch(() => this.loop());
   }
 
   /**
@@ -66,6 +64,10 @@ export default class Bot {
     setTimeout(() => this.execute(process.env.strategie), 1000);
   }
 
+  /**
+   *
+   * @returns {StrategyConfig}
+   */
   private initStrategyConfig(): StrategyConfig {
     return {
       transactions: this.transactions,

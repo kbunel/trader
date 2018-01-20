@@ -38,6 +38,7 @@ export default class Transactions {
   /**
    *
    * @param server
+   * @param {FrontModel} front
    */
   constructor(server, front: FrontModel) {
     this.front = front;

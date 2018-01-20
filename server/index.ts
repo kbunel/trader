@@ -13,7 +13,7 @@ const app: express = express();
 const server: http.Server = http.createServer(app);
 
 const bot: Bot = new Bot(server);
-const routes: Routes = new Routes(bot);
+const routes: Routes = new Routes(server, bot);
 
 app.use(cors());
 

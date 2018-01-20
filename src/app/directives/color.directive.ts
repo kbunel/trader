@@ -11,7 +11,7 @@ export class ColorDirective implements OnInit {
   }
 
   public ngOnInit() {
-    if (this.appColor.indexOf('-') !== -1) {
+    if (typeof this.appColor !== 'undefined' && (this.appColor.indexOf('-') !== -1 || Number(this.appColor) < 0)) {
       this.el.nativeElement.classList.add('magenta');
     } else {
       this.el.nativeElement.classList.add('green');

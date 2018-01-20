@@ -1,22 +1,22 @@
 <ul>
   <li>
-    <div class="title">Dernier prix</div>
-    <div class="value">{{webSocketService.trade.price}}</div>
+    <div class="title gray">Dernier prix</div>
+    <div class="value yellow">{{webSocketService.trade.price}} {{history('symbol')}}</div>
   </li>
   <li>
-    <div class="title">Variation sur 24h</div>
-    <div class="value">{{webSocketService.trade.price}}</div>
+    <div class="title gray">Market cap</div>
+    <div class="value white">{{history('market_cap_usd') | currency}}</div>
   </li>
   <li>
-    <div class="title">24h Haut</div>
-    <div class="value"></div>
+    <div class="title gray">% 1h</div>
+    <div [appColor]="history('percent_change_1h')" class="value">{{history('percent_change_1h')}}%</div>
   </li>
   <li>
-    <div class="title">24h Bas</div>
-    <div class="value"></div>
+    <div class="title gray">% 24h</div>
+    <div [appColor]="history('percent_change_24h')" class="value">{{history('percent_change_24h')}}%</div>
   </li>
   <li>
-    <div class="title">24h Volume</div>
-    <div class="value"></div>
+    <div class="title gray">% 7d</div>
+    <div [appColor]="history('percent_change_7d')" class="value">{{history('percent_change_7d')}}%</div>
   </li>
 </ul>
