@@ -4,6 +4,7 @@ import Transactions from './transactions';
 import Indicators from './indicators';
 import StrategyManager from './strategies/strategyManager';
 import { StrategyConfig } from './interfaces/strategyConfig.interface';
+import Logger from './logger';
 
 export default class Bot {
 
@@ -13,6 +14,7 @@ export default class Bot {
   private indicators: Indicators = null;
   private transactions: Transactions;
   private front: FrontModel;
+  private logger: Logger;
 
   /**
    *
@@ -22,6 +24,7 @@ export default class Bot {
     this.front = new FrontModel();
     this.indicators = new Indicators(this.front);
     this.transactions = new Transactions(server, this.front);
+    this.logger = new Logger();
     this.strategyManager = new StrategyManager(this.initStrategyConfig());
 
     this.front.startServerTime = Date.now();
@@ -52,7 +55,7 @@ export default class Bot {
   /**
    *
    */
-  private execute(strategie?: string): void {
+  private execute(): void {
     this.front.statusBot = this.active;
     this.front.executeBotTime = Date.now();
 
@@ -60,9 +63,9 @@ export default class Bot {
       return this.loop();
     }
 
-    this.strategyManager.execute(process.env.strategy)
-      .then(() => this.loop())
-      .catch(() => this.loop());
+    this.strategyManager.execute(process.env.STRATEGY)
+    .then(() => (process.env.LOOP_ACTIVE === 'true') ? this.loop() : null )
+    .catch(() => (process.env.LOOP_ACTIVE === 'true') ? this.loop() : null );
   }
 
   /**
@@ -70,7 +73,9 @@ export default class Bot {
    */
   private loop(): void {
     this.transactions.sendDataFront();
-    setTimeout(() => this.execute(process.env.strategie), 1000);
+    // this.logger.log(this);
+
+    setTimeout(() => this.execute(), 1000);
   }
 
   /**
@@ -81,7 +86,8 @@ export default class Bot {
     return {
       transactions: this.transactions,
       front: this.front,
-      indicators: this.indicators
+      indicators: this.indicators,
+      logger: this.logger
     };
   }
 }

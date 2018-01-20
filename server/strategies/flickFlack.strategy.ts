@@ -1,11 +1,18 @@
+import { StrategyConfig } from './../interfaces/strategyConfig.interface';
 import Strategy from './strategy';
 import { BinanceEnum } from '../enum';
 import { Promise } from 'es6-promise';
 
 export default class FlickFlackStrategy extends Strategy {
 
+  public strategyName = 'Flick Flack Strategy';
+
   private priceCurrent: number = null;
   private action: string = BinanceEnum.SIDE_SELL;
+
+  constructor(strategyConfig: StrategyConfig) {
+    super(strategyConfig);
+  }
 
   public launch(): Promise<void> {
     return new Promise((resolve, reject): void => {
@@ -33,4 +40,5 @@ export default class FlickFlackStrategy extends Strategy {
         .catch(reject);
     });
   }
+
 }
