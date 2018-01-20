@@ -1,0 +1,21 @@
+.containerLine {
+  margin: 10px;
+  width: 100%;
+  font-size: 14px;
+
+  div:first-child {
+    width: 40%;
+    float: left;
+    font-weight: bold;
+  }
+
+  div:last-child {
+    width: 60%;
+    float: right;
+  }
+}
+.containerLine:after {
+  content: '';
+  display: block;
+  clear: both;
+}

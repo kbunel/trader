@@ -1,8 +1,11 @@
 import * as technicalindicators from 'technicalindicators';
 import { BinanceEnum } from './enum';
+import { FrontModel } from './models/front.model';
 
 export default class Indicators {
   public decimal: string = String(process.env.DECIMAL);
+
+  public front: FrontModel;
 
   private indicators: any = null;
   private priceOrder: number = null;
@@ -10,7 +13,8 @@ export default class Indicators {
   /**
    *
    */
-  constructor() {
+  constructor(front: FrontModel) {
+    this.front = front;
     this.indicators = technicalindicators;
   }
 
@@ -41,6 +45,8 @@ export default class Indicators {
         console.log('acheté à ' + price + ' (' + priceCurrent + ')');
       }
     }
+
+    this.front.priceOrder = this.priceOrder;
 
     return output;
   }

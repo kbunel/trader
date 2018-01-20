@@ -13,7 +13,7 @@ export class CoinmarketcapComponent implements OnInit {
   private sortDirection: string = 'asc';
 
   constructor(public webSocketService: WebSocketService) {
-    webSocketService.coinmarketcapSubscribe.subscribe(() => this.onSorted());
+    this.webSocketService.coinmarketcapSubscribe.subscribe(() => this.onSorted());
   }
 
   public ngOnInit() {

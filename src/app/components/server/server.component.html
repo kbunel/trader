@@ -1,0 +1,44 @@
+<div class="containerLine">
+  <div>Paires</div>
+  <div>{{webSocketService.front.symbol}}</div>
+</div>
+<div class="containerLine">
+  <div>Interval</div>
+  <div>{{webSocketService.front.interval}}</div>
+</div>
+<div class="containerLine">
+  <div>Ordre en cours</div>
+  <div [class.magenta]="!webSocketService.front.haveOrder" class="green">
+    {{webSocketService.front.haveOrder ? 'Oui' : 'Non'}}
+  </div>
+</div>
+<div class="containerLine">
+  <div>Bot actif</div>
+  <div [class.magenta]="!webSocketService.front.statusBot" class="green">
+    {{webSocketService.front.statusBot ? 'Oui' : 'Non'}}
+  </div>
+</div>
+<div class="containerLine">
+  <div>Serveur start</div>
+  <div>{{webSocketService.front.startServerTime | date:'dd-MM-yyyy HH:mm:ss'}}</div>
+</div>
+<div class="containerLine">
+  <div>Bot start</div>
+  <div>{{webSocketService.front.startBotTime | date:'dd-MM-yyyy HH:mm:ss'}}</div>
+</div>
+<div class="containerLine">
+  <div>Bot stop</div>
+  <div>{{webSocketService.front.stopBotTime | date:'dd-MM-yyyy HH:mm:ss'}}</div>
+</div>
+<div class="containerLine">
+  <div>Bot exécution</div>
+  <div>{{webSocketService.front.executeBotTime | date:'dd-MM-yyyy HH:mm:ss'}}</div>
+</div>
+<div class="containerLine">
+  <div>Dernier update MarketCap</div>
+  <div>{{webSocketService.front.coinmarketcapTime | date:'dd-MM-yyyy HH:mm:ss'}}</div>
+</div>
+<div class="containerLine">
+  <div>Prix d'un ordre</div>
+  <div>{{webSocketService.front.priceOrder | currency}}</div>
+</div>

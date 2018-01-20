@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { WebSocketService } from '@services/webSocket.service';
 
 @Component({
   selector: 'app-bot-config',
@@ -7,7 +8,8 @@ import { Component, OnInit } from '@angular/core';
 })
 export class BotConfigComponent implements OnInit {
 
-  constructor() { }
+  constructor(public webSocketService: WebSocketService) {
+  }
 
   ngOnInit() {
   }
