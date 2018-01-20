@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { WebSocketService } from '@services/webSocket.service';
 import { CoinMarketCapModel } from '@models/coinmarketcap.model';
 
@@ -7,17 +7,23 @@ import { CoinMarketCapModel } from '@models/coinmarketcap.model';
   templateUrl: './coinmarketcap.component.html',
   styleUrls: ['./coinmarketcap.component.scss']
 })
-export class CoinmarketcapComponent {
+export class CoinmarketcapComponent implements OnInit {
 
-  private sortColumn: string = '';
-  private sortDirection: string = '';
+  private sortColumn: string = 'name';
+  private sortDirection: string = 'asc';
 
   constructor(public webSocketService: WebSocketService) {
     webSocketService.coinmarketcapSubscribe.subscribe(() => this.onSorted());
   }
 
+  public ngOnInit() {
+    this.sortColumn = 'name';
+    this.sortDirection = 'asc';
+
+    this.onSorted();
+  }
+
   public HandleClickSort(event) {
-    console.log(event);
     this.sortColumn = event.sortColumn;
     this.sortDirection = event.sortDirection;
 

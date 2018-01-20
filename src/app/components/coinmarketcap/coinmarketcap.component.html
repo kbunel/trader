@@ -1,22 +1,28 @@
-<div>
-  <table app-sortable-table (sorted)="HandleClickSort($event)">
-    <thead>
-    <tr>
-      <td app-sortable-column="name">name</td>
-      <td app-sortable-column="symbol">symbol</td>
-      <td app-sortable-column="price_btc">price_btc</td>
-      <td app-sortable-column="percent_change_1h">percent_change_1h</td>
-      <td app-sortable-column="percent_change_24h">percent_change_24h</td>
-    </tr>
-    </thead>
-    <tbody>
-    <tr *ngFor="let item of webSocketService.coinmarketcap">
-      <td>{{item.name}}</td>
-      <td>{{item.symbol}}</td>
-      <td>{{item.price_btc}} / {{item.price_usd | currency}}</td>
-      <td>{{item.percent_change_1h}}%</td>
-      <td>{{item.percent_change_24h}}%</td>
-    </tr>
-    </tbody>
-  </table>
+<div class="container">
+  <div class="head">
+    <table appSortableTable (sorted)="HandleClickSort($event)">
+      <thead>
+      <tr>
+        <th app-sortable-column="name" app-sort-direction="asc" class="left">Nom</th>
+        <th app-sortable-column="symbol" class="left">Paire</th>
+        <th app-sortable-column="price_btc" class="left">Prix</th>
+        <th app-sortable-column="percent_change_1h" class="center">% 1h</th>
+        <th app-sortable-column="percent_change_24h" class="center">% 24h</th>
+      </tr>
+      </thead>
+    </table>
+  </div>
+  <div class="body">
+    <table>
+      <tbody>
+      <tr *ngFor="let item of webSocketService.coinmarketcap">
+        <td class="left">{{item.name}}</td>
+        <td class="left">{{item.symbol}}</td>
+        <td class="left">{{item.price_btc}} / <span class="gray">{{item.price_usd | currency}}</span></td>
+        <td [appColor]="item.percent_change_1h" class="center">{{item.percent_change_1h}}%</td>
+        <td [appColor]="item.percent_change_24h" class="center">{{item.percent_change_24h}}%</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
 </div>

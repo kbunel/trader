@@ -1,46 +1,63 @@
-html, body {
-  background-color: #1e1e1e;
-  color: #e2e0e9;
-  margin: 0;
-  padding: 0;
-  font-family: Arial;
-}
-
 header {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 80px;
-  background-color: #2f2f2f;
-  border-bottom: 1px solid #3f3f3f;
+  height: 40px;
+  background-color: #262d33;
 }
 
 main {
   position: absolute;
-  top: 80px;
+  top: 45px;
   left: 0;
-  right: 500px;
+  right: 540px;
   bottom: 300px;
   padding: 10px 0 2px 2px;
+  background-color: #262d33;
 }
 
 nav {
   position: absolute;
-  top: 80px;
-  width: 500px;
+  top: 45px;
+  width: 535px;
   right: 0;
   bottom: 0;
-  border-left: 1px solid #3f3f3f;
+  background-color: #262d33;
+
+  .containerTab {
+    border-bottom: 1px solid #151a1e;
+
+    .tab {
+      display: inline-block;
+      font-size: 14px;
+      color: #ccc;
+      height: 30px;
+      line-height: 30px;
+      padding: 0 20px;
+      cursor: pointer;
+      border-right: 1px solid #151a1e;
+    }
+
+    .active {
+      background: #262d33;
+      color: #f3ba2e;
+      font-weight: bold;
+      margin-bottom: -1px;
+      border-bottom: 1px solid #262d33;
+    }
+
+  }
 }
 
 footer {
   position: absolute;
   bottom: 0;
   left: 0;
-  right: 500px;
-  height: 300px;
+  right: 540px;
+  height: 295px;
   border-top: 1px solid #3f3f3f;
+  background-color: #262d33;
 }
 
 footer ul.tab {
@@ -55,3 +72,4 @@ footer ul.tab li {
   margin: 0;
   padding: 0;
 }
+
