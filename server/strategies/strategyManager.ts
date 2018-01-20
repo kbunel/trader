@@ -12,7 +12,7 @@ export default class StrategyManager {
   }
 
   public execute(strategy: string): Promise<void> {
-    let currentStrategy: Strategie;
+    let currentStrategy: any;
     switch (strategy) {
       case 'getBestPercentChange':
         currentStrategy = new RoadTripStrategy(this.strategyConfig);

@@ -1,37 +1,43 @@
-ul {
-  margin: 0;
-  padding: 0;
-}
-ul:after {
-  clear: both;
+.container {
+  position: absolute;
+  top: 32px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  .head {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .body {
+    position: absolute;
+    top: 35px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+  }
 }
 
-li {
-  margin: 0;
-  padding: 5px 10px;
-  list-style: none;
-  float: left;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-}
-
-li:nth-child(1) {
+table td:nth-child(1), table th:nth-child(1) {
   width: 20%;
 }
 
-li:nth-child(2) {
+table td:nth-child(2), table th:nth-child(2) {
   width: 10%;
 }
 
-li:nth-child(3) {
+table td:nth-child(3), table th:nth-child(3) {
   width: 30%;
 }
 
-li:nth-child(4) {
-  width: 10%;
+table td:nth-child(4), table th:nth-child(4) {
+  width: 12%;
 }
 
-li:nth-child(5) {
-  width: 10%;
+table td:nth-child(5), table th:nth-child(5) {
+  width: 12%;
 }

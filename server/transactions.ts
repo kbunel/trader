@@ -38,9 +38,11 @@ export default class Transactions {
   /**
    *
    * @param server
+   * @param {FrontModel} front
    */
   constructor(server, front: FrontModel) {
     this.front = front;
+
     this.binanceRest = new api.BinanceRest({
       key: String(process.env.APIKEY),
       secret: String(process.env.APISECRET),
@@ -101,7 +103,6 @@ export default class Transactions {
    *
    */
   public sendOrder(side: string, price: number): Promise<boolean> {
-    // newOrder
     return this.binanceRest[process.env.SEND_ORDER_TEST === 'true' ? 'testOrder' : 'newOrder'](this.front.lastOrder = {
       symbol: this.symbol,
       type: BinanceEnum.ORDER_TYPE_LIMIT,
@@ -166,6 +167,7 @@ export default class Transactions {
   private dataGlobal(): void {
     this.request.get(process.env.API_COINMARKETCAP, (data) => {
       this.io.sockets.emit('coinmarketcap', this.coinmarketcap = data);
+      this.front.coinmarketcapTime = Date.now();
       setTimeout(() => this.dataGlobal(), 5 * 1000);
     });
   }

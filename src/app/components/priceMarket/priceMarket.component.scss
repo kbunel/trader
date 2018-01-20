@@ -1,0 +1,28 @@
+ul {
+  margin: 0;
+  padding: 0;
+  li {
+    margin: 0 10px;
+    list-style: none;
+    display: inline-flex;
+    position: relative;
+    width: 100px;
+    height: 40px;
+    text-align: center;
+
+    .title {
+      position: absolute;
+      top: 5px;
+      left: 0;
+      right: 0;
+    }
+
+    .value {
+      position: absolute;
+      bottom: 3px;
+      left: 0;
+      right: 0;
+      text-align: center;
+    }
+  }
+}

@@ -11,6 +11,8 @@ import { SortService } from '@services/sort.service';
 
 import { AmChartsModule } from '@amcharts/amcharts3-angular';
 
+import { AngularFontAwesomeModule } from 'angular-font-awesome';
+
 import { PriceMarketComponent } from '@components/priceMarket/priceMarket.component';
 import { GraphComponent } from '@components/graph/graph.component';
 
@@ -23,6 +25,7 @@ import { CoinmarketcapComponent } from '@components/coinmarketcap/coinmarketcap.
 
 import { SortableColumnComponent } from '@components/sortable-column/sortable-column.component';
 import { SortDirective } from '@directives/sort.directive';
+import { ColorDirective } from '@directives/color.directive';
 
 @NgModule({
   declarations: [
@@ -35,13 +38,15 @@ import { SortDirective } from '@directives/sort.directive';
     BotLogsComponent,
     CoinmarketcapComponent,
     SortableColumnComponent,
-    SortDirective
+    SortDirective,
+    ColorDirective
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     NgxElectronModule,
-    AmChartsModule
+    AmChartsModule,
+    AngularFontAwesomeModule
   ],
   providers: [
     WebSocketService,

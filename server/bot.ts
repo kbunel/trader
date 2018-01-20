@@ -1,7 +1,5 @@
-import { CoinMarketCapModel } from './models/coinmarketcap.model';
 import 'dotenv/config';
 import { FrontModel } from './models/front.model';
-import { BinanceEnum } from './enum';
 import Transactions from './transactions';
 import Indicators from './indicators';
 import StrategyManager from './strategies/strategyManager';
@@ -22,9 +20,11 @@ export default class Bot {
    */
   constructor(server) {
     this.front = new FrontModel();
-    this.indicators = new Indicators();
+    this.indicators = new Indicators(this.front);
     this.transactions = new Transactions(server, this.front);
     this.strategyManager = new StrategyManager(this.initStrategyConfig());
+
+    this.front.startServerTime = Date.now();
 
     this.loop();
   }
@@ -34,6 +34,9 @@ export default class Bot {
    */
   public start(): void {
     this.active = true;
+
+    this.front.startBotTime = Date.now();
+    this.front.stopBotTime = null;
   }
 
   /**
@@ -41,6 +44,9 @@ export default class Bot {
    */
   public stop(): void {
     this.active = false;
+
+    this.front.stopBotTime = Date.now();
+    this.front.startBotTime = null;
   }
 
   /**
@@ -48,14 +54,15 @@ export default class Bot {
    */
   private execute(strategie?: string): void {
     this.front.statusBot = this.active;
+    this.front.executeBotTime = Date.now();
 
     if (!this.active) {
       return this.loop();
     }
 
     this.strategyManager.execute(process.env.strategy)
-    .then(() => this.loop())
-    .catch(() => this.loop());
+      .then(() => this.loop())
+      .catch(() => this.loop());
   }
 
   /**
@@ -66,6 +73,10 @@ export default class Bot {
     setTimeout(() => this.execute(process.env.strategie), 1000);
   }
 
+  /**
+   *
+   * @returns {StrategyConfig}
+   */
   private initStrategyConfig(): StrategyConfig {
     return {
       transactions: this.transactions,

@@ -11,7 +11,13 @@ export class OrderModel {
 export class FrontModel {
   public symbol: string = null;
   public interval: string = null;
-  public haveOrder: boolean = null;
+  public haveOrder: boolean = false;
   public lastOrder: OrderModel = null;
-  public statusBot: boolean = null;
+  public statusBot: boolean = false;
+  public startServerTime: number = null;
+  public startBotTime: number = null;
+  public stopBotTime: number = null;
+  public executeBotTime: number = null;
+  public coinmarketcapTime: number = null;
+  public priceOrder: number = null;
 }

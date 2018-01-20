@@ -1,13 +1,20 @@
 <header style="-webkit-app-region: drag">
+  <h1>crazy trader</h1>
   <app-price-market></app-price-market>
 </header>
 <main>
   <app-graph></app-graph>
 </main>
 <nav>
-  <app-server></app-server>
-  <app-bot></app-bot>
-  <app-coinmarketcap></app-coinmarketcap>
+  <div class="containerTab">
+    <span [class.active]="tab === 0" class="tab" (click)="tab = 0">Server</span>
+    <span [class.active]="tab === 1" class="tab" (click)="tab = 1">Bot</span>
+    <span [class.active]="tab === 2" class="tab" (click)="tab = 2">Coin market cap</span>
+  </div>
+
+  <app-server *ngIf="tab === 0"></app-server>
+  <app-bot *ngIf="tab === 1"></app-bot>
+  <app-coinmarketcap *ngIf="tab === 2"></app-coinmarketcap>
 </nav>
 <footer>
   <ul class="tab">
