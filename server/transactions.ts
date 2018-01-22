@@ -29,11 +29,12 @@ export default class Transactions {
   public allTickers: TickerModel[] = [];
   public allKlines: KlineModel[] = [];
   public coinmarketcap: CoinMarketCapModel[] = [];
+  public userData: any;
 
   private io = null;
   private request = null;
   private binanceWS = null;
-  private binanceRest = null;
+  public  binanceRest = null;
 
   /**
    *
@@ -52,8 +53,8 @@ export default class Transactions {
       symbol: this.symbol,
       interval: this.interval
     })
-      .then((data: KlineModel[]) => this.allKlines = data)
-      .catch(console.error);
+    .then((data: KlineModel[]) => this.allKlines = data)
+    .catch(console.error);
 
     this.io = socketio(server);
 
@@ -116,6 +117,20 @@ export default class Transactions {
       .catch(console.error);
   }
 
+  public getWallet(): Promise<any> {
+    return this.binanceRest.account()
+    .then((response) => {
+      console.log('status', response.status);
+      const wallet = [];
+      for (const balance of response['balances']) {
+        if (Number(balance.free) > 0 || Number(balance.locaked) > 0) {
+          wallet.push(balance);
+        }
+      }
+      return wallet;
+    });
+  }
+
   /**
    *
    */
@@ -137,28 +152,29 @@ export default class Transactions {
         binanceWS.streams.allTickers()
       ],
       (streamEvent) => {
+        // console.log('allTickers from transaction', this.allTickers);
         switch (streamEvent.stream) {
           case binanceWS.streams.depth(this.symbol):
-            this.io.sockets.emit('depth', this.depth = streamEvent.data);
-            break;
+          this.io.sockets.emit('depth', this.depth = streamEvent.data);
+          break;
           case binanceWS.streams.depthLevel(this.symbol, 5):
-            this.io.sockets.emit('depthLevel', this.depthLevel = streamEvent.data);
-            break;
+          this.io.sockets.emit('depthLevel', this.depthLevel = streamEvent.data);
+          break;
           case binanceWS.streams.kline(this.symbol, this.interval):
-            this.io.sockets.emit('kline', this.kline = streamEvent.data);
-            break;
+          this.io.sockets.emit('kline', this.kline = streamEvent.data);
+          break;
           case binanceWS.streams.aggTrade(this.symbol):
-            this.io.sockets.emit('aggTrade', this.aggTrade = streamEvent.data);
-            break;
+          this.io.sockets.emit('aggTrade', this.aggTrade = streamEvent.data);
+          break;
           case binanceWS.streams.trade(this.symbol):
-            this.io.sockets.emit('trade', this.trade = streamEvent.data);
-            break;
+          this.io.sockets.emit('trade', this.trade = streamEvent.data);
+          break;
           case binanceWS.streams.ticker(this.symbol):
-            this.io.sockets.emit('ticker', this.ticker = streamEvent.data);
-            break;
+          this.io.sockets.emit('ticker', this.ticker = streamEvent.data);
+          break;
           case binanceWS.streams.allTickers():
-            this.io.sockets.emit('allTickers', this.allTickers = streamEvent.data);
-            break;
+          this.io.sockets.emit('allTickers', this.allTickers = streamEvent.data);
+          break;
         }
       }
     );
