@@ -14,7 +14,7 @@ export default class FlickFlackStrategy extends Strategy {
     super(strategyConfig);
   }
 
-  public launch(): Promise<void> {
+  public launch(): any {
     return new Promise((resolve, reject): void => {
       if (!this.priceCurrent) {
         this.priceCurrent = Number(this.transactions.trade.price);

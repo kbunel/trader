@@ -3,7 +3,7 @@ import { FrontModel } from '../models/front.model';
 import Indicators from '../indicators';
 import Logger from '../Logger';
 import CoinMarketCapTools from '../tools/coinMarketCap.tools';
-import { Account } from '../models/account';
+import { Account } from '../models/account.model';
 
 export interface StrategyConfig {
   transactions: Transactions;

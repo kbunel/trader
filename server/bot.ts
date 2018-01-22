@@ -6,6 +6,7 @@ import StrategyManager from './strategies/strategyManager';
 import { StrategyConfig } from './interfaces/strategyConfig.interface';
 import Logger from './logger';
 import CoinMarketCapTools from './tools/coinMarketCap.tools';
+import { Account } from './models/account.model';
 
 export default class Bot {
 
@@ -33,9 +34,10 @@ export default class Bot {
 
     this.front.startServerTime = Date.now();
 
-    this.init()
-    .then(() => {
-      this.logger.log('Initialization done');
+    this.transactions.binanceRest.account()
+    .then((data) => {
+      this.logger.log('Data user updated', data);
+      this.account = data;
       this.loop();
     });
   }
@@ -81,7 +83,6 @@ export default class Bot {
    */
   private loop(): void {
     this.transactions.sendDataFront();
-    // this.logger.log(this);
 
     setTimeout(() => this.execute(), 1000);
   }
@@ -99,17 +100,5 @@ export default class Bot {
       coinMarketCapTools: this.coinMarketCapTools,
       account: this.account
     };
-  }
-
-  private init(): Promise<any[]> {
-      const promises = [
-        this.transactions.binanceRest.account()
-        .then((data) => {
-          this.logger.log('Data user updated', data);
-          this.account = data;
-        })
-      ];
-
-      return Promise.all(promises);
   }
 }

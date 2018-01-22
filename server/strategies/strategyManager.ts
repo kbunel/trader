@@ -19,7 +19,7 @@ export default class StrategyManager {
 
     this.logger.log('strategie: ', strategy);
     switch (strategy) {
-      case 'getBestPercentChange':
+      case 'roadTrip':
         currentStrategy = new RoadTripStrategy(this.strategyConfig);
         break;
       default:
