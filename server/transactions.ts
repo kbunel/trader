@@ -123,7 +123,7 @@ export default class Transactions {
       console.log('status', response.status);
       const wallet = [];
       for (const balance of response['balances']) {
-        if (Number(balance.free) > 0 || Number(balance.locaked) > 0) {
+        if (Number(balance.free) > 0 || Number(balance.locked) > 0) {
           wallet.push(balance);
         }
       }

@@ -1,4 +1,4 @@
-import * as technicalindicators from 'technicalindicators';
+// import * as technicalindicators from 'technicalindicators';
 import { BinanceEnum } from './enum';
 import { FrontModel } from './models/front.model';
 
@@ -7,7 +7,7 @@ export default class Indicators {
 
   public front: FrontModel;
 
-  private indicators: any = null;
+  // private indicators: any = null;
   private priceOrder: number = null;
 
   /**
@@ -15,7 +15,7 @@ export default class Indicators {
    */
   constructor(front: FrontModel) {
     this.front = front;
-    this.indicators = technicalindicators;
+    // this.indicators = technicalindicators;
   }
 
   /**

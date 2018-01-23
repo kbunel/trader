@@ -22,7 +22,7 @@ export default class StrategyManager {
       case 'roadTrip':
         currentStrategy = new RoadTripStrategy(this.strategyConfig);
         break;
-      default:
+      case 'flickFlack':
         currentStrategy = new FlickFlackStrategy(this.strategyConfig);
         break;
     }

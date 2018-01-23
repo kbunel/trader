@@ -12,10 +12,4 @@ export default class CoinMarketCapTools {
   constructor(transactions: Transactions) {
     this.transactions = transactions;
   }
-
-  public getBest(key: string): CoinMarketCapModel {
-    return this.transactions.coinmarketcap.sort((a: CoinMarketCapModel, b: CoinMarketCapModel) => {
-      return Number(b[key]) - Number(a[key]);
-    })[0];
-  }
 }
