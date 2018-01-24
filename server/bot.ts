@@ -30,16 +30,18 @@ export default class Bot {
     this.indicators = new Indicators(this.front);
     this.transactions = new Transactions(server, this.front);
     this.coinMarketCapTools = new CoinMarketCapTools(this.transactions);
-    this.strategyManager = new StrategyManager(this.initStrategyConfig());
 
     this.front.startServerTime = Date.now();
 
     this.transactions.binanceRest.account()
     .then((data) => {
-      this.logger.log('Data user updated', data);
+      this.logger.log('Retrieved account informations');
       this.account = data;
+
+      this.strategyManager = new StrategyManager(this.initStrategyConfig());
       this.loop();
-    });
+    })
+    .catch(console.error);
   }
 
   /**
@@ -84,7 +86,7 @@ export default class Bot {
   private loop(): void {
     this.transactions.sendDataFront();
 
-    setTimeout(() => this.execute(), 1000);
+    setTimeout(() => this.execute(), 10000);
   }
 
   /**

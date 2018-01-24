@@ -117,19 +117,19 @@ export default class Transactions {
       .catch(console.error);
   }
 
-  public getWallet(): Promise<any> {
-    return this.binanceRest.account()
-    .then((response) => {
-      console.log('status', response.status);
-      const wallet = [];
-      for (const balance of response['balances']) {
-        if (Number(balance.free) > 0 || Number(balance.locked) > 0) {
-          wallet.push(balance);
-        }
-      }
-      return wallet;
-    });
-  }
+  // public getWallet(): Promise<any> {
+  //   return this.binanceRest.account()
+  //   .then((response) => {
+  //     const wallet = [];
+  //     for (const balance of response['balances']) {
+  //       if (Number(balance.free) > 0 || Number(balance.locked) > 0) {
+  //         wallet.push(balance);
+  //       }
+  //     }
+  //     return wallet;
+  //   });
+  // }
+
 
   /**
    *
@@ -140,6 +140,13 @@ export default class Transactions {
     }
 
     const binanceWS = new api.BinanceWS(true);
+
+    binanceWS.onUserData(this.binanceRest, (data) => {
+      console.log('userData', data);
+    }, 60000) // Optional, how often the keep alive should be sent in milliseconds
+    .then((ws) => {
+      // websocket instance available here
+    });
 
     this.binanceWS = binanceWS.onCombinedStream(
       [

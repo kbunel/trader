@@ -7,56 +7,77 @@ import { Wallet } from '../models/wallet.models';
 export default class RoadTripStrategy extends Strategy {
 
   public strategyName = 'Road Trip Strategy';
-  private wallet: Wallet[];
 
   public launch(): any {
     return new Promise((resolve): any => {
-      if (!this.transactions.allTickers) {
+      if (!this.transactions.allTickers || !this.account) {
+        console.log('Missing informations to continue');
         resolve();
         return;
       }
       const best1HrPercent: CoinMarketCapModel = this.getBest(this.coinMarketCapTools.P_1H);
-      //this.logger.log('best 1hr', best1HrPercent);
+      this.logger.log('best 1hr', best1HrPercent);
+      // if (btcAvailableInWallet()) {
+        this.logger.log('Coins in wallet not in best percent coin retrieve');
+        this.logger.log('Checking orders');
+        this.transactions.binanceRest.openOrders()
+        .then((dataOrders: any) => {
+          this.logger.log('dataOrders', dataOrders);
+        })
+        .catch(console.error);
 
-      this.transactions.getWallet()
-      .then((response) => {
-        this.wallet = response;
-        this.logger.log('Wallet =>', this.wallet);
-        if (!this.walletContains(best1HrPercent)) {
-          // Go buy it !!!!!
-          console.log('**************************');
-          console.log('Change money required');
-          console.log(best1HrPercent);
-          console.log('**************************');
-        } else {
-          console.log('Wallet is OK');
-        }
-      });
+        // Go buy it !!!!!
+        console.log('**************************');
+        console.log('Change money required');
+        console.log(best1HrPercent);
+        console.log('**************************');
+      // } else {
+      //   console.log('Wallet is OK');
+      // }
 
       resolve();
+      return;
+      // const best1HrPercent: CoinMarketCapModel = this.getBest(this.coinMarketCapTools.P_1H);
+      // // this.logger.log('best 1hr', best1HrPercent);
+
+      // this.transactions.getWallet()
+      // .then((response) => {
+      //   this.wallet = response;
+      //   this.logger.log('Wallet =>', this.wallet);
+      //   if (!this.walletContains(best1HrPercent)) {
+
+      //     this.transactions.binanceRest.openOrders()
+      //     .then((dataOrders: any) => console.log('dataOrders', dataOrders))
+      //     .catch(console.error);
+
+      //     // Go buy it !!!!!
+      //     console.log('**************************');
+      //     console.log('Change money required');
+      //     console.log(best1HrPercent);
+      //     console.log('**************************');
+      //   } else {
+      //     console.log('Wallet is OK');
+      //   }
+      // })
+      // .catch(console.error);
+
+      // resolve();
     });
   }
 
   private walletContains(coin: CoinMarketCapModel): boolean {
-    for (const w of this.wallet) {
-      if (w['asset'] === coin['symbol'] && this.isBestAmountInWallet(w)) {
+    this.logger.log('Checking if wallet contains' + coin['symbol']);
+    for (const w of this.account.getWallet()) {
+      if (w['asset'] === coin['symbol']) {
         return true;
       }
     }
     return false;
   }
 
-  private isBestAmountInWallet(coin: Wallet): boolean {
-    for (const w of this.wallet) {
-      if (w['asset'] != coin['asset'] && Number(w['free']) > Number(coin['free'])) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   private getBest(key: string): CoinMarketCapModel {
     const selection = this.getAvailablesCoins();
+
     return selection.sort((a: CoinMarketCapModel, b: CoinMarketCapModel) => {
       return Number(b[key]) - Number(a[key]);
     })[0];
