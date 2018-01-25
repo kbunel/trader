@@ -7,7 +7,12 @@ import { StrategyConfig } from './interfaces/strategyConfig.interface';
 import Logger from './logger';
 import CoinMarketCapTools from './tools/coinMarketCap.tools';
 import { Account } from './models/account.model';
+import AccountManager from './accountManager';
 import { Order } from './models/order.model';
+import { BinanceEnum } from './binanceEnum';
+import OrderManager from './orderManager';
+import BinanceRest from 'binance';
+import api from 'binance';
 
 export default class Bot {
 
@@ -19,23 +24,34 @@ export default class Bot {
   private front: FrontModel;
   private logger: Logger;
   private coinMarketCapTools: CoinMarketCapTools;
-  private account: Account;
   private orders: Order[] = [];
+  private binanceRest: BinanceRest;
+  private accountManager: AccountManager;
 
   /**
    *
    * @param server
    */
   constructor(server) {
+    this.initBinanceRest();
+
     this.front = new FrontModel();
     this.logger = new Logger();
     this.indicators = new Indicators(this.front);
-    this.transactions = new Transactions(server, this.front);
+    this.transactions = new Transactions(server, this.front, this.binanceRest);
     this.coinMarketCapTools = new CoinMarketCapTools(this.transactions);
+    this.accountManager = new AccountManager(this.binanceRest);
 
     this.front.startServerTime = Date.now();
 
     this.init();
+  }
+
+  public initBinanceRest(): void {
+    this.binanceRest = new api.BinanceRest({
+      key: String(process.env.APIKEY),
+      secret: String(process.env.APISECRET),
+    });
   }
 
   /**
@@ -94,8 +110,8 @@ export default class Bot {
       indicators: this.indicators,
       logger: this.logger,
       coinMarketCapTools: this.coinMarketCapTools,
-      account: this.account,
-      orders: this.orders
+      accountManager: this.accountManager,
+      orderManager: new OrderManager(this.orders, this.transactions, this.accountManager)
     };
   }
 
@@ -103,7 +119,7 @@ export default class Bot {
     this.transactions.binanceRest.account()
     .then((data) => {
       this.logger.log('Retrieved account informations');
-      this.account = data;
+      this.accountManager.setAccount(data);
 
       this.transactions.binanceRest.openOrders()
       .then((dataOrders: Order[]) => {

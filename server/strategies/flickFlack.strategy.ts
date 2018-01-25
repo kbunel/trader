@@ -1,6 +1,6 @@
 import { StrategyConfig } from './../interfaces/strategyConfig.interface';
 import Strategy from './strategy';
-import { BinanceEnum } from '../enum';
+import { BinanceEnum } from '../binanceEnum';
 import { Promise } from 'es6-promise';
 
 export default class FlickFlackStrategy extends Strategy {

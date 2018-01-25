@@ -3,7 +3,7 @@ import * as api from 'binance';
 import { Client } from 'node-rest-client';
 import * as socketio from 'socket.io';
 
-import { BinanceEnum } from './enum';
+import { BinanceEnum } from './binanceEnum';
 
 import { FrontModel } from './models/front.model';
 import { AggTradeModel } from './models/aggTrade.model';
@@ -41,13 +41,10 @@ export default class Transactions {
    * @param server
    * @param {FrontModel} front
    */
-  constructor(server, front: FrontModel) {
+  constructor(server, front: FrontModel, binanceRest: any) {
     this.front = front;
 
-    this.binanceRest = new api.BinanceRest({
-      key: String(process.env.APIKEY),
-      secret: String(process.env.APISECRET),
-    });
+    this.binanceRest = binanceRest;
 
     this.binanceRest.klines({
       symbol: this.symbol,
@@ -116,20 +113,6 @@ export default class Transactions {
       .then((dataOrders: any) => this.front.haveOrder = !!dataOrders.length)
       .catch(console.error);
   }
-
-  // public getWallet(): Promise<any> {
-  //   return this.binanceRest.account()
-  //   .then((response) => {
-  //     const wallet = [];
-  //     for (const balance of response['balances']) {
-  //       if (Number(balance.free) > 0 || Number(balance.locked) > 0) {
-  //         wallet.push(balance);
-  //       }
-  //     }
-  //     return wallet;
-  //   });
-  // }
-
 
   /**
    *

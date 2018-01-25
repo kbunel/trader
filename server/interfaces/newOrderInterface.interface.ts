@@ -1,9 +1,9 @@
-import { BinanceEnum } from '../enum';
+import { BinanceEnum } from '../binanceEnum';
 
 export interface NewOrderInterface {
     symbol: string;
     side: BinanceEnum;
-    type: Indicators;
-    quantity: Logger;
-    timestamp: CoinMarketCapTools;
+    type: BinanceEnum;
+    quantity: number;
+    timestamp: number;
 }

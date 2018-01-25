@@ -2,11 +2,12 @@ import { StrategyConfig } from './../interfaces/strategyConfig.interface';
 import { StrategyInterface } from './../interfaces/strategy.interface';
 import CoinMarketCapTools from '../tools/coinMarketCap.tools';
 import { FrontModel } from '../models/front.model';
-import { Account } from '../models/account.model';
 import { Order } from '../models/order.model';
 import Transactions from '../transactions';
 import Indicators from '../indicators';
 import Logger from '../Logger';
+import OrderManager from '../orderManager';
+import AccountManager from '../accountManager';
 
 export default abstract class Strategy implements StrategyInterface {
 
@@ -15,8 +16,8 @@ export default abstract class Strategy implements StrategyInterface {
   protected indicators: Indicators;
   protected logger: Logger;
   protected coinMarketCapTools: CoinMarketCapTools;
-  protected account: Account;
-  protected orders: Order[];
+  protected orderManager: OrderManager;
+  protected accountManager: AccountManager;
 
   public abstract strategyName;
 
@@ -26,8 +27,8 @@ export default abstract class Strategy implements StrategyInterface {
     this.front = strategyConfig.front;
     this.logger = strategyConfig.logger;
     this.coinMarketCapTools = strategyConfig.coinMarketCapTools;
-    this.account = strategyConfig.account;
-    this.orders = strategyConfig.orders;
+    this.orderManager = strategyConfig.orderManager;
+    this.accountManager = strategyConfig.accountManager;
   }
 
   abstract launch(): Promise<void>;

@@ -3,8 +3,9 @@ import { FrontModel } from '../models/front.model';
 import Indicators from '../indicators';
 import Logger from '../Logger';
 import CoinMarketCapTools from '../tools/coinMarketCap.tools';
-import { Account } from '../models/account.model';
+import AccountManager from '../accountManager';
 import { Order } from '../models/order.model';
+import OrderManager from '../orderManager';
 
 export interface StrategyConfig {
   transactions: Transactions;
@@ -12,6 +13,6 @@ export interface StrategyConfig {
   indicators: Indicators;
   logger: Logger;
   coinMarketCapTools: CoinMarketCapTools;
-  account: Account;
-  orders: Order[];
+  orderManager: OrderManager;
+  accountManager: AccountManager;
 }
