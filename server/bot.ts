@@ -7,6 +7,7 @@ import { StrategyConfig } from './interfaces/strategyConfig.interface';
 import Logger from './logger';
 import CoinMarketCapTools from './tools/coinMarketCap.tools';
 import { Account } from './models/account.model';
+import { Order } from './models/order.model';
 
 export default class Bot {
 
@@ -19,6 +20,7 @@ export default class Bot {
   private logger: Logger;
   private coinMarketCapTools: CoinMarketCapTools;
   private account: Account;
+  private orders: Order[] = [];
 
   /**
    *
@@ -33,15 +35,7 @@ export default class Bot {
 
     this.front.startServerTime = Date.now();
 
-    this.transactions.binanceRest.account()
-    .then((data) => {
-      this.logger.log('Retrieved account informations');
-      this.account = data;
-
-      this.strategyManager = new StrategyManager(this.initStrategyConfig());
-      this.loop();
-    })
-    .catch(console.error);
+    this.init();
   }
 
   /**
@@ -86,7 +80,7 @@ export default class Bot {
   private loop(): void {
     this.transactions.sendDataFront();
 
-    setTimeout(() => this.execute(), 10000);
+    setTimeout(() => this.execute(), 3000);
   }
 
   /**
@@ -100,7 +94,27 @@ export default class Bot {
       indicators: this.indicators,
       logger: this.logger,
       coinMarketCapTools: this.coinMarketCapTools,
-      account: this.account
+      account: this.account,
+      orders: this.orders
     };
+  }
+
+  private init(): void {
+    this.transactions.binanceRest.account()
+    .then((data) => {
+      this.logger.log('Retrieved account informations');
+      this.account = data;
+
+      this.transactions.binanceRest.openOrders()
+      .then((dataOrders: Order[]) => {
+        this.logger.log('Retrieved open orders informations');
+        this.orders = dataOrders;
+
+        this.strategyManager = new StrategyManager(this.initStrategyConfig());
+        this.loop();
+      })
+      .catch(console.error);
+    })
+    .catch(console.error);
   }
 }

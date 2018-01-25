@@ -3,10 +3,13 @@ import { CoinMarketCapModel } from './../models/coinmarketcap.model';
 import { Promise } from 'es6-promise';
 import CoinMarketCapTools from '../tools/coinMarketCap.tools';
 import { Wallet } from '../models/wallet.models';
+import { Order } from '../models/order.model';
 
 export default class RoadTripStrategy extends Strategy {
 
   public strategyName = 'Road Trip Strategy';
+
+  private orderSent: Boolean;
 
   public launch(): any {
     return new Promise((resolve): any => {
@@ -18,13 +21,14 @@ export default class RoadTripStrategy extends Strategy {
       const best1HrPercent: CoinMarketCapModel = this.getBest(this.coinMarketCapTools.P_1H);
       this.logger.log('best 1hr', best1HrPercent);
       // if (btcAvailableInWallet()) {
-        this.logger.log('Coins in wallet not in best percent coin retrieve');
-        this.logger.log('Checking orders');
-        this.transactions.binanceRest.openOrders()
-        .then((dataOrders: any) => {
-          this.logger.log('dataOrders', dataOrders);
-        })
-        .catch(console.error);
+      // this.logger.log('Coins in wallet not in best percent coin retrieve');
+      if (this.orders.length) {
+          this.logger.log('Open orders found, checking orders', this.orders);
+          this.checkOrders();
+      } else {
+        this.logger.log('No open orders');
+      }
+
 
         // Go buy it !!!!!
         console.log('**************************');
@@ -95,4 +99,62 @@ export default class RoadTripStrategy extends Strategy {
     }
     return selected;
   }
+
+  private checkOrders(): void {
+    this.logger.log('Checking orders');
+    for (const order of this.orders) {
+      // give 5 minutes to the order to be sold
+      if (Number(order.time) + 5 * 60 * 1000 < Date.now()) {
+        this.logger.log('Order #' + order.orderId + 'for ' + order.symbol + ' is pending since more than 5 minutes, \
+         cancelling and putting it back to the market value');
+         this.cancelOrder(order)
+         .then(() => {
+           this.newOrder(order);
+         });
+        }
+      }
+    }
+
+  private cancelOrder(order: Order): Promise<any> {
+    return new Promise((resolve, reject): any => {
+      this.transactions.binanceRest.cancelOrder({
+        symbol: order.symbol,
+        timestamp: order.time
+      }, (response) => {
+        resolve();
+        console.log('response in callback after cancelling an order');
+      })
+      .then((response) => {
+        resolve();
+        console.log('response in then after cancelling an order');
+      })
+      .catch((error) => {
+        reject();
+        console.log('error while trying to cancel an order', error);
+      });
+    });
+  }
+
+  private newOrder(order: Order): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.transactions.binanceRest.newOrder({
+        symbol: order.symbol,
+        side: 
+      }, () => {
+        resolve();
+        console.log('response in callback after cancelling an order');
+      })
+      .then((response) => {
+        resolve();
+        console.log('response in then after cancelling an order');
+      })
+      .catch((error) => {
+        reject();
+        console.log('error while trying to cancel an order', error);
+      })
+    });
+  }
+
 }
+
+

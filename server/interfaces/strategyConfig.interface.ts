@@ -4,6 +4,7 @@ import Indicators from '../indicators';
 import Logger from '../Logger';
 import CoinMarketCapTools from '../tools/coinMarketCap.tools';
 import { Account } from '../models/account.model';
+import { Order } from '../models/order.model';
 
 export interface StrategyConfig {
   transactions: Transactions;
@@ -12,4 +13,5 @@ export interface StrategyConfig {
   logger: Logger;
   coinMarketCapTools: CoinMarketCapTools;
   account: Account;
+  orders: Order[];
 }
