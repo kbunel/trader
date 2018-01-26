@@ -1,4 +1,6 @@
 import 'dotenv/config';
+import * as api from 'binance';
+import { Promise } from 'es6-promise';
 import { FrontModel } from './models/front.model';
 import Transactions from './transactions';
 import Indicators from './indicators';
@@ -11,8 +13,6 @@ import AccountManager from './accountManager';
 import { Order } from './models/order.model';
 import { BinanceEnum } from './binanceEnum';
 import OrderManager from './orderManager';
-import BinanceRest from 'binance';
-import api from 'binance';
 
 export default class Bot {
 
@@ -25,7 +25,7 @@ export default class Bot {
   private logger: Logger;
   private coinMarketCapTools: CoinMarketCapTools;
   private orders: Order[] = [];
-  private binanceRest: BinanceRest;
+  private binanceRest: any;
   private accountManager: AccountManager;
 
   /**
@@ -33,25 +33,55 @@ export default class Bot {
    * @param server
    */
   constructor(server) {
-    this.initBinanceRest();
-
-    this.front = new FrontModel();
     this.logger = new Logger();
-    this.indicators = new Indicators(this.front);
-    this.transactions = new Transactions(server, this.front, this.binanceRest);
-    this.coinMarketCapTools = new CoinMarketCapTools(this.transactions);
-    this.accountManager = new AccountManager(this.binanceRest);
+    this.logger.log('Starting BOT');
 
-    this.front.startServerTime = Date.now();
-
-    this.init();
-  }
-
-  public initBinanceRest(): void {
     this.binanceRest = new api.BinanceRest({
       key: String(process.env.APIKEY),
       secret: String(process.env.APISECRET),
     });
+
+    this.front = new FrontModel();
+    this.indicators = new Indicators(this.front);
+    this.transactions = new Transactions(server, this.front, this.binanceRest);
+    this.coinMarketCapTools = new CoinMarketCapTools(this.transactions);
+    this.accountManager = new AccountManager(this.binanceRest);
+    this.strategyManager = new StrategyManager(this.initStrategyConfig());
+
+    this.execute();
+  }
+
+  /**
+   *
+   */
+  private execute(): void {
+    this.front.statusBot = this.active;
+    this.front.executeBotTime = Date.now();
+    this.transactions.sendDataFront();
+
+    if (!this.active) {
+      return this.execute();
+    }
+
+    this.strategyManager.execute(process.env.STRATEGY)
+    .then(() => (process.env.LOOP_ACTIVE === 'true') ? setTimeout(() => this.execute(), 3000) : null )
+    .catch(() => (process.env.LOOP_ACTIVE === 'true') ? setTimeout(() => this.execute(), 3000) : null );
+  }
+
+  /**
+   *
+   * @returns {StrategyConfig}
+   */
+  private initStrategyConfig(): StrategyConfig {
+    return {
+      transactions: this.transactions,
+      front: this.front,
+      indicators: this.indicators,
+      logger: this.logger,
+      coinMarketCapTools: this.coinMarketCapTools,
+      accountManager: this.accountManager,
+      orderManager: new OrderManager(this.orders, this.binanceRest, this.accountManager)
+    };
   }
 
   /**
@@ -72,65 +102,5 @@ export default class Bot {
 
     this.front.stopBotTime = Date.now();
     this.front.startBotTime = null;
-  }
-
-  /**
-   *
-   */
-  private execute(): void {
-    this.front.statusBot = this.active;
-    this.front.executeBotTime = Date.now();
-
-    if (!this.active) {
-      return this.loop();
-    }
-
-    this.strategyManager.execute(process.env.STRATEGY)
-    .then(() => (process.env.LOOP_ACTIVE === 'true') ? this.loop() : null )
-    .catch(() => (process.env.LOOP_ACTIVE === 'true') ? this.loop() : null );
-  }
-
-  /**
-   *
-   */
-  private loop(): void {
-    this.transactions.sendDataFront();
-
-    setTimeout(() => this.execute(), 3000);
-  }
-
-  /**
-   *
-   * @returns {StrategyConfig}
-   */
-  private initStrategyConfig(): StrategyConfig {
-    return {
-      transactions: this.transactions,
-      front: this.front,
-      indicators: this.indicators,
-      logger: this.logger,
-      coinMarketCapTools: this.coinMarketCapTools,
-      accountManager: this.accountManager,
-      orderManager: new OrderManager(this.orders, this.transactions, this.accountManager)
-    };
-  }
-
-  private init(): void {
-    this.transactions.binanceRest.account()
-    .then((data) => {
-      this.logger.log('Retrieved account informations');
-      this.accountManager.setAccount(data);
-
-      this.transactions.binanceRest.openOrders()
-      .then((dataOrders: Order[]) => {
-        this.logger.log('Retrieved open orders informations');
-        this.orders = dataOrders;
-
-        this.strategyManager = new StrategyManager(this.initStrategyConfig());
-        this.loop();
-      })
-      .catch(console.error);
-    })
-    .catch(console.error);
   }
 }

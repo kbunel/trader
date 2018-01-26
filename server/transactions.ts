@@ -13,6 +13,7 @@ import { KlineModel } from './models/kline.model';
 import { TickerModel } from './models/ticker.model';
 import { TradeModel } from './models/trade.model';
 import { CoinMarketCapModel } from './models/coinmarketcap.model';
+import Logger from './logger';
 
 export default class Transactions {
   public symbol: string = String(process.env.SYMBOL);
@@ -31,10 +32,11 @@ export default class Transactions {
   public coinmarketcap: CoinMarketCapModel[] = [];
   public userData: any;
 
+  public  binanceRest = null;
   private io = null;
   private request = null;
   private binanceWS = null;
-  public  binanceRest = null;
+  private logger: Logger;
 
   /**
    *
@@ -42,6 +44,7 @@ export default class Transactions {
    * @param {FrontModel} front
    */
   constructor(server, front: FrontModel, binanceRest: any) {
+    this.logger = new Logger();
     this.front = front;
 
     this.binanceRest = binanceRest;
@@ -125,7 +128,7 @@ export default class Transactions {
     const binanceWS = new api.BinanceWS(true);
 
     binanceWS.onUserData(this.binanceRest, (data) => {
-      console.log('userData', data);
+      this.logger.details('userData', data);
     }, 60000) // Optional, how often the keep alive should be sent in milliseconds
     .then((ws) => {
       // websocket instance available here

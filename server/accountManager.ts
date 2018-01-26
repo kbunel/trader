@@ -14,8 +14,8 @@ export default class AccountManager {
 
         this.binanceRest.account()
         .then((data) => {
-          this.logger.log('Retrieved account informations');
           this.setAccount(data);
+          this.logger.details('Retrieved account informations', this.account);
         })
         .catch(console.error);
     }

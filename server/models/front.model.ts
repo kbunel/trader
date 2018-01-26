@@ -20,4 +20,8 @@ export class FrontModel {
   public executeBotTime: number = null;
   public coinmarketcapTime: number = null;
   public priceOrder: number = null;
+
+  constructor() {
+    this.startServerTime = Date.now();
+  }
 }

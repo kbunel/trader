@@ -1,26 +1,29 @@
+import { Promise } from 'es6-promise';
 import { Wallet } from './models/wallet.model';
 import { NewOrder } from './models/newOrder.model';
 import { BinanceEnum } from './binanceEnum';
 import { Order } from './models/order.model';
 import Logger from './Logger';
-import Transactions from './transactions';
 import AccountManager from './accountManager';
+import BinanceRest from 'binance';
 
 export default class OrderManager {
     private orders: Order[];
     private logger: Logger;
-    private transactions;
     private account: Account;
+    private binanceRest: BinanceRest;
 
-    constructor(orders: Order[], transactions: Transactions, accountManager: AccountManager) {
+    constructor(orders: Order[], binanceRest: BinanceRest, accountManager: AccountManager) {
         this.setOrders(orders);
-        this.transactions = transactions;
+        this.binanceRest = binanceRest;
         this.logger = new Logger();
+
+        this.getOrdersFromBinance();
     }
 
     public treatCurrentOrders() {
         if (this.getOrders().length) {
-            this.logger.log('Open orders found, checking orders', this.orders);
+            this.logger.details('Open orders found, checking orders', this.orders);
             this.checkOrders();
         } else {
           this.logger.log('No open orders');
@@ -64,37 +67,51 @@ export default class OrderManager {
 
     private newOrder(newOrder: NewOrder): Promise<any> {
         return new Promise((resolve, reject) => {
-            this.transactions.binanceRest.newOrder(newOrder.getParameters(), () => {
-            resolve();
-            console.log('response in callback after cancelling an order');
-          })
-          .then((response) => {
-              resolve();
-              console.log('response in then after cancelling an order');
+            this.binanceRest.newOrder(newOrder.getParameters(), (response) => {
+                this.logger.details('response in callback after cancelling an order', response);
+                resolve();
+            })
+            .then((response) => {
+                this.logger.details('response in then after cancelling an order', response);
+                resolve();
             })
             .catch((error) => {
+                this.logger.details('error while trying to cancel an order', error);
                 reject();
-                console.log('error while trying to cancel an order', error);
             });
         });
     }
 
     private cancelOrder(order: Order): Promise<any> {
         return new Promise((resolve, reject): any => {
-            this.transactions.binanceRest.cancelOrder({
+            this.binanceRest.cancelOrder({
                 symbol: order.symbol,
                 timestamp: order.time
             }, (response) => {
+                this.logger.details('response in callback after cancelling an order', response);
                 resolve();
-                console.log('response in callback after cancelling an order');
             })
             .then((response) => {
+                this.logger.details('response in then after cancelling an order', response);
                 resolve();
-                console.log('response in then after cancelling an order');
             })
             .catch((error) => {
+                this.logger.details('error while trying to cancel an order', error);
                 reject();
-                console.log('error while trying to cancel an order', error);
+            });
+        });
+    }
+
+    private getOrdersFromBinance(): Promise<any> {
+        return new Promise((resolve, reject): any => {
+            this.binanceRest.openOrders()
+            .then((dataOrders: Order[]) => {
+                this.orders = dataOrders;
+                this.logger.details('Retrieved open orders informations', this.orders);
+                resolve();
+            })
+            .catch((error) => {
+                console.log('Error while retriving open orders', error);
             });
         });
     }
