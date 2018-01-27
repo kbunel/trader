@@ -39,6 +39,7 @@ export class NewOrder implements NewOrderInterface {
         this.type = newOrder.type;
         this.quantity = newOrder.quantity;
         this.timestamp = newOrder.timestamp;
+        this.timeInForce = BinanceEnum.TIME_IN_FORCE_GTC;
     }
 
     public getParameters(): any {

@@ -163,9 +163,21 @@ export default class OrderManager {
     }
 
     public sendNewOrder(newOrder: NewOrder): void {
-        this.logger.details('Sending order: ', newOrder);
-        this.binanceRest.newOrder(newOrder.getParameters(), (response) => {
+        this.logger.details('Sending order: ', newOrder.getParameters());
+        this.binanceRest.testOrder({ 
+        symbol: 'AIONBTC',
+        side: 'BUY',
+        type: 'MARKET',
+        quantity: 10,
+        timestamp: 1517079998897,
+        timeInForce: 'GTC' }, (response) => {
             this.logger.details('response in callback after sending a new order', response);
+        })
+        .then((response) => {
+            console.log('response from binanceRest.newOrder', response);
+        })
+        .catch((error) => {
+            console.error('Error from binanceRest.newOrder', error)
         });
     }
 

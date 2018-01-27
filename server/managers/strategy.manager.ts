@@ -25,6 +25,9 @@ export default class StrategyManager {
       case 'flickFlack':
         currentStrategy = new FlickFlackStrategy(this.strategyConfig);
         break;
+      default:
+        this.logger.log('Ivalid strategy');
+        return null;
     }
     return currentStrategy.launch();
   }
