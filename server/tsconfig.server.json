@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "@enums": ["./enums/*"],
+    "@interfaces": ["./interfaces/*"],
+    "@managers": ["./managers/*"],
+    "@m/*": ["./models/*"],
+    "@strategies": ["./strategies/*"],
+    "@tools": ["./tools/*"]
+  }
+}

@@ -5,7 +5,8 @@ import CoinMarketCapTools from '../tools/coinMarketCap.tools';
 import { Wallet } from '../models/wallet.model';
 import { Order } from '../models/order.model';
 import { NewOrder } from '../models/newOrder.model';
-import { BinanceEnum } from '../binanceEnum';
+import { BinanceEnum } from '../enums/binance.enum';
+import { SymbolToTrade } from '../enums/symbolToTrade.enum';
 
 export default class RoadTripStrategy extends Strategy {
 
@@ -15,59 +16,74 @@ export default class RoadTripStrategy extends Strategy {
 
   public launch(): any {
     return new Promise((resolve): any => {
-      if (!this.transactions.allTickers || !this.accountManager.getAccount()) {
+      if (!this.transactions.allTickers || !this.accountManager.getAccount() || !this.transactions.trade) {
         console.log('Missing informations to continue');
         resolve();
+      }
+
+      const best1HrPercent: CoinMarketCapModel = this.getBest(this.coinMarketCapTools.P_1H);
+      this.logger.log('Best current crypto is: ', best1HrPercent);
+
+      if (this.transactions.symbol !== best1HrPercent.symbol + SymbolToTrade.DEFAULT) {
+        this.logger.log('Transactions not watching the good crypto, Let\'s watch it');
+
+        this.transactions.symbol = best1HrPercent.symbol + SymbolToTrade.DEFAULT;
+        this.transactions.socket();
+        resolve();
+        return;
+      } else if (this.accountManager.getInWallet(best1HrPercent.symbol)
+          && this.isCurrentCrypto(best1HrPercent.symbol)) {
+        this.logger.log('We got ' + best1HrPercent.symbol + ', let\'s keep for now');
+
+        resolve();
+        return;
+      } else if (this.orderManager.getCurrentOrder(best1HrPercent.symbol).length) {
+        this.logger.log('Best 1Hr Percent found in current order, let\'s check if it s still available');
+
+        this.orderManager.resetOrdersIfTooLong(5);
+        resolve();
+        return;
+      } else if (this.orderManager.getCurrentOrders().length) {
+        this.logger.log('Crypto ' + best1HrPercent.symbol + ' not in wallet and not in current orders, \
+        but orders found, let\'s cancel them all to buy the good crypto');
+
+        this.orderManager.cancelAllOrders()
+        .then(() => {
+          this.sendNewOrderWithBestRate(best1HrPercent);
+          return;
+        })
+        .catch((error) => {
+          this.logger.error('Error trying to cancel all orders', error);
+          resolve();
+          return;
+        });
+      } else {
+        this.logger.log('Crypto ' + best1HrPercent.symbol + ' not in wallet and not in current orders, \
+        No order running, let\'s buy some');
+
+        this.sendNewOrderWithBestRate(best1HrPercent);
         return;
       }
-      const best1HrPercent: CoinMarketCapModel = this.getBest(this.coinMarketCapTools.P_1H);
-      this.logger.log('best 1hr', best1HrPercent);
-      // if (btcAvailableInWallet()) {
-      // this.logger.log('Coins in wallet not in best percent coin retrieve');
-      this.orderManager.treatCurrentOrders();
 
-
-
-        // Go buy it !!!!!
-        // console.log('**************************');
-        // console.log('Change money required');
-        // console.log(best1HrPercent);
-        // console.log('**************************');
-      // } else {
-      //   console.log('Wallet is OK');
-      // }
-
-      resolve();
-      return;
-      // const best1HrPercent: CoinMarketCapModel = this.getBest(this.coinMarketCapTools.P_1H);
-      // // this.logger.log('best 1hr', best1HrPercent);
-
-      // this.transactions.getWallet()
-      // .then((response) => {
-      //   this.wallet = response;
-      //   this.logger.log('Wallet =>', this.wallet);
-      //   if (!this.walletContains(best1HrPercent)) {
-
-      //     this.transactions.binanceRest.openOrders()
-      //     .then((dataOrders: any) => console.log('dataOrders', dataOrders))
-      //     .catch(console.error);
-
-      //     // Go buy it !!!!!
-      //     console.log('**************************');
-      //     console.log('Change money required');
-      //     console.log(best1HrPercent);
-      //     console.log('**************************');
-      //   } else {
-      //     console.log('Wallet is OK');
-      //   }
-      // })
-      // .catch(console.error);
-
-      // resolve();
+      this.logger.log('EOS');
     });
   }
 
+  private sendNewOrderWithBestRate(best1HrPercent: CoinMarketCapModel): void {
+    const newOrder = this.orderManager.createNewOrderFromSymbol(best1HrPercent.symbol, BinanceEnum.SIDE_BUY);
+    this.orderManager.sendNewOrder(newOrder);
+      // .then(() => {
+      //   this.logger.log('An order to get ' + best1HrPercent.symbol + ' has been sent');
+      //   this.orderManager.getCurrentOrdersFromBinance();
+      // })
+      // .catch((error) => {
+      //   this.logger.error('Error while trying to send order to get ' + best1HrPercent.symbol, error);
+      //   this.orderManager.getCurrentOrdersFromBinance();
+      // });
+  }
+
   private getBest(key: string): CoinMarketCapModel {
+    this.logger.log('Looking for the best Crypto with highest ' + key);
     const selection = this.getAvailablesCoins();
 
     return selection.sort((a: CoinMarketCapModel, b: CoinMarketCapModel) => {
@@ -86,5 +102,11 @@ export default class RoadTripStrategy extends Strategy {
       }
     }
     return selected;
+  }
+
+  private isCurrentCrypto(symbol: string): boolean {
+    this.logger.log('Checkin if ' + symbol + ' is the crypto with the highest value in the wallet');
+
+    return this.accountManager.getHigherPriceInWallet().asset === symbol;
   }
 }

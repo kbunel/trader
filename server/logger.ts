@@ -15,4 +15,10 @@ export default class Logger {
       }
     }
   }
+
+  public error(...args: any[]) {
+    for (const arg of args) {
+      console.error(arg);
+    }
+  }
 }

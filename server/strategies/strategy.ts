@@ -6,8 +6,8 @@ import { Order } from '../models/order.model';
 import Transactions from '../transactions';
 import Indicators from '../indicators';
 import Logger from '../Logger';
-import OrderManager from '../orderManager';
-import AccountManager from '../accountManager';
+import OrderManager from '../managers/order.manager';
+import AccountManager from '../managers/account.manager';
 
 export default abstract class Strategy implements StrategyInterface {
 

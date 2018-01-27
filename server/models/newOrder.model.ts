@@ -12,8 +12,8 @@
 +-------------------+----------------------------------------------+
 */
 
-import { NewOrderInterface } from '../interfaces/newOrderInterface.interface';
-import { BinanceEnum } from '../binanceEnum';
+import { NewOrderInterface } from '../interfaces/newOrder.interface';
+import { BinanceEnum } from '../enums/binance.enum';
 
 export class NewOrder implements NewOrderInterface {
     // Valeur obligatoire

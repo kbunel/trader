@@ -1,4 +1,4 @@
-import { BinanceEnum } from '../binanceEnum';
+import { BinanceEnum } from '../enums/binance.enum';
 
 export interface NewOrderInterface {
     symbol: string;

@@ -3,7 +3,7 @@ import * as api from 'binance';
 import { Client } from 'node-rest-client';
 import * as socketio from 'socket.io';
 
-import { BinanceEnum } from './binanceEnum';
+import { BinanceEnum } from './enums/binance.enum';
 
 import { FrontModel } from './models/front.model';
 import { AggTradeModel } from './models/aggTrade.model';
@@ -14,9 +14,10 @@ import { TickerModel } from './models/ticker.model';
 import { TradeModel } from './models/trade.model';
 import { CoinMarketCapModel } from './models/coinmarketcap.model';
 import Logger from './logger';
+import { SymbolToTrade } from './enums/symbolToTrade.enum';
 
 export default class Transactions {
-  public symbol: string = String(process.env.SYMBOL);
+  public symbol: string;
   public interval: string = String(process.env.INTERVAL);
 
   public front: FrontModel;
@@ -44,6 +45,7 @@ export default class Transactions {
    * @param {FrontModel} front
    */
   constructor(server, front: FrontModel, binanceRest: any) {
+    this.symbol = String(process.env.SYMBOL);
     this.logger = new Logger();
     this.front = front;
 
@@ -120,7 +122,7 @@ export default class Transactions {
   /**
    *
    */
-  private socket(): void {
+  public socket(): void {
     if (this.binanceWS) {
       this.binanceWS.terminate();
     }
@@ -171,6 +173,15 @@ export default class Transactions {
         }
       }
     );
+  }
+
+  public getFromCoinMarketCap(symbol: string): CoinMarketCapModel {
+    for (const c of this.coinmarketcap) {
+      if (c.symbol === symbol) {
+        return c;
+      }
+    }
+    return null;
   }
 
   private dataGlobal(): void {

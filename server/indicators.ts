@@ -1,5 +1,5 @@
 // import * as technicalindicators from 'technicalindicators';
-import { BinanceEnum } from './binanceEnum';
+import { BinanceEnum } from './enums/binance.enum';
 import { FrontModel } from './models/front.model';
 
 export default class Indicators {
