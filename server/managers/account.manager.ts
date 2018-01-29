@@ -44,16 +44,20 @@ export default class AccountManager {
     }
 
     public getInWallet(symbol: string): Wallet {
+      this.logger.log('Looking for ' + symbol + ' in wallet');
       const wallet = this.getWallet();
       for (const w of wallet) {
         if (w.asset === symbol) {
+          this.logger.log(symbol + ' found in wallet');
           return w;
         }
       }
+      this.logger.log(symbol + ' not found in wallet');
       return null;
     }
 
     public getHigherPriceInWallet(symbolToTrade: SymbolToTrade = SymbolToTrade.DEFAULT): Wallet {
+      this.logger.log('Looking for the highest crypto in the wallet');
       let bestInWallet: Wallet = this.getWallet()[0];
       const wallet = this.getWallet();
       console.log('wallet', this.getWallet());

@@ -61,7 +61,8 @@ export default class RoadTripStrategy extends Strategy {
         this.logger.log('Crypto ' + best1HrPercent.symbol + ' not in wallet and not in current orders, \
         No order running, let\'s buy some');
 
-        this.sendNewOrderWithBestRate(best1HrPercent);
+        this.orderManager.sellEverything();
+        // this.sendNewOrderWithBestRate(best1HrPercent);
         return;
       }
 

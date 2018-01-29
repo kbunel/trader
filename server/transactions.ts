@@ -176,7 +176,8 @@ export default class Transactions {
   }
 
   public getFromCoinMarketCap(symbol: string): CoinMarketCapModel {
-    for (const c of this.coinmarketcap) {
+    const coinmarketcap = this.coinmarketcap;
+    for (const c of coinmarketcap) {
       if (c.symbol === symbol) {
         return c;
       }

@@ -30,6 +30,15 @@ export default class OrderManager {
         this.getCurrentOrdersFromBinance();
     }
 
+    public sellEverything(): void {
+        const wallet = this.accountManager.getWallet();
+        for (const w of wallet) {
+            if (w.asset !== SymbolToTrade.DEFAULT) {
+                this.sendNewOrder(this.createNewOrderFromSymbol(w.asset, BinanceEnum.SIDE_SELL));
+            }
+        }
+    }
+
     public resetOrdersIfTooLong(min: number): Promise<any> {
         return new Promise((resolve, reject) => {
             this.logger.log('Checking orders');
@@ -44,7 +53,7 @@ export default class OrderManager {
                     promises.push(
                         this.cancelOrder(order)
                         .then(() => {
-                            this.sendNewOrder(this.createNewOrderFromOrder(order));
+                            this.sendNewOrder(this.createNewOrderFromOrder(order, BinanceEnum.SIDE_BUY));
                             // .then((response) => {
                             //     this.logger.details('New order sent', response);
                             // })
@@ -92,7 +101,7 @@ export default class OrderManager {
     }
 
     // Create an order at market price from another order
-    public createNewOrderFromOrder(order: Order, side: BinanceEnum = BinanceEnum.SIDE_SELL): NewOrder {
+    public createNewOrderFromOrder(order: Order, side: BinanceEnum): NewOrder {
         return new NewOrder({
             symbol: order.symbol + SymbolToTrade.DEFAULT,
             type: BinanceEnum.ORDER_TYPE_MARKET,
@@ -102,18 +111,18 @@ export default class OrderManager {
         });
     }
 
-    public createNewOrderFromSymbol(symbol: string, side: BinanceEnum = BinanceEnum.SIDE_SELL): NewOrder {
+    public createNewOrderFromSymbol(symbol: string, side: BinanceEnum): NewOrder {
         const quantity = Number(this.accountManager.getInWallet(SymbolToTrade.BTC).free) / Number(this.transactions.ticker.bestAskPrice);
         return new NewOrder({
             symbol: symbol + SymbolToTrade.DEFAULT,
             type: BinanceEnum.ORDER_TYPE_MARKET,
             side: side,
-            quantity: Number(quantity.toPrecision(8)),
+            quantity: Number(quantity),
             timestamp: Date.now()
         });
     }
 
-    public resetOrderWithMarketPrice(wallet: Wallet, side: BinanceEnum = BinanceEnum.SIDE_SELL): NewOrder {
+    public resetOrderWithMarketPrice(wallet: Wallet, side: BinanceEnum): NewOrder {
         return new NewOrder({
             symbol: wallet.asset,
             type: BinanceEnum.ORDER_TYPE_MARKET,
@@ -164,20 +173,19 @@ export default class OrderManager {
 
     public sendNewOrder(newOrder: NewOrder): void {
         this.logger.details('Sending order: ', newOrder.getParameters());
-        this.binanceRest.testOrder({ 
-        symbol: 'AIONBTC',
-        side: 'BUY',
-        type: 'MARKET',
-        quantity: 10,
-        timestamp: 1517079998897,
-        timeInForce: 'GTC' }, (response) => {
-            this.logger.details('response in callback after sending a new order', response);
+        this.binanceRest.testOrder(newOrder.getParameters(), (err, data) => {
+            if (err) {
+                console.log('err', err);
+            }
+            if (data) {
+                console.log('data', data);
+            }
         })
         .then((response) => {
             console.log('response from binanceRest.newOrder', response);
         })
         .catch((error) => {
-            console.error('Error from binanceRest.newOrder', error)
+            console.error('Error from binanceRest.newOrder', error);
         });
     }
 

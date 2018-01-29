@@ -14,6 +14,7 @@
 
 import { NewOrderInterface } from '../interfaces/newOrder.interface';
 import { BinanceEnum } from '../enums/binance.enum';
+import Logger from '../logger';
 
 export class NewOrder implements NewOrderInterface {
     // Valeur obligatoire
@@ -22,6 +23,8 @@ export class NewOrder implements NewOrderInterface {
     public type: BinanceEnum;
     public quantity: number;
     public timestamp: number;
+
+    private logger: Logger;
 
     // Valeur optionnelle
     public timeInForce: BinanceEnum;
@@ -34,12 +37,14 @@ export class NewOrder implements NewOrderInterface {
     public recvWindow: number;
 
     constructor(newOrder: NewOrderInterface) {
+        this.logger = new Logger();
         this.symbol = newOrder.symbol;
         this.side = newOrder.side;
         this.type = newOrder.type;
-        this.quantity = newOrder.quantity;
+        this.quantity = Number(Math.round(newOrder.quantity).toFixed(2));
         this.timestamp = newOrder.timestamp;
-        this.timeInForce = BinanceEnum.TIME_IN_FORCE_GTC;
+
+        this.logger.log();
     }
 
     public getParameters(): any {
@@ -50,5 +55,9 @@ export class NewOrder implements NewOrderInterface {
             }
         }
         return params;
+    }
+
+    private log(): void {
+        this.logger.details('Creating new Order: ', this.getParameters());
     }
 }
