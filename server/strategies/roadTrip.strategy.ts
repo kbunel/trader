@@ -16,57 +16,46 @@ export default class RoadTripStrategy extends Strategy {
 
   public launch(): any {
     return new Promise((resolve): any => {
-      if (!this.transactions.allTickers || !this.accountManager.getAccount() || !this.transactions.trade) {
+      if (!this.informationsRequired()) {
         console.log('Missing informations to continue');
         resolve();
       }
+      resolve();
 
-      const best1HrPercent: CoinMarketCapModel = this.getBest(this.coinMarketCapTools.P_1H);
-      this.logger.log('Best current crypto is: ', best1HrPercent);
+      // const best1HrPercent: CoinMarketCapModel = this.getBest(this.coinMarketCapTools.P_1H);
+      // this.logger.log('Best current crypto is: ', best1HrPercent);
 
-      if (this.transactions.symbol !== best1HrPercent.symbol + SymbolToTrade.DEFAULT) {
-        this.logger.log('Transactions not watching the good crypto, Let\'s watch it');
+      // if (this.transactions.symbol !== best1HrPercent.symbol + SymbolToTrade.DEFAULT) {
+      //   this.logger.log('Transactions not watching the good crypto, Let\'s watch it');
 
-        this.transactions.symbol = best1HrPercent.symbol + SymbolToTrade.DEFAULT;
-        this.transactions.socket();
-        resolve();
-        return;
-      } else if (this.accountManager.getInWallet(best1HrPercent.symbol)
-          && this.isCurrentCrypto(best1HrPercent.symbol)) {
-        this.logger.log('We got ' + best1HrPercent.symbol + ', let\'s keep for now');
+      //   this.transactions.symbol = best1HrPercent.symbol + SymbolToTrade.DEFAULT;
+      //   this.transactions.socket();
 
-        resolve();
-        return;
-      } else if (this.orderManager.getCurrentOrder(best1HrPercent.symbol).length) {
-        this.logger.log('Best 1Hr Percent found in current order, let\'s check if it s still available');
+      //   resolve();
+      // } else if (this.accountManager.getInWallet(best1HrPercent.symbol)
+      //     && this.isCurrentCrypto(best1HrPercent.symbol)) {
+      //   this.logger.log('We got ' + best1HrPercent.symbol + ', let\'s keep for now');
 
-        this.orderManager.resetOrdersIfTooLong(5);
-        resolve();
-        return;
-      } else if (this.orderManager.getCurrentOrders().length) {
-        this.logger.log('Crypto ' + best1HrPercent.symbol + ' not in wallet and not in current orders, \
-        but orders found, let\'s cancel them all to buy the good crypto');
+      //   resolve();
+      // } else if (this.orderManager.getCurrentOrder(best1HrPercent.symbol).length) {
+      //   this.logger.log('Best 1Hr Percent found in current order, let\'s check if it s still available');
 
-        this.orderManager.cancelAllOrders()
-        .then(() => {
-          this.sendNewOrderWithBestRate(best1HrPercent);
-          return;
-        })
-        .catch((error) => {
-          this.logger.error('Error trying to cancel all orders', error);
-          resolve();
-          return;
-        });
-      } else {
-        this.logger.log('Crypto ' + best1HrPercent.symbol + ' not in wallet and not in current orders, \
-        No order running, let\'s buy some');
+      //   this.orderManager.resetOrdersIfTooLong(5);
+      //   resolve();
+      // } else if (this.orderManager.getCurrentOrders().length) {
+      //   this.logger.log('Crypto ' + best1HrPercent.symbol + ' not in wallet and not in current orders'
+      //   + ' but orders found, let\'s cancel them all to buy the good crypto');
 
-        this.orderManager.sellEverything();
-        // this.sendNewOrderWithBestRate(best1HrPercent);
-        return;
-      }
+      //   this.orderManager.cancelAllOrders();
+      // } else {
+      //   this.logger.log('Crypto ' + best1HrPercent.symbol + ' not in wallet and not in current orders,'
+      //   + ' no order running, let\'s buy some');
 
-      this.logger.log('EOS');
+      //   this.orderManager.sellEverything();
+      //   // this.sendNewOrderWithBestRate(best1HrPercent);
+      // }
+
+      // this.logger.log('EOS');
     });
   }
 
@@ -109,5 +98,11 @@ export default class RoadTripStrategy extends Strategy {
     this.logger.log('Checkin if ' + symbol + ' is the crypto with the highest value in the wallet');
 
     return this.accountManager.getHigherPriceInWallet().asset === symbol;
+  }
+
+  private informationsRequired(): boolean {
+    return !(!this.transactions.allTickers
+            || !this.accountManager.getAccount()
+            || !this.orderManager.getExchangeInfo());
   }
 }

@@ -24,8 +24,6 @@ export class NewOrder implements NewOrderInterface {
     public quantity: number;
     public timestamp: number;
 
-    private logger: Logger;
-
     // Valeur optionnelle
     public timeInForce: BinanceEnum;
     public price: number;
@@ -37,14 +35,11 @@ export class NewOrder implements NewOrderInterface {
     public recvWindow: number;
 
     constructor(newOrder: NewOrderInterface) {
-        this.logger = new Logger();
         this.symbol = newOrder.symbol;
         this.side = newOrder.side;
         this.type = newOrder.type;
         this.quantity = Number(Math.round(newOrder.quantity).toFixed(2));
         this.timestamp = newOrder.timestamp;
-
-        this.logger.log();
     }
 
     public getParameters(): any {
@@ -55,9 +50,5 @@ export class NewOrder implements NewOrderInterface {
             }
         }
         return params;
-    }
-
-    private log(): void {
-        this.logger.details('Creating new Order: ', this.getParameters());
     }
 }

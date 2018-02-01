@@ -64,18 +64,27 @@ export default class Bot {
     this.front.executeBotTime = Date.now();
     this.transactions.sendDataFront();
 
+    this.binanceRest.exchangeInfo((err, data) => {
+      if (err) {
+        console.log('err', err);
+      }
+      if (data) {
+        console.log(data.symbols[0].filters);
+      }
+
+    });
+
     if (process.env.SHOW_MARKET_DATA === 'true') {
-      setTimeout(() => {
-        // this.logger.log('Agg Trade', this.transactions.aggTrade);
-        // this.logger.log('Kline', this.transactions.kline);
-        // this.logger.log('All Klines', this.transactions.allKlines);
-        // this.logger.log('Ticker', this.transactions.ticker);
-        // this.logger.log('All Tickers', this.transactions.allTickers);
-        // this.logger.log('Depth', this.transactions.depth);
-        // this.logger.log('Depth Level', this.transactions.depthLevel);
-        // this.logger.log('Trade', this.transactions.trade);
-        // this.logger.log('User Data', this.transactions.userData);
-      }, process.env.LOOP_TIME);
+        console.log('Getting informations from transactions');
+        this.logger.log('Agg Trade', this.transactions.aggTrade);
+        this.logger.log('Kline', this.transactions.kline);
+        this.logger.log('All Klines', this.transactions.allKlines);
+        this.logger.log('Ticker', this.transactions.ticker);
+        this.logger.log('All Tickers', this.transactions.allTickers);
+        this.logger.log('Depth', this.transactions.depth);
+        this.logger.log('Depth Level', this.transactions.depthLevel);
+        this.logger.log('Trade', this.transactions.trade);
+        this.logger.log('User Data', this.transactions.userData);
     }
 
     if (!this.active) {

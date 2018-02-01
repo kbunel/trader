@@ -8,6 +8,7 @@ import AccountManager from '../managers/account.manager';
 import BinanceRest from 'binance';
 import { SymbolToTrade } from '../enums/symbolToTrade.enum';
 import Transactions from '../Transactions';
+import { ExchangeInfo } from '../models/exchangeInfo.model';
 
 export default class OrderManager {
 
@@ -20,6 +21,7 @@ export default class OrderManager {
     private accountManager: AccountManager;
     private binanceRest: BinanceRest;
     private transactions: Transactions;
+    private exchangeInfo: ExchangeInfo[];
 
     constructor(binanceRest: BinanceRest, accountManager: AccountManager, transactions: Transactions) {
         this.binanceRest = binanceRest;
@@ -28,9 +30,11 @@ export default class OrderManager {
         this.transactions = transactions;
 
         this.getCurrentOrdersFromBinance();
+        this.getExchangeInfosFromBinance();
     }
 
     public sellEverything(): void {
+        this.logger.log('Going to sell everything in wallet except ' + SymbolToTrade.DEFAULT);
         const wallet = this.accountManager.getWallet();
         for (const w of wallet) {
             if (w.asset !== SymbolToTrade.DEFAULT) {
@@ -112,7 +116,13 @@ export default class OrderManager {
     }
 
     public createNewOrderFromSymbol(symbol: string, side: BinanceEnum): NewOrder {
-        const quantity = Number(this.accountManager.getInWallet(SymbolToTrade.BTC).free) / Number(this.transactions.ticker.bestAskPrice);
+        this.logger.log('Creating new order from symbol (' + symbol + ')');
+        let quantity: number;
+        if (side === BinanceEnum.SIDE_BUY) {
+            quantity = Number(this.accountManager.getInWallet(SymbolToTrade.DEFAULT).free) / Number(this.transactions.getFromCoinMarketCap(symbol).price_btc);
+        } else {
+            quantity = Number(this.accountManager.getInWallet(symbol).free);
+        }
         return new NewOrder({
             symbol: symbol + SymbolToTrade.DEFAULT,
             type: BinanceEnum.ORDER_TYPE_MARKET,
@@ -138,6 +148,14 @@ export default class OrderManager {
 
     public getCurrentOrders(): Order[] {
         return this.currentOrders;
+    }
+
+    public setExchangeInfo(exchangeInfo: ExchangeInfo[]) {
+        this.exchangeInfo = exchangeInfo;
+    }
+
+    public getExchangeInfo(): ExchangeInfo[] {
+        return this.exchangeInfo;
     }
 
     public getCurrentOrder(symbol: string) {
@@ -180,12 +198,6 @@ export default class OrderManager {
             if (data) {
                 console.log('data', data);
             }
-        })
-        .then((response) => {
-            console.log('response from binanceRest.newOrder', response);
-        })
-        .catch((error) => {
-            console.error('Error from binanceRest.newOrder', error);
         });
     }
 
@@ -215,11 +227,23 @@ export default class OrderManager {
             .then((dataOrders: Order[]) => {
                 this.setCurrentOrders(dataOrders);
                 this.logger.details('Retrieved open orders informations from Binance', this.getCurrentOrders());
-                resolve();
+                resolve(dataOrders);
             })
             .catch((error) => {
                 console.log('Error while retriving open orders from Binance', error);
+                reject(error);
             });
+        });
+    }
+
+    private getExchangeInfosFromBinance(): void {
+        this.binanceRest.exchangeInfo()
+        .then((exchangeInfo: ExchangeInfo[]) => {
+            this.setExchangeInfo(exchangeInfo);
+            this.logger.details('Retrieved Exchange Info from Binance', this.getExchangeInfo());
+        })
+        .catch((error) => {
+            this.logger.error('Error while retriving Exchange Info from Binance', error);
         });
     }
 }
