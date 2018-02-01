@@ -175,16 +175,6 @@ export default class Transactions {
     );
   }
 
-  public getFromCoinMarketCap(symbol: string): CoinMarketCapModel {
-    const coinmarketcap = this.coinmarketcap;
-    for (const c of coinmarketcap) {
-      if (c.symbol === symbol) {
-        return c;
-      }
-    }
-    return null;
-  }
-
   private dataGlobal(): void {
     this.request.get(process.env.API_COINMARKETCAP, (data) => {
       this.io.sockets.emit('coinmarketcap', this.coinmarketcap = data);

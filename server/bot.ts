@@ -57,22 +57,13 @@ export default class Bot {
    *
    */
   private execute(): void {
+    console.log('Executing');
     if (process.env.LOOP_TIME <= 0) {
       return;
     }
     this.front.statusBot = this.active;
     this.front.executeBotTime = Date.now();
     this.transactions.sendDataFront();
-
-    this.binanceRest.exchangeInfo((err, data) => {
-      if (err) {
-        console.log('err', err);
-      }
-      if (data) {
-        console.log(data.symbols[0].filters);
-      }
-
-    });
 
     if (process.env.SHOW_MARKET_DATA === 'true') {
         console.log('Getting informations from transactions');

@@ -56,21 +56,30 @@ export default class AccountManager {
       return null;
     }
 
-    public getHigherPriceInWallet(symbolToTrade: SymbolToTrade = SymbolToTrade.DEFAULT): Wallet {
+    public getHigherValueInWallet(): Wallet {
       this.logger.log('Looking for the highest crypto in the wallet');
-      let bestInWallet: Wallet = this.getWallet()[0];
+
+      let bestInWallet: Wallet = this.getWallet()[2];
       const wallet = this.getWallet();
-      console.log('wallet', this.getWallet());
+
       for (const w of wallet) {
-        console.log('checking', w);
-        if (this.transactions.getFromCoinMarketCap(w.asset).price_btc > this.transactions.getFromCoinMarketCap(bestInWallet.asset).price_btc) {
-          console.log(w, 'is better');
+        if (this.getPrice(w) > this.getPrice(bestInWallet)) {
           bestInWallet = w;
         }
       }
-      this.logger.log('Best crypto in the wallet is ' + bestInWallet.asset + ' with '
-      + this.transactions.getFromCoinMarketCap(bestInWallet.asset).price_usd + ' $ available in the wallet');
 
+      this.logger.details('Best crypto in the wallet is ' + bestInWallet.asset, bestInWallet);
       return bestInWallet;
+    }
+
+    public getPrice(wallet: Wallet, ref: SymbolToTrade = SymbolToTrade.DEFAULT, price: string = 'best'): number {
+      this.logger.log('Looking for the price of ' + wallet.asset + ' in ' + ref + '.');
+      for (const ticker of this.transactions.allTickers) {
+        if (wallet.asset + ref === ticker.symbol) {
+          return Number(wallet.free) * Number((price === 'best') ? ticker.bestAskPrice : ticker.bestBid);
+        }
+      }
+      this.logger.log('Ticker not found for ' + wallet.asset + ref  + ' in AllTicker...');
+      return null;
     }
 }

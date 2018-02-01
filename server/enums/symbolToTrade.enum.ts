@@ -3,5 +3,5 @@ export enum SymbolToTrade {
     ETH  = 'ETH',
     USDT = 'USDT',
     BNB  = 'BNB',
-    DEFAULT = 'ETH'
+    DEFAULT = 'BTC'
 }
