@@ -3,18 +3,18 @@
 export class ExchangeInfo {
     public timezone: string;
     public serverTime: number;
-    public rateLimits: RateLimit[];
+    public rateLimits: ExRateLimit[];
     public exchangeFilters: any; // Didnt retrieve any informations abt this yet.
-    public symbols: Symbol[];
+    public symbols: ExSymbol[];
 }
 
-class RateLimit {
+export class ExRateLimit {
     public rateLimitType: string;
     public interval: string;
     public limit: number;
 }
 
-class Symbol {
+export class ExSymbol {
     public symbol: string;
     public status: string;
     public baseAsset: string;
@@ -23,24 +23,24 @@ class Symbol {
     public quotePrecision: number;
     public orderTypes: string[];
     public icebergAllowed: boolean;
-    public filters: [PriceFilter, LotSizeFilter, MinNotionalFilter];
+    public filters: [ExPriceFilter, ExLotSizeFilter, ExMinNotionalFilter];
 }
 
-class PriceFilter {
+export class ExPriceFilter {
     public filterType: string;
     public minPrice: string;
     public maxPrice: string;
     public tickSize: string;
 }
 
-class LotSizeFilter {
+export class ExLotSizeFilter {
     public filterTypestring;
     public minQty: string;
     public maxQty: string;
     public stepSize: string;
 }
 
-class MinNotionalFilter {
+export class ExMinNotionalFilter {
     public filterType: string;
     public minNotional: string;
 }

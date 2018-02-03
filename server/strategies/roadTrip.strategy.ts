@@ -19,6 +19,7 @@ export default class RoadTripStrategy extends Strategy {
       if (!this.informationsRequired()) {
         console.log('Missing informations to continue');
         resolve();
+        return;
       }
 
       const best1HrPercent: CoinMarketCapModel = this.getBest(this.coinMarketCapTools.P_1H);
@@ -31,51 +32,55 @@ export default class RoadTripStrategy extends Strategy {
         this.transactions.socket();
 
         resolve();
+        return;
       } else if (this.accountManager.getInWallet(best1HrPercent.symbol)
           && this.isCurrentCrypto(best1HrPercent.symbol)) {
         this.logger.log('We got ' + best1HrPercent.symbol + ', let\'s keep for now');
 
         resolve();
+        return;
       } else if (this.orderManager.getCurrentOrder(best1HrPercent.symbol).length) {
         this.logger.log('Best 1Hr Percent found in current order, let\'s check if it s still available');
 
         this.orderManager.resetOrdersIfTooLong(5);
         resolve();
+        return;
       } else if (this.orderManager.getCurrentOrders().length) {
         this.logger.log('Crypto ' + best1HrPercent.symbol + ' not in wallet and not in current orders'
         + ' but orders found, let\'s cancel them all to buy the good crypto');
 
         this.orderManager.cancelAllOrders();
         resolve();
+        return;
       } else if (this.accountManager.getHigherValueInWallet().asset !== SymbolToTrade.DEFAULT) {
         this.logger.log('Crypto ' + best1HrPercent.symbol + ' not in wallet and not in current orders,'
         + ' let\' s get some ' + SymbolToTrade.DEFAULT + ' to buy it');
 
         this.orderManager.sellEverything(best1HrPercent.symbol);
         resolve();
+        return;
       } else {
         this.logger.log('Let\'s buy some ' + best1HrPercent.symbol);
 
         // this.sendNewOrderWithBestRate(best1HrPercent);
         resolve();
+        return;
       }
-
-      this.logger.log('EOS');
     });
   }
 
-  private sendNewOrderWithBestRate(best1HrPercent: CoinMarketCapModel): void {
-    const newOrder = this.orderManager.createNewOrderFromSymbol(best1HrPercent.symbol, BinanceEnum.SIDE_BUY);
-    this.orderManager.sendNewOrder(newOrder);
-      // .then(() => {
-      //   this.logger.log('An order to get ' + best1HrPercent.symbol + ' has been sent');
-      //   this.orderManager.getCurrentOrdersFromBinance();
-      // })
-      // .catch((error) => {
-      //   this.logger.error('Error while trying to send order to get ' + best1HrPercent.symbol, error);
-      //   this.orderManager.getCurrentOrdersFromBinance();
-      // });
-  }
+  // private sendNewOrderWithBestRate(best1HrPercent: CoinMarketCapModel): void {
+  //   const newOrder = this.orderManager.createNewOrderFromSymbol(best1HrPercent.symbol, BinanceEnum.SIDE_BUY);
+  //   this.orderManager.sendNewOrder(newOrder);
+  //     // .then(() => {
+  //     //   this.logger.log('An order to get ' + best1HrPercent.symbol + ' has been sent');
+  //     //   this.orderManager.getCurrentOrdersFromBinance();
+  //     // })
+  //     // .catch((error) => {
+  //     //   this.logger.error('Error while trying to send order to get ' + best1HrPercent.symbol, error);
+  //     //   this.orderManager.getCurrentOrdersFromBinance();
+  //     // });
+  // }
 
   private getBest(key: string): CoinMarketCapModel {
     this.logger.log('Looking for the best Crypto with highest ' + key);
@@ -106,8 +111,20 @@ export default class RoadTripStrategy extends Strategy {
   }
 
   private informationsRequired(): boolean {
-    return !(!this.transactions.allTickers
-            || !this.accountManager.getAccount()
-            || !this.orderManager.getExchangeInfo());
+    if (!this.transactions.allTickers) {
+      console.log('allTickers missing');
+      return false;
+    }
+
+    if (!this.accountManager.getAccount()) {
+      console.log('Account missing');
+      return false;
+    }
+
+    if (!this.orderManager.getExchangeInfo()) {
+      console.log('ExchangeInfo missing');
+      return false;
+    }
+    return true;
   }
 }

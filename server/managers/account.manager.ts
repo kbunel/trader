@@ -48,7 +48,7 @@ export default class AccountManager {
       const wallet = this.getWallet();
       for (const w of wallet) {
         if (w.asset === symbol) {
-          this.logger.log(symbol + ' found in wallet');
+          this.logger.details(symbol + ' found in wallet', w);
           return w;
         }
       }
@@ -63,7 +63,7 @@ export default class AccountManager {
       const wallet = this.getWallet();
 
       for (const w of wallet) {
-        if (this.getPrice(w) > this.getPrice(bestInWallet)) {
+        if (this.getWalletPrice(w) > this.getWalletPrice(bestInWallet)) {
           bestInWallet = w;
         }
       }
@@ -72,7 +72,7 @@ export default class AccountManager {
       return bestInWallet;
     }
 
-    public getPrice(wallet: Wallet, ref: SymbolToTrade = SymbolToTrade.DEFAULT, price: string = 'best'): number {
+    public getWalletPrice(wallet: Wallet, ref: SymbolToTrade = SymbolToTrade.DEFAULT, price: string = 'best'): number {
       this.logger.log('Looking for the price of ' + wallet.asset + ' in ' + ref + '.');
       for (const ticker of this.transactions.allTickers) {
         if (wallet.asset + ref === ticker.symbol) {

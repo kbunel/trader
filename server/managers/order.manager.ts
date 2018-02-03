@@ -8,7 +8,8 @@ import AccountManager from '../managers/account.manager';
 import BinanceRest from 'binance';
 import { SymbolToTrade } from '../enums/symbolToTrade.enum';
 import Transactions from '../Transactions';
-import { ExchangeInfo } from '../models/exchangeInfo.model';
+import { ExchangeInfo, ExLotSizeFilter, ExSymbol } from '../models/exchangeInfo.model';
+import { TickerEnum } from '../enums/ticker.enum';
 
 export default class OrderManager {
 
@@ -44,7 +45,7 @@ export default class OrderManager {
                 && !(except !== null && w.asset === except)
                 && Number(w.free) >= this.getMinQtyTradable(w.asset)) {
 
-                this.sendNewOrder(this.createNewOrderFromSymbol(w.asset, BinanceEnum.SIDE_SELL));
+                this.sendNewOrder(this.createNewSellOrder(w.asset));
             } else {
                 this.logger.log('Cannot sell anything from ' + w.asset);
             }
@@ -97,20 +98,27 @@ export default class OrderManager {
         });
     }
 
-    public createNewOrderFromSymbol(symbol: string, side: BinanceEnum, type: BinanceEnum = BinanceEnum.ORDER_TYPE_LIMIT): NewOrder {
-        this.logger.log('Creating new order from symbol (' + symbol + ')');
+    public createNewBuyOrder(symbolToBuy: string,  type: BinanceEnum = BinanceEnum.ORDER_TYPE_LIMIT): NewOrder {
+        this.logger.log('Creating new buy order (' + symbolToBuy + SymbolToTrade.DEFAULT + ')');
 
-        const ref: SymbolToTrade = SymbolToTrade.DEFAULT;
-        const price: number = this.accountManager.getPrice(this.accountManager.getInWallet(symbol), ref);
-        const quantity: number = Number(this.accountManager.getInWallet(ref).free) / price;
+        const price: number = this.getPrice(symbolToBuy);
+        const quantity: number = Number(this.accountManager.getInWallet(SymbolToTrade.DEFAULT).free) / price;
+        const symbol: string = symbolToBuy + SymbolToTrade.DEFAULT;
+        const side: BinanceEnum = BinanceEnum.SIDE_BUY;
 
-        return new NewOrder({
-            symbol: symbol + ref,
-            type: type,
-            side: side,
-            quantity: quantity,
-            timestamp: Date.now()
-        });
+        return this.createNewOrder(symbol, side, price, quantity, type);
+    }
+
+    public createNewSellOrder(symbolToSell: string, type: BinanceEnum = BinanceEnum.ORDER_TYPE_LIMIT): NewOrder {
+        this.logger.log('Creating new sell order (' + symbolToSell + SymbolToTrade.DEFAULT + ')');
+
+        const price: number = this.getPrice(symbolToSell);
+        const qtyFixed = this.getQuantityPrecision(symbolToSell);
+        const quantity: number = Number(Number(this.accountManager.getInWallet(symbolToSell).free).toFixed(qtyFixed));
+        const symbol: string = symbolToSell + SymbolToTrade.DEFAULT;
+        const side: BinanceEnum = BinanceEnum.SIDE_SELL;
+
+        return this.createNewOrder(symbol, side, price, quantity, type);
     }
 
     public setCurrentOrders(currentOrders: Order[]) {
@@ -165,7 +173,7 @@ export default class OrderManager {
     public sendNewOrder(newOrder: NewOrder): void {
         this.logger.details('Sending order: ', newOrder.getParameters());
 
-        this.binanceRest.testOrder(newOrder.getParameters(), (err, data) => {
+        this.binanceRest.newOrder(newOrder.getParameters(), (err, data) => {
             if (err) { console.log('err', err); }
             if (data) { console.log('data', data); }
         });
@@ -201,9 +209,29 @@ export default class OrderManager {
     }
 
     public getMinQtyTradable(symbol: string): number {
-        console.log('Getting min qty traddable');
-        const min: any = this.getLotSizeFilter(this.getSymbolFromExchangeInfo(symbol));
-        return min.minQty;
+        this.logger.log('Getting min qty traddable');
+        const exLotSizeFilter: ExLotSizeFilter = this.getLotSizeFilter(this.getSymbolFromExchangeInfo(symbol));
+        console.log('lotSize filter -----------> ', exLotSizeFilter);
+        return Number(exLotSizeFilter.minQty);
+    }
+
+    private createNewOrder(tradeSymbol: string, side: BinanceEnum, price: number,  quantity: number, type: BinanceEnum): NewOrder {
+        const newOrder = new NewOrder({
+            symbol: tradeSymbol,
+            type: type,
+            side: side,
+            quantity: quantity,
+            timestamp: Date.now()
+        });
+
+        newOrder.timeInForce = BinanceEnum.TIME_IN_FORCE_GTC;
+        newOrder.price = price;
+        return newOrder;
+    }
+
+    private getQuantityPrecision(symbol): number {
+        const exLotSizeFilter: ExLotSizeFilter = this.getLotSizeFilter(this.getSymbolFromExchangeInfo(symbol));
+        return Number(exLotSizeFilter.minQty).toString().split('.')[1].length;
     }
 
     private getExchangeInfosFromBinance(): void {
@@ -254,19 +282,30 @@ export default class OrderManager {
         });
     }
 
-    private getLotSizeFilter(symbol: any): any {
+    private getLotSizeFilter(symbol: ExSymbol): ExLotSizeFilter {
         console.log('Getting min filter for min Qty');
         return symbol.filters[1];
     }
 
-    private getSymbolFromExchangeInfo(symbol: string): any {
+    private getSymbolFromExchangeInfo(symbol: string): ExSymbol {
         console.log('Getting symbol [' + symbol + SymbolToTrade.DEFAULT + '].');
         for (const s of this.exchangeInfo.symbols) {
             if (s.symbol === symbol + SymbolToTrade.DEFAULT) {
                 return s;
             }
         }
-        console.log('Didnt get symbol ' + symbol + '....');
+        console.log('Didnt get symbol ' + symbol + ' ...');
+        return null;
+    }
+
+    private getPrice(symbol, priceKind: TickerEnum = TickerEnum.BEST_ASK_PRICE): number {
+        for (const ticker of this.transactions.allTickers) {
+            if (symbol + SymbolToTrade.DEFAULT === ticker.symbol) {
+              const price = Number((priceKind === TickerEnum.BEST_ASK_PRICE) ? ticker.bestAskPrice : ticker.bestBid);
+                return Number(price.toFixed(8));
+            }
+        }
+        this.logger.log('Price for ' + symbol + SymbolToTrade.DEFAULT + ' not found ...');
         return null;
     }
 }

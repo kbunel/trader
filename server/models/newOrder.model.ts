@@ -38,7 +38,7 @@ export class NewOrder implements NewOrderInterface {
         this.symbol = newOrder.symbol;
         this.side = newOrder.side;
         this.type = newOrder.type;
-        this.quantity = Number(Math.round(newOrder.quantity).toFixed(2));
+        this.quantity = newOrder.quantity;
         this.timestamp = newOrder.timestamp;
     }
 
