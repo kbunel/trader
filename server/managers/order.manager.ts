@@ -35,22 +35,21 @@ export default class OrderManager {
     }
 
     public sellEverything(except: string = null): void {
-        this.logger.log('Going to sell everything in wallet except ' + SymbolToTrade.DEFAULT);
-
         const wallet = this.accountManager.getWallet();
-        console.log(wallet);
+        this.logger.log('Going to sell everything in wallet except ' + SymbolToTrade.DEFAULT, wallet);
+
+        let ordersSent: number = 0;
         for (const w of wallet) {
-            console.log(w);
             if (w.asset !== SymbolToTrade.DEFAULT
                 && !(except !== null && w.asset === except)
-                && Number(w.free) >= this.getMinQtyTradable(w.asset)) {
+                && Number(w.free) >= this.getMinQtyTradable(w.asset)
+                && this.getCurrentOrder(w.asset).length === 0) {
 
+                ordersSent++;
                 this.sendNewOrder(this.createNewSellOrder(w.asset));
-            } else {
-                this.logger.log('Cannot sell anything from ' + w.asset);
             }
         }
-        this.logger.log('All orders have been sent');
+        this.logger.log(ordersSent + ' orders have been sent');
     }
 
     public resetOrdersIfTooLong(min: number): Promise<any> {
@@ -102,7 +101,8 @@ export default class OrderManager {
         this.logger.log('Creating new buy order (' + symbolToBuy + SymbolToTrade.DEFAULT + ')');
 
         const price: number = this.getPrice(symbolToBuy);
-        const quantity: number = Number(this.accountManager.getInWallet(SymbolToTrade.DEFAULT).free) / price;
+        const absoluteQty = Number(this.accountManager.getInWallet(SymbolToTrade.DEFAULT).free) / price;
+        const quantity: number = this.getValidQuantity(symbolToBuy, absoluteQty);
         const symbol: string = symbolToBuy + SymbolToTrade.DEFAULT;
         const side: BinanceEnum = BinanceEnum.SIDE_BUY;
 
@@ -113,8 +113,7 @@ export default class OrderManager {
         this.logger.log('Creating new sell order (' + symbolToSell + SymbolToTrade.DEFAULT + ')');
 
         const price: number = this.getPrice(symbolToSell);
-        const qtyFixed = this.getQuantityPrecision(symbolToSell);
-        const quantity: number = Number(Number(this.accountManager.getInWallet(symbolToSell).free).toFixed(qtyFixed));
+        const quantity: number = this.getValidQuantityFromWallet(this.accountManager.getInWallet(symbolToSell));
         const symbol: string = symbolToSell + SymbolToTrade.DEFAULT;
         const side: BinanceEnum = BinanceEnum.SIDE_SELL;
 
@@ -139,12 +138,17 @@ export default class OrderManager {
     }
 
     public getCurrentOrder(symbol: string) {
+        this.logger.log('Getting orders for ' + symbol);
+
         const orders: Order[] = [];
+        console.log('Current orders: ' + this.getCurrentOrders());
         for (const order of this.getCurrentOrders()) {
             if (order.symbol === symbol) {
                 orders.push(order);
             }
         }
+
+        this.logger.details('Found ' + orders.length + ' orders for ' + symbol, orders);
         return orders;
     }
 
@@ -194,24 +198,24 @@ export default class OrderManager {
     }
 
     public getCurrentOrdersFromBinance(): Promise<any> {
+        this.logger.log('Getting current orders from Binance');
+
         return new Promise((resolve, reject): any => {
-            this.binanceRest.openOrders()
-            .then((dataOrders: Order[]) => {
-                this.setCurrentOrders(dataOrders);
-                this.logger.details('Retrieved open orders informations from Binance', this.getCurrentOrders());
-                resolve(dataOrders);
-            })
-            .catch((error) => {
-                this.logger.error('Error while retriving open orders from Binance', error);
-                reject(error);
+            this.binanceRest.openOrders({}, (err, data) => {
+                if (err) { this.logger.log('Error from openOrders', err); }
+                if (data) {
+                    this.setCurrentOrders(data);
+                    this.logger.log('data from openOrders', data);
+                }
+                resolve();
             });
         });
     }
 
     public getMinQtyTradable(symbol: string): number {
         this.logger.log('Getting min qty traddable');
+
         const exLotSizeFilter: ExLotSizeFilter = this.getLotSizeFilter(this.getSymbolFromExchangeInfo(symbol));
-        console.log('lotSize filter -----------> ', exLotSizeFilter);
         return Number(exLotSizeFilter.minQty);
     }
 
@@ -229,9 +233,22 @@ export default class OrderManager {
         return newOrder;
     }
 
-    private getQuantityPrecision(symbol): number {
+    private getValidQuantityFromWallet(wallet: Wallet): number {
+        const exLotSizeFilter: ExLotSizeFilter = this.getLotSizeFilter(this.getSymbolFromExchangeInfo(wallet.asset));
+        const precision = Number(exLotSizeFilter.minQty).toString().split('.')[1].length;
+        const left = wallet.free.split('.')[0];
+        const right = wallet.free.split('.')[1].substring(0, precision);
+
+        return Number(left + '.' + right);
+    }
+
+    private getValidQuantity(symbol: string, qty: number): number {
         const exLotSizeFilter: ExLotSizeFilter = this.getLotSizeFilter(this.getSymbolFromExchangeInfo(symbol));
-        return Number(exLotSizeFilter.minQty).toString().split('.')[1].length;
+        const precision = Number(exLotSizeFilter.minQty).toString().split('.')[1].length;
+        const left = qty.toString().split('.')[0];
+        const right = qty.toString().split('.')[1].substring(0, precision);
+
+        return Number(left + '.' + right);
     }
 
     private getExchangeInfosFromBinance(): void {
@@ -288,7 +305,8 @@ export default class OrderManager {
     }
 
     private getSymbolFromExchangeInfo(symbol: string): ExSymbol {
-        console.log('Getting symbol [' + symbol + SymbolToTrade.DEFAULT + '].');
+        this.logger.log('Getting symbol [' + symbol + SymbolToTrade.DEFAULT + '].');
+
         for (const s of this.exchangeInfo.symbols) {
             if (s.symbol === symbol + SymbolToTrade.DEFAULT) {
                 return s;
@@ -302,7 +320,7 @@ export default class OrderManager {
         for (const ticker of this.transactions.allTickers) {
             if (symbol + SymbolToTrade.DEFAULT === ticker.symbol) {
               const price = Number((priceKind === TickerEnum.BEST_ASK_PRICE) ? ticker.bestAskPrice : ticker.bestBid);
-                return Number(price.toFixed(8));
+                return price;
             }
         }
         this.logger.log('Price for ' + symbol + SymbolToTrade.DEFAULT + ' not found ...');

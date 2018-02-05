@@ -14,6 +14,7 @@ import { Order } from './models/order.model';
 import { BinanceEnum } from './enums/binance.enum';
 import OrderManager from './managers/order.manager';
 import { setTimeout } from 'timers';
+import SocketManager from './managers/socket.manager';
 
 export default class Bot {
 
@@ -41,6 +42,7 @@ export default class Bot {
     this.binanceRest = new api.BinanceRest({
       key: String(process.env.APIKEY),
       secret: String(process.env.APISECRET),
+      recvWindow: 10000
     });
 
     this.front = new FrontModel();
@@ -59,24 +61,12 @@ export default class Bot {
   private execute(): void {
     console.log('Executing');
     if (process.env.LOOP_TIME <= 0) {
+      this.logger.error('BAD LOOP_TIME');
       return;
     }
-    this.front.statusBot = this.active;
-    this.front.executeBotTime = Date.now();
-    this.transactions.sendDataFront();
-
-    if (process.env.SHOW_MARKET_DATA === 'true') {
-        console.log('Getting informations from transactions');
-        this.logger.log('Agg Trade', this.transactions.aggTrade);
-        this.logger.log('Kline', this.transactions.kline);
-        this.logger.log('All Klines', this.transactions.allKlines);
-        this.logger.log('Ticker', this.transactions.ticker);
-        this.logger.log('All Tickers', this.transactions.allTickers);
-        this.logger.log('Depth', this.transactions.depth);
-        this.logger.log('Depth Level', this.transactions.depthLevel);
-        this.logger.log('Trade', this.transactions.trade);
-        this.logger.log('User Data', this.transactions.userData);
-    }
+    // this.front.statusBot = this.active;
+    // this.front.executeBotTime = Date.now();
+    // this.transactions.sendDataFront();
 
     if (!this.active) {
       return this.execute();
@@ -101,7 +91,8 @@ export default class Bot {
       logger: this.logger,
       coinMarketCapTools: this.coinMarketCapTools,
       accountManager: this.accountManager,
-      orderManager: new OrderManager(this.binanceRest, this.accountManager, this.transactions)
+      orderManager: new OrderManager(this.binanceRest, this.accountManager, this.transactions),
+      socketManager: new SocketManager(this.accountManager, this.binanceRest)
     };
   }
 

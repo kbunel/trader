@@ -22,19 +22,30 @@ export default class RoadTripStrategy extends Strategy {
         return;
       }
 
-      const best1HrPercent: CoinMarketCapModel = this.getBest(this.coinMarketCapTools.P_1H);
-      this.logger.log('Best current crypto is: ', best1HrPercent);
+      if (process.env.SHOW_MARKET_DATA === 'true') {
+        this.socketManager.logDatas();
+      }
 
-      if (this.transactions.symbol !== best1HrPercent.symbol + SymbolToTrade.DEFAULT) {
+      // this.orderManager.getCurrentOrdersFromBinance();
+
+      const best1HrPercent: CoinMarketCapModel = this.getBest(this.coinMarketCapTools.P_1H);
+      this.logger.log('Best current crypto (' + Number(best1HrPercent.percent_change_1h) + ') is: ', best1HrPercent);
+
+      if (Number(best1HrPercent.percent_change_1h) < 0) {
+        this.logger.log('Nothing currently interesting, let\'s not make any move');
+
+        resolve();
+        return;
+      } else if (this.socketManager.getSymbolToWatch() !== best1HrPercent.symbol + SymbolToTrade.DEFAULT) {
         this.logger.log('Transactions not watching the good crypto, Let\'s watch it');
 
-        this.transactions.symbol = best1HrPercent.symbol + SymbolToTrade.DEFAULT;
-        this.transactions.socket();
+        this.socketManager.setSymbolToWatch(best1HrPercent.symbol);
+        this.socketManager.resetCombinedSocket();
 
         resolve();
         return;
       } else if (this.accountManager.getInWallet(best1HrPercent.symbol)
-          && this.isCurrentCrypto(best1HrPercent.symbol)) {
+          && this.isCurrentCrypto(best1HrPercent.symbol) && this.isWorthyToSwitch(best1HrPercent)) {
         this.logger.log('We got ' + best1HrPercent.symbol + ', let\'s keep for now');
 
         resolve();
@@ -62,25 +73,12 @@ export default class RoadTripStrategy extends Strategy {
       } else {
         this.logger.log('Let\'s buy some ' + best1HrPercent.symbol);
 
-        // this.sendNewOrderWithBestRate(best1HrPercent);
+        this.orderManager.sendNewOrder(this.orderManager.createNewBuyOrder(best1HrPercent.symbol));
         resolve();
         return;
       }
     });
   }
-
-  // private sendNewOrderWithBestRate(best1HrPercent: CoinMarketCapModel): void {
-  //   const newOrder = this.orderManager.createNewOrderFromSymbol(best1HrPercent.symbol, BinanceEnum.SIDE_BUY);
-  //   this.orderManager.sendNewOrder(newOrder);
-  //     // .then(() => {
-  //     //   this.logger.log('An order to get ' + best1HrPercent.symbol + ' has been sent');
-  //     //   this.orderManager.getCurrentOrdersFromBinance();
-  //     // })
-  //     // .catch((error) => {
-  //     //   this.logger.error('Error while trying to send order to get ' + best1HrPercent.symbol, error);
-  //     //   this.orderManager.getCurrentOrdersFromBinance();
-  //     // });
-  // }
 
   private getBest(key: string): CoinMarketCapModel {
     this.logger.log('Looking for the best Crypto with highest ' + key);
@@ -94,7 +92,7 @@ export default class RoadTripStrategy extends Strategy {
   private getAvailablesCoins(): CoinMarketCapModel[] {
     const selected: CoinMarketCapModel[] = [];
     for (const c of this.transactions.coinmarketcap) {
-      for (const t of this.transactions.allTickers) {
+      for (const t of this.socketManager.getAllTickers()) {
         if (c['symbol'] + 'ETH' === t['symbol'] || c['symbol'] + 'BTC' === t['symbol']) {
           selected.push(c);
           break;
@@ -111,7 +109,7 @@ export default class RoadTripStrategy extends Strategy {
   }
 
   private informationsRequired(): boolean {
-    if (!this.transactions.allTickers) {
+    if (!this.socketManager.getAllTickers()) {
       console.log('allTickers missing');
       return false;
     }
@@ -126,5 +124,34 @@ export default class RoadTripStrategy extends Strategy {
       return false;
     }
     return true;
+  }
+
+  private getCoinMarketCapValueFor(symbol: string): CoinMarketCapModel {
+    this.logger.log('Looking for coinMarketCap value informations for ' + symbol);
+
+    for (const c of this.transactions.coinmarketcap) {
+      if (c.symbol === symbol) {
+        return c;
+      }
+    }
+
+    this.logger.error('CoinMarketCap informations for ' + symbol + ' not found...');
+    return null;
+  }
+
+  private isWorthyToSwitch(symbolToSwitchFor: CoinMarketCapModel): boolean {
+    this.logger.log('Checking if it is worthy to switch crypto place');
+
+    const currentCrypto: CoinMarketCapModel = this.getCoinMarketCapValueFor(this.accountManager.getHigherValueInWallet().asset);
+
+    if (Number(symbolToSwitchFor.percent_change_1h) > Number(currentCrypto.percent_change_1h) + 1) {
+      this.logger.log('It is worthy to change: current: ' + currentCrypto.symbol + '(' + currentCrypto.percent_change_1h
+      + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change_1h + ')');
+      return true;
+    } else {
+      this.logger.log('Not worthy to change: current: ' + currentCrypto.symbol + '(' + currentCrypto.percent_change_1h
+      + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change_1h + ')');
+      return false;
+    }
   }
 }

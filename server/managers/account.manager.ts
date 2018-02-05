@@ -20,7 +20,7 @@ export default class AccountManager {
         this.binanceRest.account()
         .then((data) => {
           this.setAccount(data);
-          this.logger.details('Retrieved account informations');
+          this.logger.details('Retrieved account informations', this.getAccount());
         })
         .catch(console.error);
     }
@@ -59,9 +59,8 @@ export default class AccountManager {
     public getHigherValueInWallet(): Wallet {
       this.logger.log('Looking for the highest crypto in the wallet');
 
-      let bestInWallet: Wallet = this.getWallet()[2];
-      const wallet = this.getWallet();
-
+      const wallet: Wallet[] = this.getWallet();
+      let bestInWallet: Wallet = this.getWallet()[0];
       for (const w of wallet) {
         if (this.getWalletPrice(w) > this.getWalletPrice(bestInWallet)) {
           bestInWallet = w;
@@ -74,6 +73,10 @@ export default class AccountManager {
 
     public getWalletPrice(wallet: Wallet, ref: SymbolToTrade = SymbolToTrade.DEFAULT, price: string = 'best'): number {
       this.logger.log('Looking for the price of ' + wallet.asset + ' in ' + ref + '.');
+
+      if (wallet.asset === SymbolToTrade.DEFAULT) {
+        return Number(wallet.free);
+      }
       for (const ticker of this.transactions.allTickers) {
         if (wallet.asset + ref === ticker.symbol) {
           return Number(wallet.free) * Number((price === 'best') ? ticker.bestAskPrice : ticker.bestBid);

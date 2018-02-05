@@ -8,6 +8,7 @@ import Indicators from '../indicators';
 import Logger from '../Logger';
 import OrderManager from '../managers/order.manager';
 import AccountManager from '../managers/account.manager';
+import SocketManager from '../managers/socket.manager';
 
 export default abstract class Strategy implements StrategyInterface {
 
@@ -18,6 +19,7 @@ export default abstract class Strategy implements StrategyInterface {
   protected coinMarketCapTools: CoinMarketCapTools;
   protected orderManager: OrderManager;
   protected accountManager: AccountManager;
+  protected socketManager: SocketManager;
 
   public abstract strategyName;
 
@@ -29,6 +31,7 @@ export default abstract class Strategy implements StrategyInterface {
     this.coinMarketCapTools = strategyConfig.coinMarketCapTools;
     this.orderManager = strategyConfig.orderManager;
     this.accountManager = strategyConfig.accountManager;
+    this.socketManager = strategyConfig.socketManager;
   }
 
   abstract launch(): Promise<void>;

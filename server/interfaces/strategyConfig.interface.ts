@@ -6,6 +6,7 @@ import CoinMarketCapTools from '../tools/coinMarketCap.tools';
 import AccountManager from '../managers/account.manager';
 import { Order } from '../models/order.model';
 import OrderManager from '../managers/order.manager';
+import SocketManager from '../managers/socket.manager';
 
 export interface StrategyConfig {
   transactions: Transactions;
@@ -15,4 +16,5 @@ export interface StrategyConfig {
   coinMarketCapTools: CoinMarketCapTools;
   orderManager: OrderManager;
   accountManager: AccountManager;
+  socketManager: SocketManager;
 }
