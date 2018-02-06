@@ -63,19 +63,25 @@ export default class RoadTripStrategy extends Strategy {
         this.orderManager.cancelAllOrders();
         resolve();
         return;
-      } else if (this.accountManager.getHigherValueInWallet().asset !== SymbolToTrade.DEFAULT) {
-        this.logger.log('Crypto ' + best1HrPercent.symbol + ' not in wallet and not in current orders,'
-        + ' let\' s get some ' + SymbolToTrade.DEFAULT + ' to buy it');
-
-        this.orderManager.sellEverything(best1HrPercent.symbol);
-        resolve();
-        return;
       } else {
-        this.logger.log('Let\'s buy some ' + best1HrPercent.symbol);
+        this.accountManager.getHigherValueInWallet()
+        .then((wallet: Wallet) => {
+          if (wallet.asset !== SymbolToTrade.DEFAULT) {
+            this.logger.log('Crypto ' + best1HrPercent.symbol + ' not in wallet and not in current orders,'
+            + ' let\' s get some ' + SymbolToTrade.DEFAULT + ' to buy it');
 
-        this.orderManager.sendNewOrder(this.orderManager.createNewBuyOrder(best1HrPercent.symbol));
-        resolve();
-        return;
+            this.orderManager.sellEverything(best1HrPercent.symbol);
+            resolve();
+            return;
+          } else {
+            this.logger.log('Let\'s buy some ' + best1HrPercent.symbol);
+
+            this.orderManager.sendNewOrder(this.orderManager.createNewBuyOrder(best1HrPercent.symbol));
+            resolve();
+            return;
+          }
+        })
+        .catch((error) => this.logger.error(error));
       }
     });
   }
@@ -109,6 +115,7 @@ export default class RoadTripStrategy extends Strategy {
   }
 
   private informationsRequired(): boolean {
+    console.log('all ticker founds: ', this.socketManager.getAllTickers());
     if (!this.socketManager.getAllTickers()) {
       console.log('allTickers missing');
       return false;

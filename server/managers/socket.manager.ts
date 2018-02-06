@@ -1,4 +1,3 @@
-import AccountManager from './account.manager';
 import { BinanceWS, BinanceRest } from 'binance';
 import Logger from '../logger';
 import { DepthModel } from '../models/depth.model';
@@ -11,9 +10,7 @@ import { SymbolToTrade } from '../enums/symbolToTrade.enum';
 
 export default class SocketManager {
 
-    private accountManager: AccountManager;
-    private binanceWS: BinanceWS = null;
-    private binanceRest: BinanceRest;
+    private binanceWS: BinanceWS;
     private combinedWebSocket: WebSocket;
     private logger;
     private symbolToWatch: string = 'ETHBTC';
@@ -28,11 +25,9 @@ export default class SocketManager {
     private userData: any;
     private allKlines: KlineModel[];
 
-    constructor(accountManager: AccountManager, binanceRest: BinanceRest) {
+    constructor(private binanceRest: BinanceRest) {
         this.logger = new Logger();
-        this.accountManager = accountManager;
         this.binanceWS = new BinanceWS();
-        this.binanceRest = binanceRest;
 
         this.activateKlinesSocket();
         this.activateUserDataSocket();

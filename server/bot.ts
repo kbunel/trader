@@ -8,7 +8,7 @@ import StrategyManager from './managers/strategy.manager';
 import { StrategyConfig } from './interfaces/strategyConfig.interface';
 import Logger from './logger';
 import CoinMarketCapTools from './tools/coinMarketCap.tools';
-import { Account } from './models/account.model';
+import { AccountModel } from './models/account.model';
 import AccountManager from './managers/account.manager';
 import { Order } from './models/order.model';
 import { BinanceEnum } from './enums/binance.enum';
@@ -28,6 +28,8 @@ export default class Bot {
   private coinMarketCapTools: CoinMarketCapTools;
   private binanceRest: any;
   private accountManager: AccountManager;
+  private orderManager: OrderManager;
+  private socketManager: SocketManager;
 
   /**
    *
@@ -44,12 +46,13 @@ export default class Bot {
       secret: String(process.env.APISECRET),
       recvWindow: 10000
     });
-
     this.front = new FrontModel();
     this.indicators = new Indicators(this.front);
     this.transactions = new Transactions(server, this.front, this.binanceRest);
     this.coinMarketCapTools = new CoinMarketCapTools(this.transactions);
-    this.accountManager = new AccountManager(this.binanceRest, this.transactions);
+    this.socketManager = new SocketManager(this.binanceRest);
+    this.accountManager = new AccountManager(this.binanceRest, this.socketManager);
+    this.orderManager = new OrderManager(this.binanceRest, this.accountManager, this.socketManager);
     this.strategyManager = new StrategyManager(this.initStrategyConfig());
 
     this.execute();
@@ -91,8 +94,8 @@ export default class Bot {
       logger: this.logger,
       coinMarketCapTools: this.coinMarketCapTools,
       accountManager: this.accountManager,
-      orderManager: new OrderManager(this.binanceRest, this.accountManager, this.transactions),
-      socketManager: new SocketManager(this.accountManager, this.binanceRest)
+      orderManager: this.orderManager,
+      socketManager: this.socketManager
     };
   }
 

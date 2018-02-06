@@ -1,6 +1,6 @@
 import { Wallet } from './wallet.model';
 
-export class Account {
+export class AccountModel {
   public makerCommission: Number;
   public takerCommission: Number;
   public buyerCommission: Number;

@@ -1,21 +1,20 @@
-import { Account } from '../models/account.model';
+import { Promise } from 'es6-promise';
+import { AccountModel } from '../models/account.model';
 import BinanceRest from 'binance';
 import Logger from '../Logger';
 import { Wallet } from '../models/wallet.model';
 import { SymbolToTrade } from '../enums/symbolToTrade.enum';
-import Transactions from '../transactions';
 import { CoinMarketCapModel } from '../models/coinmarketcap.model';
+import SocketManager from './socket.manager';
+import { SymbolPriceTickerModel } from '../models/symbolPriceTicker.model';
 
 export default class AccountManager {
-    private account: Account;
-    private binanceRest: BinanceRest;
+    private account: AccountModel;
     private logger: Logger;
-    private transactions: Transactions;
 
-    constructor(binanceRest: BinanceRest, transactions: Transactions) {
-        this.binanceRest = binanceRest;
+    constructor(private binanceRest: BinanceRest,
+                private socketManager: SocketManager) {
         this.logger = new Logger();
-        this.transactions = transactions;
 
         this.binanceRest.account()
         .then((data) => {
@@ -25,11 +24,11 @@ export default class AccountManager {
         .catch(console.error);
     }
 
-    public setAccount(account: Account) {
+    public setAccount(account: AccountModel) {
         this.account = account;
     }
 
-    public getAccount(): Account {
+    public getAccount(): AccountModel {
         return this.account;
     }
 
@@ -56,28 +55,47 @@ export default class AccountManager {
       return null;
     }
 
-    public getHigherValueInWallet(): Wallet {
+    public getHigherValueInWallet(): Promise<Wallet> {
       this.logger.log('Looking for the highest crypto in the wallet');
 
-      const wallet: Wallet[] = this.getWallet();
-      let bestInWallet: Wallet = this.getWallet()[0];
-      for (const w of wallet) {
-        if (this.getWalletPrice(w) > this.getWalletPrice(bestInWallet)) {
-          bestInWallet = w;
-        }
-      }
-
-      this.logger.details('Best crypto in the wallet is ' + bestInWallet.asset, bestInWallet);
-      return bestInWallet;
+      return new Promise((resolve, reject) => {
+        const wallet: Wallet[] = this.getWallet();
+        this.binanceRest.tickerPrice(null, (err, prices: SymbolPriceTickerModel[]) => {
+          if (prices) {
+            this.logger.details('Get symbol Ticker prices from Binance', prices);
+            let bestInWallet: any = {
+              wallet: this.getWallet()[0],
+              price: null
+            };
+            for (const w of wallet) {
+              for (const p of prices) {
+                if (p.symbol === w.asset && (bestInWallet.walllet === null || p.price > bestInWallet.price )) {
+                  bestInWallet = {
+                    wallet: w,
+                    price: p.price
+                  };
+                }
+              }
+            }
+            this.logger.details('Best crypto in the wallet is ' + bestInWallet.wallet.asset, bestInWallet);
+            resolve(bestInWallet.wallet);
+          }
+          if (err) {
+            this.logger.error('Error while getting symbols tickers prices', err);
+            reject(err);
+          }
+        });
+      });
     }
 
-    public getWalletPrice(wallet: Wallet, ref: SymbolToTrade = SymbolToTrade.DEFAULT, price: string = 'best'): number {
-      this.logger.log('Looking for the price of ' + wallet.asset + ' in ' + ref + '.');
+    private getWalletPrice(wallet: Wallet, ref: SymbolToTrade = SymbolToTrade.DEFAULT, price: string = 'best'): number {
+      this.logger.log('Looking for the wallet price of ' + wallet.asset + ' in ' + ref + '.');
 
       if (wallet.asset === SymbolToTrade.DEFAULT) {
         return Number(wallet.free);
       }
-      for (const ticker of this.transactions.allTickers) {
+      for (const ticker of this.socketManager.getAllTickers()) {
+        console.log('ticker.symbol:', ticker.symbol);
         if (wallet.asset + ref === ticker.symbol) {
           return Number(wallet.free) * Number((price === 'best') ? ticker.bestAskPrice : ticker.bestBid);
         }

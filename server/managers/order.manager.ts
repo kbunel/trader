@@ -7,9 +7,9 @@ import Logger from '../logger';
 import AccountManager from '../managers/account.manager';
 import BinanceRest from 'binance';
 import { SymbolToTrade } from '../enums/symbolToTrade.enum';
-import Transactions from '../Transactions';
 import { ExchangeInfo, ExLotSizeFilter, ExSymbol } from '../models/exchangeInfo.model';
 import { TickerEnum } from '../enums/ticker.enum';
+import SocketManager from './socket.manager';
 
 export default class OrderManager {
 
@@ -19,16 +19,12 @@ export default class OrderManager {
 
     private currentOrders: Order[];
     private logger: Logger;
-    private accountManager: AccountManager;
-    private binanceRest: BinanceRest;
-    private transactions: Transactions;
     private exchangeInfo: ExchangeInfo;
 
-    constructor(binanceRest: BinanceRest, accountManager: AccountManager, transactions: Transactions) {
-        this.binanceRest = binanceRest;
-        this.accountManager = accountManager;
+    constructor(private binanceRest: BinanceRest,
+                private accountManager: AccountManager,
+                private socketManager: SocketManager) {
         this.logger = new Logger();
-        this.transactions = transactions;
 
         this.getCurrentOrdersFromBinance();
         this.getExchangeInfosFromBinance();
@@ -177,7 +173,7 @@ export default class OrderManager {
     public sendNewOrder(newOrder: NewOrder): void {
         this.logger.details('Sending order: ', newOrder.getParameters());
 
-        this.binanceRest.newOrder(newOrder.getParameters(), (err, data) => {
+        this.binanceRest.testOrder(newOrder.getParameters(), (err, data) => {
             if (err) { console.log('err', err); }
             if (data) { console.log('data', data); }
         });
@@ -300,7 +296,7 @@ export default class OrderManager {
     }
 
     private getLotSizeFilter(symbol: ExSymbol): ExLotSizeFilter {
-        console.log('Getting min filter for min Qty');
+        console.log('Getting min filter for min Qty', symbol.filters[1]);
         return symbol.filters[1];
     }
 
@@ -317,13 +313,18 @@ export default class OrderManager {
     }
 
     private getPrice(symbol, priceKind: TickerEnum = TickerEnum.BEST_ASK_PRICE): number {
-        for (const ticker of this.transactions.allTickers) {
+        this.logger.log('Looking for the price of ' + symbol);
+
+        const allTickers = this.socketManager.getAllTickers();
+        for (const ticker of allTickers) {
+            console.log('ticker.symbol:', ticker);
             if (symbol + SymbolToTrade.DEFAULT === ticker.symbol) {
               const price = Number((priceKind === TickerEnum.BEST_ASK_PRICE) ? ticker.bestAskPrice : ticker.bestBid);
                 return price;
             }
         }
-        this.logger.log('Price for ' + symbol + SymbolToTrade.DEFAULT + ' not found ...');
+
+        this.logger.details('Price for ' + symbol + SymbolToTrade.DEFAULT + ' not found ...', allTickers);
         return null;
     }
 }
