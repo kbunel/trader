@@ -7,6 +7,7 @@ import { SymbolToTrade } from '../enums/symbolToTrade.enum';
 import { CoinMarketCapModel } from '../models/coinmarketcap.model';
 import SocketManager from './socket.manager';
 import { SymbolPriceTickerModel } from '../models/symbolPriceTicker.model';
+import { OutboundBalances } from '../models/outboundAccountInfo.model';
 
 export default class AccountManager {
     private account: AccountModel;
@@ -98,12 +99,26 @@ export default class AccountManager {
         return Number(wallet.free);
       }
       for (const ticker of this.socketManager.getAllTickers()) {
-        console.log('ticker.symbol:', ticker.symbol);
         if (wallet.asset + ref === ticker.symbol) {
           return Number(wallet.free) * Number((price === 'best') ? ticker.bestAskPrice : ticker.bestBid);
         }
       }
       this.logger.log('Ticker not found for ' + wallet.asset + ref  + ' in AllTicker...');
       return null;
+    }
+
+    private updateWalletFromBalances(balances: OutboundBalances[]): void {
+      this.logger.log('Updating wallet from new balances');
+
+      for (const w of this.account.balances) {
+        for (const balance of balances) {
+          if (w.asset === balance.asset) {
+            w.free = balance.availableBalance;
+            w.locked = balance.onOrderBalance;
+
+            break ;
+          }
+        }
+      }
     }
 }

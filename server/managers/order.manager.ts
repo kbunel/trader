@@ -128,7 +128,6 @@ export default class OrderManager {
     }
 
     public getExchangeInfo(): ExchangeInfo {
-        console.log('Getting exchange info');
         return this.exchangeInfo;
     }
 
@@ -264,7 +263,8 @@ export default class OrderManager {
 
     private getValidQuantityFromWallet(wallet: Wallet): number {
         const exLotSizeFilter: ExLotSizeFilter = this.getLotSizeFilter(this.getSymbolFromExchangeInfo(wallet.asset));
-        const precision = Number(exLotSizeFilter.minQty).toString().split('.')[1].length;
+        const minQty = Number(exLotSizeFilter.minQty);
+        const precision = (minQty < 1) ? minQty.toString().split('.')[1].length : 0;
         const left = wallet.free.split('.')[0];
         const right = wallet.free.split('.')[1].substring(0, precision);
 
@@ -330,7 +330,6 @@ export default class OrderManager {
     }
 
     private getLotSizeFilter(symbol: ExSymbol): ExLotSizeFilter {
-        console.log('Getting min filter for min Qty', symbol.filters[1]);
         return symbol.filters[1];
     }
 
@@ -342,7 +341,7 @@ export default class OrderManager {
                 return s;
             }
         }
-        console.log('Didnt get symbol ' + symbol + ' ...');
+        this.logger.log('Didnt get symbol ' + symbol + ' ...');
         return null;
     }
 

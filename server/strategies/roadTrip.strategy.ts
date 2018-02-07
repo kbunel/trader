@@ -17,7 +17,7 @@ export default class RoadTripStrategy extends Strategy {
   public launch(): any {
     return new Promise((resolve, reject): any => {
       if (!this.informationsRequired()) {
-        console.log('Missing informations to continue');
+        this.logger.log('Missing informations to continue');
         reject();
         return;
       }
@@ -115,17 +115,17 @@ export default class RoadTripStrategy extends Strategy {
 
   private informationsRequired(): boolean {
     if (!this.socketManager.getAllTickers()) {
-      console.log('allTickers missing');
+      this.logger.log('allTickers missing');
       return false;
     }
 
     if (!this.accountManager.getAccount()) {
-      console.log('Account missing');
+      this.logger.log('Account missing');
       return false;
     }
 
     if (!this.orderManager.getExchangeInfo()) {
-      console.log('ExchangeInfo missing');
+      this.logger.log('ExchangeInfo missing');
       return false;
     }
     return true;

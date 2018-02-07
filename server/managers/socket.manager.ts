@@ -7,6 +7,7 @@ import { AggTradeModel } from '../models/aggTrade.model';
 import { TradeModel } from '../models/trade.model';
 import { TickerModel } from '../models/ticker.model';
 import { SymbolToTrade } from '../enums/symbolToTrade.enum';
+import { OutboundBalances } from '../models/outboundAccountInfo.model';
 
 export default class SocketManager {
 
@@ -24,6 +25,7 @@ export default class SocketManager {
     private allTickers: TickerModel[] = [];
     private userData: any;
     private allKlines: KlineModel[] = [];
+    private balances: OutboundBalances[] = [];
 
     constructor(private binanceRest: BinanceRest) {
         this.logger = new Logger();
@@ -34,8 +36,12 @@ export default class SocketManager {
         this.activateCombinedSockets();
     }
 
+    public setBalances(balances: OutboundBalances[]) {
+        this.balances = balances;
+    }
+
     public logDatas(): void {
-        console.log('Getting informations retrieved by the Socket Manager');
+        this.logger.log('Getting informations retrieved by the Socket Manager');
 
         this.logger.log('Agg Trade', this.aggTrade);
         this.logger.log('Kline', this.kline);
@@ -90,6 +96,9 @@ export default class SocketManager {
 
         this.binanceWS.onUserData(this.binanceRest, (data) => {
             this.logger.details('userData', data);
+            if (data.eventType === 'outboundAccountInfo') {
+                this.setBalances(data.balances);
+            }
         }, 60000) // Optional, how often the keep alive should be sent in milliseconds
         .then((ws) => {
             // websocket instance available here
