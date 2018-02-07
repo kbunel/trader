@@ -14,16 +14,16 @@ export default class SocketManager {
     private combinedWebSocket: WebSocket;
     private logger;
     private symbolToWatch: string = 'ETHBTC';
-    public interval: string = String(process.env.INTERVAL);
+    private interval: string = String(process.env.INTERVAL);
     private depth: DepthModel;
     private depthLevel: DepthLevelModel;
     private kline: KlineModel;
     private aggTrade: AggTradeModel;
     private trade: TradeModel;
     private ticker: TickerModel;
-    private allTickers: TickerModel[];
+    private allTickers: TickerModel[] = [];
     private userData: any;
-    private allKlines: KlineModel[];
+    private allKlines: KlineModel[] = [];
 
     constructor(private binanceRest: BinanceRest) {
         this.logger = new Logger();
@@ -61,9 +61,16 @@ export default class SocketManager {
     }
 
     public resetCombinedSocket(): void {
-        this.logger.log('Resetting sockets');
+        this.logger.log('Resetting activateCombinedSockets');
 
-        if (this.binanceWS) { this.binanceWS.terminate(); }
+        // Disabled cause it s freezing the bot, check for userData before
+        // putting it back
+        // if (this.binanceWS) {
+        //     console.log('Terminating binanceWS');
+        //     this.binanceWS.terminate()
+        //     .then((data) => { console.log('data', data); })
+        //     .catch(console.error);
+        // }
         this.activateCombinedSockets();
     }
 
@@ -88,6 +95,23 @@ export default class SocketManager {
             // websocket instance available here
         })
         .catch((error) => this.logger.error(error));
+    }
+
+    private addTickers(tickers: TickerModel[]): void {
+        let updated: boolean;
+        for (const ticker of tickers) {
+            updated = false;
+            for (const i in this.allTickers) {
+                if (this.allTickers[+i].symbol === ticker.symbol) {
+                    this.allTickers[+i] = ticker;
+                    updated = true;
+                    break;
+                }
+            }
+            if (!updated) {
+                this.allTickers.push(ticker);
+            }
+        }
     }
 
     private activateCombinedSockets(): void {
@@ -125,7 +149,7 @@ export default class SocketManager {
                 this.ticker = streamEvent.data;
             break;
             case this.binanceWS.streams.allTickers():
-                this.allTickers = streamEvent.data;
+                this.addTickers(streamEvent.data);
             break;
             }
         }

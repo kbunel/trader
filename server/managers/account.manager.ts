@@ -60,23 +60,26 @@ export default class AccountManager {
 
       return new Promise((resolve, reject) => {
         const wallet: Wallet[] = this.getWallet();
-        this.binanceRest.tickerPrice(null, (err, prices: SymbolPriceTickerModel[]) => {
+        this.binanceRest.tickerPrice({}, (err, prices: SymbolPriceTickerModel[]) => {
           if (prices) {
-            this.logger.details('Get symbol Ticker prices from Binance', prices);
             let bestInWallet: any = {
-              wallet: this.getWallet()[0],
+              wallet: null,
               price: null
             };
             for (const w of wallet) {
               for (const p of prices) {
-                if (p.symbol === w.asset && (bestInWallet.walllet === null || p.price > bestInWallet.price )) {
-                  bestInWallet = {
-                    wallet: w,
-                    price: p.price
-                  };
+                if (w.asset !== p.symbol
+                  && p.symbol === w.asset + SymbolToTrade.DEFAULT
+                  && (bestInWallet.walllet === null ||  Number(p.price) * Number(w.free) > bestInWallet.price )) {
+                  bestInWallet = { wallet: w, price: Number(p.price) * Number(w.free) };
                 }
               }
             }
+            const symbTotrade = this.getInWallet(SymbolToTrade.DEFAULT);
+            if (symbTotrade && Number(symbTotrade.free) > bestInWallet.price) {
+              bestInWallet = { wallet: symbTotrade, price: symbTotrade.free };
+            }
+
             this.logger.details('Best crypto in the wallet is ' + bestInWallet.wallet.asset, bestInWallet);
             resolve(bestInWallet.wallet);
           }

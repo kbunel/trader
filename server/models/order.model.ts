@@ -4,6 +4,7 @@ export class Order {
     public symbol: string;
     public orderId: number;
     public clientOrderId: string;
+    public transactTime: number;
     public price: string;
     public origQty: string;
     public executedQty: string;

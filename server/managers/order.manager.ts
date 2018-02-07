@@ -10,6 +10,8 @@ import { SymbolToTrade } from '../enums/symbolToTrade.enum';
 import { ExchangeInfo, ExLotSizeFilter, ExSymbol } from '../models/exchangeInfo.model';
 import { TickerEnum } from '../enums/ticker.enum';
 import SocketManager from './socket.manager';
+import { SymbolPriceTickerModel } from '../models/symbolPriceTicker.model';
+import { CancelOrderResponse } from '../models/cancelOrderReponse.model';
 
 export default class OrderManager {
 
@@ -17,7 +19,12 @@ export default class OrderManager {
     public readonly ORDERS_FOUND: string = 'orders found';
     public readonly ORDERS_FOUND_WITH_ERRORS: string = 'orders found with errors';
 
-    private currentOrders: Order[];
+    public readonly CURRENT_ORDER_STATUS: Array<string> = [
+        BinanceEnum.ORDER_STATUS_NEW,
+        BinanceEnum.ORDER_STATUS_PARTIALLY_FILLED
+    ];
+
+    private currentOrders: Order[] = [];
     private logger: Logger;
     private exchangeInfo: ExchangeInfo;
 
@@ -39,7 +46,7 @@ export default class OrderManager {
             if (w.asset !== SymbolToTrade.DEFAULT
                 && !(except !== null && w.asset === except)
                 && Number(w.free) >= this.getMinQtyTradable(w.asset)
-                && this.getCurrentOrder(w.asset).length === 0) {
+                && this.getCurrentOrders(w.asset).length === 0) {
 
                 ordersSent++;
                 this.sendNewOrder(this.createNewSellOrder(w.asset));
@@ -116,14 +123,6 @@ export default class OrderManager {
         return this.createNewOrder(symbol, side, price, quantity, type);
     }
 
-    public setCurrentOrders(currentOrders: Order[]) {
-        this.currentOrders = currentOrders;
-    }
-
-    public getCurrentOrders(): Order[] {
-        return this.currentOrders;
-    }
-
     public setExchangeInfo(exchangeInfo: ExchangeInfo) {
         this.exchangeInfo = exchangeInfo;
     }
@@ -133,19 +132,50 @@ export default class OrderManager {
         return this.exchangeInfo;
     }
 
-    public getCurrentOrder(symbol: string) {
-        this.logger.log('Getting orders for ' + symbol);
+    public getCurrentOrders(symbol: string = null): Order[] {
+        if (symbol) {
+            this.logger.log('Getting current orders for ' + symbol);
+            const reg = new RegExp(symbol);
+            const orders: Order[] = [];
+            for (const order of this.currentOrders) {
+                if (order.symbol.match(reg)) {
+                    orders.push(order);
+                }
+            }
+            this.logger.details('Retrieved ' + orders.length + 'from current orders', orders);
+            return orders;
+        }
+        this.logger.details('Getting all current orders (' + this.currentOrders.length + ')', this.currentOrders);
+        return this.currentOrders;
+    }
 
-        const orders: Order[] = [];
-        console.log('Current orders: ' + this.getCurrentOrders());
-        for (const order of this.getCurrentOrders()) {
-            if (order.symbol === symbol) {
-                orders.push(order);
+    public setCurrentOrders(currentOrders: Order[]): void {
+        this.currentOrders = currentOrders;
+    }
+
+    public addOrder(order: Order): void {
+        for (const i in this.currentOrders) {
+            if (this.currentOrders[+i].orderId === order.orderId) {
+                this.currentOrders.splice(+i, 1);
+                break ;
             }
         }
+        this.currentOrders.push(order);
+    }
 
-        this.logger.details('Found ' + orders.length + ' orders for ' + symbol, orders);
-        return orders;
+    public addOrders(orders: Order[]) {
+        for (const order of orders) {
+            this.addOrder(order);
+        }
+    }
+
+    public removeOrder(orderId: number): void {
+        for (const i in this.getCurrentOrders) {
+            if (this.currentOrders[+i].orderId === orderId) {
+                this.logger.details('Order #' + this.currentOrders[+i].orderId + ' removed', this.currentOrders[+i]);
+                this.currentOrders.splice(+i, 1);
+            }
+        }
     }
 
     public cancelAllOrders(): Promise<any> {
@@ -173,21 +203,24 @@ export default class OrderManager {
     public sendNewOrder(newOrder: NewOrder): void {
         this.logger.details('Sending order: ', newOrder.getParameters());
 
-        this.binanceRest.testOrder(newOrder.getParameters(), (err, data) => {
-            if (err) { console.log('err', err); }
-            if (data) { console.log('data', data); }
+        this.binanceRest.newOrder(newOrder.getParameters(), (err, order: Order) => {
+            if (err) { this.logger.error('Error trying to send an order', err); }
+            if (order) {
+                this.logger.details('New order sent', order);
+                this.addOrder(order);
+            }
         });
     }
 
     private cancelOrder(order: Order): Promise<any> {
         this.logger.details('Cancelling order', order);
         return new Promise((resolve, reject): any => {
-            this.binanceRest.cancelOrder({
-                symbol: order.symbol,
-                timestamp: order.time
-            }, (err, data) => {
+            this.binanceRest.cancelOrder(order, (err, data: CancelOrderResponse) => {
                 if (err) { this.logger.log(err); }
-                if (data) { this.logger.log(data); }
+                if (data) {
+                    this.logger.details('Canceled order #' + data.orderId, data);
+                    this.removeOrder(data.orderId);
+                }
                 resolve();
             });
         });
@@ -197,11 +230,11 @@ export default class OrderManager {
         this.logger.log('Getting current orders from Binance');
 
         return new Promise((resolve, reject): any => {
-            this.binanceRest.openOrders({}, (err, data) => {
+            this.binanceRest.openOrders({}, (err, orders: Order[]) => {
                 if (err) { this.logger.log('Error from openOrders', err); }
-                if (data) {
-                    this.setCurrentOrders(data);
-                    this.logger.log('data from openOrders', data);
+                if (orders) {
+                    this.addOrders(orders);
+                    this.logger.log('Current orders retrieved from Binance', orders);
                 }
                 resolve();
             });
@@ -240,7 +273,8 @@ export default class OrderManager {
 
     private getValidQuantity(symbol: string, qty: number): number {
         const exLotSizeFilter: ExLotSizeFilter = this.getLotSizeFilter(this.getSymbolFromExchangeInfo(symbol));
-        const precision = Number(exLotSizeFilter.minQty).toString().split('.')[1].length;
+        const minQty = Number(exLotSizeFilter.minQty);
+        const precision = (minQty < 1) ? minQty.toString().split('.')[1].length : 0;
         const left = qty.toString().split('.')[0];
         const right = qty.toString().split('.')[1].substring(0, precision);
 
@@ -317,7 +351,6 @@ export default class OrderManager {
 
         const allTickers = this.socketManager.getAllTickers();
         for (const ticker of allTickers) {
-            console.log('ticker.symbol:', ticker);
             if (symbol + SymbolToTrade.DEFAULT === ticker.symbol) {
               const price = Number((priceKind === TickerEnum.BEST_ASK_PRICE) ? ticker.bestAskPrice : ticker.bestBid);
                 return price;
