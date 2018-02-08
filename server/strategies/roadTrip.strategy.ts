@@ -107,9 +107,16 @@ export default class RoadTripStrategy extends Strategy {
       this.logger.log('Getting datas from CoinMarketCap');
       const request = new Client();
 
+      if (!request) {
+        console.log('no request service');
+      }
       request.get(process.env.API_COINMARKETCAP, (data) => {
         resolve(data);
-      }).catch((err) => {
+      })
+      .then((datas) => {
+        console.log('datas from coinmarketcap', datas);
+      })
+      .catch((err) => {
         this.logger.error('Error while getting coinMarketap informations', err);
         reject(err);
       });

@@ -33,7 +33,7 @@ export default class AccountManager {
       this.binanceRest.account()
         .then((data) => {
           this.setAccount(data);
-          this.logger.details('Retrieved account informations', this.getAccount());
+          this.logger.details('Retrieved account informations', data);
         })
         .catch((error) => {
           console.error('Error while getting account from Binance', error);
