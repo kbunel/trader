@@ -33,9 +33,9 @@ export default class SocketManager {
         this.logger = new Logger();
         this.binanceWS = new BinanceWS();
 
+        this.activateCombinedSockets();
         this.activateKlinesSocket();
         this.activateUserDataSocket();
-        this.activateCombinedSockets();
     }
 
     public setBalances(balances: OutboundBalances[]) {
@@ -91,7 +91,9 @@ export default class SocketManager {
             interval: this.interval
         })
         .then((data: KlineModel[]) => this.allKlines = data)
-        .catch((error) => this.logger.error(error));
+        .catch((error) => {
+            this.logger.error('Error getting KlinesSockets', error);
+        });
     }
 
     private activateUserDataSocket(): void {
@@ -99,6 +101,7 @@ export default class SocketManager {
 
         this.binanceWS.onUserData(this.binanceRest, (data) => {
             this.logger.details('userData', data);
+
             if (data.eventType === 'outboundAccountInfo') {
                 this.setBalances(data.balances);
             }
@@ -106,10 +109,14 @@ export default class SocketManager {
         .then((ws) => {
             // websocket instance available here
         })
-        .catch((error) => this.logger.error(error));
+        .catch((error) => {
+            this.logger.error('Error getting usearDataSockets', error);
+        });
     }
 
     private addTickers(tickers: TickerModel[]): void {
+        this.logger.details('Retrieved allTickers from Binances', tickers);
+
         let updated: boolean;
         for (const ticker of tickers) {
             updated = false;
@@ -140,7 +147,7 @@ export default class SocketManager {
             this.binanceWS.streams.allTickers()
         ],
         (streamEvent) => {
-            // console.log('allTickers from transaction', this.allTickers);
+            console.log('streamEvent', streamEvent);
             switch (streamEvent.stream) {
             case this.binanceWS.streams.depth(this.symbolToWatch):
                 this.depth = streamEvent.data;

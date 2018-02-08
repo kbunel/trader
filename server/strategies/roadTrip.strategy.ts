@@ -67,18 +67,29 @@ export default class RoadTripStrategy extends Strategy {
           })
           .catch((error) => this.logger.error(error));
         }
+      })
+      .catch((error) => {
+        reject(error);
       });
     });
   }
 
   private getBest(key: string): Promise<CoinMarketCapModel> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       this.logger.log('Looking for the best Crypto with highest ' + key);
       this.getAvailablesCoins()
       .then((selection: CoinMarketCapModel[]) => {
-        resolve(selection.sort((a: CoinMarketCapModel, b: CoinMarketCapModel) => {
+        this.logger.details('Retrieved selection done from Binance & CoinMArketCap', selection);
+
+        const best: CoinMarketCapModel = selection.sort((a: CoinMarketCapModel, b: CoinMarketCapModel) => {
           return Number(b[key]) - Number(a[key]);
-        })[0]);
+        })[0];
+
+        this.logger.log('Best is ' + best);
+        resolve(best);
+      })
+      .catch((error) => {
+        reject(error);
       });
     });
   }
@@ -89,7 +100,9 @@ export default class RoadTripStrategy extends Strategy {
 
       this.getCoinMarketCapDatas()
       .then((coinMakerCapDatas: CoinMarketCapModel[]) => {
-        for (const c of this.transactions.coinmarketcap) {
+        this.logger.details('Get datas from coinmarketCap', coinMakerCapDatas);
+
+        for (const c of coinMakerCapDatas) {
           for (const t of this.socketManager.getAllTickers()) {
             if (c.symbol + 'BTC' === t.symbol || c.symbol + 'ETH' === t.symbol) {
               selected.push(c);
@@ -98,6 +111,9 @@ export default class RoadTripStrategy extends Strategy {
           }
         }
         resolve(selected);
+      })
+      .catch((error) => {
+        reject(error);
       });
     });
   }
@@ -107,25 +123,17 @@ export default class RoadTripStrategy extends Strategy {
       this.logger.log('Getting datas from CoinMarketCap');
       const request = new Client();
 
-      if (!request) {
-        console.log('no request service');
-      }
-      request.get(process.env.API_COINMARKETCAP, (data) => {
-        resolve(data);
-      })
-      .then((datas) => {
-        console.log('datas from coinmarketcap', datas);
-      })
-      .catch((err) => {
-        this.logger.error('Error while getting coinMarketap informations', err);
-        reject(err);
+      request.get(process.env.API_COINMARKETCAP, (data, response) => {
+        (data) ? resolve(data) : reject('No data get from CoinMarketCap');
       });
     });
   }
 
   private informationsRequired(): boolean {
-    if (!this.socketManager.getAllTickers()) {
-      this.logger.log('allTickers missing');
+
+    this.logger.details('allTickers from transactions', this.transactions.allTickers);
+    if (!this.socketManager.getAllTickers().length) {
+      this.logger.details('allTickers missing', this.socketManager.getAllTickers());
       return false;
     }
 

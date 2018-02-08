@@ -8,12 +8,12 @@ export default class Logger {
   }
 
   public details(info: string, ...details: any[]) {
-    console.log(info);
     if (process.env.LOG_DETAILS_ACTIVE) {
       for (const arg of details) {
         console.log(arg);
       }
     }
+    console.log(info);
   }
 
   public error(...args: any[]) {

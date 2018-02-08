@@ -38,9 +38,9 @@ export default class AccountManager {
         .catch((error) => {
           console.error('Error while getting account from Binance', error);
           if (error.code === -1000) {
-            this.logger.log('Unknow error located, trying again in 5 sec.');
+            this.logger.log('Unknown error located, trying again in 5 sec.');
 
-            setTimeout(() => this.getAccountFromBinance(), 50000);
+            // setTimeout(() => this.getAccountFromBinance(), 50000);
           }
         });
     }
