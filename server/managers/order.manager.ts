@@ -137,6 +137,7 @@ export default class OrderManager {
             const reg = new RegExp(symbol);
             const orders: Order[] = [];
             for (const order of this.currentOrders) {
+                console.log('order -> ', order);
                 if (order.symbol.match(reg)) {
                     orders.push(order);
                 }
@@ -177,13 +178,16 @@ export default class OrderManager {
         }
     }
 
-    public cancelAllOrders(): Promise<any> {
+    public cancelAllOrders(symbolToNotCancel: string = null): Promise<any> {
         this.logger.log('Cancelling all orders');
 
         return new Promise((resolve, reject) => {
             const promises: Promise<any>[] = [];
 
             for (const order of this.getCurrentOrders()) {
+                if (symbolToNotCancel && order.symbol === symbolToNotCancel) {
+                    continue;
+                }
                 promises.push(this.cancelOrder(order));
             }
 
@@ -214,7 +218,11 @@ export default class OrderManager {
     private cancelOrder(order: Order): Promise<any> {
         this.logger.details('Cancelling order', order);
         return new Promise((resolve, reject): any => {
-            this.binanceRest.cancelOrder(order, (err, data: CancelOrderResponse) => {
+            this.binanceRest.cancelOrder({
+                symbol: order.symbol,
+                orderId: order.orderId,
+                timestamp: Date.now()
+            }, (err, data: CancelOrderResponse) => {
                 if (err) { this.logger.log(err); }
                 if (data) {
                     this.logger.details('Canceled order #' + data.orderId, data);

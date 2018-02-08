@@ -8,6 +8,7 @@ import { TradeModel } from '../models/trade.model';
 import { TickerModel } from '../models/ticker.model';
 import { SymbolToTrade } from '../enums/symbolToTrade.enum';
 import { OutboundBalances } from '../models/outboundAccountInfo.model';
+import { EventEmitter } from 'events';
 
 export default class SocketManager {
 
@@ -26,6 +27,7 @@ export default class SocketManager {
     private userData: any;
     private allKlines: KlineModel[] = [];
     private balances: OutboundBalances[] = [];
+    public eventEmitter = new EventEmitter();
 
     constructor(private binanceRest: BinanceRest) {
         this.logger = new Logger();
@@ -38,6 +40,7 @@ export default class SocketManager {
 
     public setBalances(balances: OutboundBalances[]) {
         this.balances = balances;
+        this.eventEmitter.emit('balances', balances);
     }
 
     public logDatas(): void {

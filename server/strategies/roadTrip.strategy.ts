@@ -40,7 +40,7 @@ export default class RoadTripStrategy extends Strategy {
             this.bestInWallet = wallet;
 
             if (wallet.asset === best1HrPercent.symbol
-              || (wallet.asset !== best1HrPercent.symbol && this.isWorthyToSwitch(best1HrPercent))) {
+              || !this.isWorthyToSwitch(best1HrPercent)) {
               this.logger.log('We got ' + best1HrPercent.symbol + ', let\'s hold for now');
 
             } else if (this.orderManager.getCurrentOrders(best1HrPercent.symbol).length) {
@@ -51,7 +51,7 @@ export default class RoadTripStrategy extends Strategy {
               this.logger.log('Crypto ' + best1HrPercent.symbol + ' not in wallet and not in current orders'
               + ' but orders found, let\'s cancel them all to buy the good crypto');
 
-              this.orderManager.cancelAllOrders();
+              this.orderManager.cancelAllOrders(wallet.asset + SymbolToTrade.DEFAULT);
             } else if (wallet.asset !== SymbolToTrade.DEFAULT) {
               this.logger.log('Crypto ' + best1HrPercent.symbol + ' not in wallet and not in current orders,'
               + ' let\' s get some ' + SymbolToTrade.DEFAULT + ' to buy it');
@@ -109,6 +109,9 @@ export default class RoadTripStrategy extends Strategy {
 
       request.get(process.env.API_COINMARKETCAP, (data) => {
         resolve(data);
+      }).catch((err) => {
+        this.logger.error('Error while getting coinMarketap informations', err);
+        reject(err);
       });
     });
   }

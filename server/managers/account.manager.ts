@@ -17,12 +17,8 @@ export default class AccountManager {
                 private socketManager: SocketManager) {
         this.logger = new Logger();
 
-        this.binanceRest.account()
-        .then((data) => {
-          this.setAccount(data);
-          this.logger.details('Retrieved account informations', this.getAccount());
-        })
-        .catch(console.error);
+        this.getAccountFromBinance();
+        this.subscribeToEvents();
     }
 
     public setAccount(account: AccountModel) {
@@ -31,6 +27,22 @@ export default class AccountManager {
 
     public getAccount(): AccountModel {
         return this.account;
+    }
+
+    public getAccountFromBinance() {
+      this.binanceRest.account()
+        .then((data) => {
+          this.setAccount(data);
+          this.logger.details('Retrieved account informations', this.getAccount());
+        })
+        .catch((error) => {
+          console.error('Error while getting account from Binance', error);
+          if (error.code === -1000) {
+            this.logger.log('Unknow error located, trying again in 5 sec.');
+
+            setTimeout(() => this.getAccountFromBinance(), 50000);
+          }
+        });
     }
 
     public getWallet(): Wallet[] {
@@ -107,8 +119,16 @@ export default class AccountManager {
       return null;
     }
 
+    private subscribeToEvents(): void {
+      this.socketManager.eventEmitter.on('balances', (balances) => {
+        this.logger.details('Received balances from socket', balances);
+
+        this.updateWalletFromBalances(balances);
+      });
+    }
+
     private updateWalletFromBalances(balances: OutboundBalances[]): void {
-      this.logger.log('Updating wallet from new balances');
+      this.logger.details('Updating account balances with new balances', balances);
 
       for (const w of this.account.balances) {
         for (const balance of balances) {
@@ -120,5 +140,7 @@ export default class AccountManager {
           }
         }
       }
+
+      this.logger.details('Account balances updated', this.account.balances);
     }
 }
