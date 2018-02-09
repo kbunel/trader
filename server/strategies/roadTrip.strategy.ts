@@ -41,11 +41,15 @@ export default class RoadTripStrategy extends Strategy {
 
             if (wallet.asset === best1HrPercent.symbol
               || !this.isWorthyToSwitch(best1HrPercent)) {
-              this.logger.log('We got ' + best1HrPercent.symbol + ', let\'s hold for now');
+              this.logger.log('We got ' + wallet.asset + ', let\'s hold for now');
 
             } else if (this.orderManager.getCurrentOrders(best1HrPercent.symbol).length) {
               this.logger.log('Best 1Hr Percent found in current order, let\'s check if it s still available');
 
+              this.orderManager.resetOrdersIfTooLong(5);
+            } else if (wallet.asset !== SymbolToTrade.DEFAULT && this.orderManager.getCurrentOrders(SymbolToTrade.DEFAULT).length) {
+
+              this.logger.log('Orders with symbol to trade found, let\'s check if it s still available');
               this.orderManager.resetOrdersIfTooLong(5);
             } else if (this.orderManager.getCurrentOrders().length) {
               this.logger.log('Crypto ' + best1HrPercent.symbol + ' not in wallet and not in current orders'
@@ -60,7 +64,21 @@ export default class RoadTripStrategy extends Strategy {
             } else {
               this.logger.log('Let\'s buy some ' + best1HrPercent.symbol);
 
-              this.orderManager.sendNewOrder(this.orderManager.createNewBuyOrder(best1HrPercent.symbol));
+              this.orderManager.createNewBuyOrder(best1HrPercent.symbol)
+              .then((newBuyOrder: NewOrder) => {
+                this.orderManager.sendNewOrder(newBuyOrder)
+                .then((order: Order) => {
+                  this.logger.details('New buy order for ' + order.symbol + ' sent', order);
+                  resolve(order);
+                })
+                .catch((error) => {
+                  this.logger.error('Error trying to send an order', error);
+                });
+              })
+              .catch((error) => {
+                this.logger.error('Error trying create a newBuyOrder', error);
+                reject(error);
+              });
             }
             resolve();
             return;
@@ -85,7 +103,7 @@ export default class RoadTripStrategy extends Strategy {
           return Number(b[key]) - Number(a[key]);
         })[0];
 
-        this.logger.log('Best is ' + best);
+        this.logger.details('Best is ' + best.symbol, best);
         resolve(best);
       })
       .catch((error) => {
@@ -131,7 +149,6 @@ export default class RoadTripStrategy extends Strategy {
 
   private informationsRequired(): boolean {
 
-    this.logger.details('allTickers from transactions', this.transactions.allTickers);
     if (!this.socketManager.getAllTickers().length) {
       this.logger.details('allTickers missing', this.socketManager.getAllTickers());
       return false;
@@ -168,6 +185,10 @@ export default class RoadTripStrategy extends Strategy {
     const currentCrypto: CoinMarketCapModel = this.getCoinMarketCapValueFor(this.bestInWallet.asset);
 
     if (Number(symbolToSwitchFor.percent_change_1h) > Number(currentCrypto.percent_change_1h) + 1) {
+      this.logger.log('It is worthy to change: current: ' + currentCrypto.symbol + '(' + currentCrypto.percent_change_1h
+      + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change_1h + ')');
+      return true;
+    } if (Number(symbolToSwitchFor.percent_change_1h) > 0 && Number(currentCrypto.percent_change_1h) < 0) {
       this.logger.log('It is worthy to change: current: ' + currentCrypto.symbol + '(' + currentCrypto.percent_change_1h
       + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change_1h + ')');
       return true;

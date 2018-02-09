@@ -13,7 +13,7 @@ import { EventEmitter } from 'events';
 export default class SocketManager {
 
     private binanceWS: BinanceWS;
-    private combinedWebSocket: WebSocket;
+    private combinedWebSocket: BinanceWS;
     private logger;
     private symbolToWatch: string = 'ETHBTC';
     private interval: string = String(process.env.INTERVAL);
@@ -72,14 +72,12 @@ export default class SocketManager {
     public resetCombinedSocket(): void {
         this.logger.log('Resetting activateCombinedSockets');
 
-        // Disabled cause it s freezing the bot, check for userData before
-        // putting it back
-        // if (this.binanceWS) {
-        //     console.log('Terminating binanceWS');
-        //     this.binanceWS.terminate()
-        //     .then((data) => { console.log('data', data); })
-        //     .catch(console.error);
-        // }
+        if (this.binanceWS) {
+            console.log('Terminating binanceWS');
+            this.combinedWebSocket.terminate()
+            .then((data) => { console.log('data', data); })
+            .catch(console.error);
+        }
         this.activateCombinedSockets();
     }
 
@@ -147,7 +145,6 @@ export default class SocketManager {
             this.binanceWS.streams.allTickers()
         ],
         (streamEvent) => {
-            console.log('streamEvent', streamEvent);
             switch (streamEvent.stream) {
             case this.binanceWS.streams.depth(this.symbolToWatch):
                 this.depth = streamEvent.data;
