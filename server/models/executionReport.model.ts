@@ -18,7 +18,7 @@ export class ExecutionReport {
   public executionType: string;
   public orderStatus: BinanceEnum;
   public rejectReason: string;
-  public orderId: string;
+  public orderId: number;
   public lastTradeQuantity: string;
   public accumulatedQuantity: string;
   public lastTradePrice: string;

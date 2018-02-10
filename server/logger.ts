@@ -9,7 +9,12 @@ export default class Logger {
 
   public details(info: string, ...details: any[]) {
     if (process.env.LOG_DETAILS_ACTIVE) {
+      let i: number = 0;
       for (const arg of details) {
+        i++;
+        if (process.env.LOGET_DETAILS_MINIFIED === 'true' && i === 3) {
+          break ;
+        }
         console.log(arg);
       }
     }

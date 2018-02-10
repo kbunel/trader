@@ -9,6 +9,7 @@ import { TickerModel } from '../models/ticker.model';
 import { SymbolToTrade } from '../enums/symbolToTrade.enum';
 import { OutboundBalances } from '../models/outboundAccountInfo.model';
 import { EventEmitter } from 'events';
+import { BinanceEnum } from '../enums/binance.enum';
 
 export default class SocketManager {
 
@@ -102,6 +103,9 @@ export default class SocketManager {
 
             if (data.eventType === 'outboundAccountInfo') {
                 this.setBalances(data.balances);
+            }
+            if (data.eventType === 'executionReport') {
+                this.eventEmitter.emit('executionReport', data);
             }
         }, 60000) // Optional, how often the keep alive should be sent in milliseconds
         .then((ws) => {
