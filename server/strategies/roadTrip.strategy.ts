@@ -23,11 +23,9 @@ export default class RoadTripStrategy extends Strategy {
         reject();
         return;
       }
-      this.logger.log('CHECKING BEST');
 
       this.getBest(this.coinMarketCapTools.P_1H)
       .then((best1HrPercent: CoinMarketCapModel) => {
-        this.logger.log('GOT BEST');
 
         if (this.socketManager.getSymbolToWatch() !== best1HrPercent.symbol + SymbolToTrade.DEFAULT) {
           this.logger.log('Transactions not watching the good crypto, Let\'s watch it');
@@ -174,7 +172,6 @@ export default class RoadTripStrategy extends Strategy {
       return false;
     }
 
-    this.logger.log('Got all informations required');
     return true;
   }
 

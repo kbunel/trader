@@ -45,21 +45,15 @@ export default class Bot {
       secret: String(process.env.APISECRET),
       recvWindow: 10000
     });
-    this.socketManager = new SocketManager(this.binanceRest);
-    this.orderManager = new OrderManager(this.binanceRest, this.accountManager, this.socketManager, this.trader);
-    this.trader = new Trader(this.logger, this.socketManager, this.binanceRest);
-    this.accountManager = new AccountManager(this.binanceRest, this.socketManager, this.trader);
-    this.strategyManager = new StrategyManager(this.initStrategyConfig());
-
-    // @TODO Put CoinMarketCapTools in a model or something else or remove it
-    this.coinMarketCapTools = new CoinMarketCapTools();
-
-    // useless one for BOT
     this.front = new FrontModel();
     this.indicators = new Indicators(this.front);
-
-    // Should be passed away
     this.transactions = new Transactions(server, this.front, this.binanceRest);
+    this.coinMarketCapTools = new CoinMarketCapTools();
+    this.socketManager = new SocketManager(this.binanceRest);
+    this.trader = new Trader(this.logger, this.socketManager, this.binanceRest);
+    this.accountManager = new AccountManager(this.binanceRest, this.socketManager, this.trader);
+    this.orderManager = new OrderManager(this.binanceRest, this.accountManager, this.socketManager, this.trader);
+    this.strategyManager = new StrategyManager(this.initStrategyConfig());
     this.execute();
   }
 

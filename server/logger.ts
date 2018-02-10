@@ -8,7 +8,7 @@ export default class Logger {
   }
 
   public details(info: string, ...details: any[]) {
-    if (process.env.LOG_DETAILS_ACTIVE) {
+    if (process.env.LOG_DETAILS_ACTIVE === 'true') {
       let i: number = 0;
       for (const arg of details) {
         i++;
