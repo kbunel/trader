@@ -8,14 +8,18 @@ import { CoinMarketCapModel } from '../models/coinmarketcap.model';
 import SocketManager from './socket.manager';
 import { SymbolPriceTickerModel } from '../models/symbolPriceTicker.model';
 import { OutboundBalances } from '../models/outboundAccountInfo.model';
+import Trader from '../tools/trader.service';
 
 export default class AccountManager {
     private account: AccountModel;
     private logger: Logger;
 
     constructor(private binanceRest: BinanceRest,
-                private socketManager: SocketManager) {
+                private socketManager: SocketManager,
+                private trader: Trader) {
         this.logger = new Logger();
+
+        this.logger.log('Activating AccountManager');
 
         this.getAccountFromBinance();
         this.subscribeToEvents();
@@ -55,16 +59,16 @@ export default class AccountManager {
         return wallet;
     }
 
-    public getInWallet(symbol: string): Wallet {
-      this.logger.log('Looking for ' + symbol + ' in wallet');
+    public getInWallet(symbol: string, log: boolean = false): Wallet {
+      this.logger.logIf(log, 'Looking for ' + symbol + ' in wallet');
       const wallet = this.getWallet();
       for (const w of wallet) {
         if (w.asset === symbol) {
-          this.logger.details(symbol + ' found in wallet', w);
+          this.logger.detailsIf(log, symbol + ' found in wallet', w);
           return w;
         }
       }
-      this.logger.log(symbol + ' not found in wallet');
+      this.logger.log(symbol + ' not found in wallet...');
       return null;
     }
 
@@ -104,19 +108,17 @@ export default class AccountManager {
       });
     }
 
-    private getWalletPrice(wallet: Wallet, ref: SymbolToTrade = SymbolToTrade.DEFAULT, price: string = 'best'): number {
-      this.logger.log('Looking for the wallet price of ' + wallet.asset + ' in ' + ref + '.');
+    public getWalletPriceTotal(ref: SymbolToTrade, price: string = 'best'): number {
+      return 1;
+      // let walletPriceTotal: number = 0;
+      // const promises: Promise<number>[] = [];
+      // for (const w of this.getWallet()) {
 
-      if (wallet.asset === SymbolToTrade.DEFAULT) {
-        return Number(wallet.free);
-      }
-      for (const ticker of this.socketManager.getAllTickers()) {
-        if (wallet.asset + ref === ticker.symbol) {
-          return Number(wallet.free) * Number((price === 'best') ? ticker.bestAskPrice : ticker.bestBid);
-        }
-      }
-      this.logger.log('Ticker not found for ' + wallet.asset + ref  + ' in AllTicker...');
-      return null;
+
+      //   walletPriceTotal += this.trader.getPrice(w.asset, ref);
+      // }
+
+      // return walletPriceTotal;
     }
 
     private subscribeToEvents(): void {

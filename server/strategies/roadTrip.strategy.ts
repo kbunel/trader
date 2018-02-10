@@ -15,6 +15,8 @@ export default class RoadTripStrategy extends Strategy {
   private bestInWallet: Wallet;
 
   public launch(): any {
+    this.logger.log('Launching RoadTrip Strategy');
+
     return new Promise((resolve, reject): any => {
       if (!this.informationsRequired()) {
         this.logger.log('Missing informations to continue');
@@ -24,7 +26,6 @@ export default class RoadTripStrategy extends Strategy {
 
       this.getBest(this.coinMarketCapTools.P_1H)
       .then((best1HrPercent: CoinMarketCapModel) => {
-        this.logger.log('Best current crypto (' + Number(best1HrPercent.percent_change_1h) + ') is: ', best1HrPercent);
 
         if (this.socketManager.getSymbolToWatch() !== best1HrPercent.symbol + SymbolToTrade.DEFAULT) {
           this.logger.log('Transactions not watching the good crypto, Let\'s watch it');
@@ -87,14 +88,16 @@ export default class RoadTripStrategy extends Strategy {
         }
       })
       .catch((error) => {
+        this.logger.error(error);
         reject(error);
       });
     });
   }
 
   private getBest(key: string): Promise<CoinMarketCapModel> {
+    console.log('wewergwergwerg');
+    this.logger.log('Looking for the best Crypto with highest ' + key);
     return new Promise((resolve, reject) => {
-      this.logger.log('Looking for the best Crypto with highest ' + key);
       this.getAvailablesCoins()
       .then((selection: CoinMarketCapModel[]) => {
         this.logger.details('Retrieved selection done from Binance & CoinMArketCap', selection);
@@ -103,7 +106,11 @@ export default class RoadTripStrategy extends Strategy {
           return Number(b[key]) - Number(a[key]);
         })[0];
 
-        this.logger.details('Best is ' + best.symbol, best);
+        this.logger.details('Best is ' + best.symbol
+        + ' - ' + best.price_btc + ' BTC - '
+        + best.price_usd + ' $ - '
+        + best.percent_change_1h + ' %',
+         best);
         resolve(best);
       })
       .catch((error) => {
@@ -148,6 +155,7 @@ export default class RoadTripStrategy extends Strategy {
   }
 
   private informationsRequired(): boolean {
+    this.logger.log('Checking informations');
 
     if (!this.socketManager.getAllTickers().length) {
       this.logger.details('allTickers missing', this.socketManager.getAllTickers());
@@ -163,6 +171,7 @@ export default class RoadTripStrategy extends Strategy {
       this.logger.log('ExchangeInfo missing');
       return false;
     }
+
     return true;
   }
 

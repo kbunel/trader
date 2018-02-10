@@ -13,6 +13,7 @@ import SocketManager from './socket.manager';
 import { SymbolPriceTickerModel } from '../models/symbolPriceTicker.model';
 import { CancelOrderResponse } from '../models/cancelOrderReponse.model';
 import { ExecutionReport } from '../models/executionReport.model';
+import Trader from '../tools/trader.service';
 
 export default class OrderManager {
 
@@ -31,8 +32,11 @@ export default class OrderManager {
 
     constructor(private binanceRest: BinanceRest,
         private accountManager: AccountManager,
-        private socketManager: SocketManager) {
+        private socketManager: SocketManager,
+        private trader: Trader) {
         this.logger = new Logger();
+
+        this.logger.log('Activating OrderManager');
 
         this.subscribeToEvents();
         this.getCurrentOrdersFromBinance();
@@ -74,11 +78,20 @@ export default class OrderManager {
                     this.logger.log('Order #' + order.orderId + 'for ' + order.symbol
                         + ' is pending since more than 5 minutes cancelling and putting it back to the market value');
 
-                    promises.push(
-                        this.cancelOrder(order)
-                            .then(() => {
-                                this.sendNewOrder(this.createNewOrderFromOrder(order));
-                            })
+
+                    promises.push(this.cancelOrder(order)
+                        .then((orderCanceled: CancelOrderResponse) => {
+                            this.sendNewOrder(this.createNewOrderFromOrder(order))
+                                .then((orderSent: Order) => {
+                                    resolve(orderSent);
+                                })
+                                .catch((error) => {
+                                    reject(error);
+                                });
+                        })
+                        .catch((error) => {
+                            reject(error);
+                        })
                     );
 
                 }
@@ -112,7 +125,7 @@ export default class OrderManager {
         this.logger.log('Creating new buy order (' + symbolToBuy + SymbolToTrade.DEFAULT + ')');
 
         return new Promise((resolve, reject) => {
-            this.getPrice(symbolToBuy)
+            this.trader.getPrice(symbolToBuy)
                 .then((price: number) => {
                     const absoluteQty = Number(this.accountManager.getInWallet(SymbolToTrade.DEFAULT).free) / price;
                     const quantity: number = this.getValidQuantity(symbolToBuy, absoluteQty);
@@ -132,7 +145,7 @@ export default class OrderManager {
         this.logger.log('Creating new sell order (' + symbolToSell + SymbolToTrade.DEFAULT + ')');
 
         return new Promise((resolve, reject) => {
-            this.getPrice(symbolToSell)
+            this.trader.getPrice(symbolToSell)
                 .then((price: number) => {
                     const quantity: number = this.getValidQuantityFromWallet(this.accountManager.getInWallet(symbolToSell));
                     const symbol: string = symbolToSell + SymbolToTrade.DEFAULT;
@@ -156,7 +169,7 @@ export default class OrderManager {
     }
 
     public getCurrentOrders(symbol: string = null): Order[] {
-        this.logger.log('Getting current orders' + (symbol) ? ' for ' + symbol : '');
+        this.logger.log('Getting current orders' + ((symbol) ? ' for ' + symbol : ''));
 
         const reg = (symbol) ? new RegExp(symbol) : null;
         const orders: Order[] = [];
@@ -165,15 +178,21 @@ export default class OrderManager {
                 && order.status !== BinanceEnum.ORDER_STATUS_CANCELED
                 && order.status !== BinanceEnum.ORDER_STATUS_EXPIRED
                 && order.status !== BinanceEnum.ORDER_STATUS_REJECTED) {
-                if (reg && order.symbol.match(reg)) {
-                    orders.push(order);
-                } else {
-                    orders.push(order);
+                // Experienced a 'cannot use .match of undefined...'
+                try {
+                    if (reg && order.symbol.match(reg)) {
+                        orders.push(order);
+                    } else {
+                        orders.push(order);
+                    }
+                } catch (error) {
+                    this.logger.log('Error with', order, error);
                 }
             }
         }
-        this.logger.details('Retrieved ' + orders.length + ' orders from current orders'
-            + (symbol) ? ' for ' + symbol : '', orders);
+        this.logger.details('Retrieved ' + orders.length
+            + ' orders from current orders'
+            + ((symbol) ? ' for ' + symbol : ''), orders);
         return orders;
     }
 
@@ -198,7 +217,7 @@ export default class OrderManager {
     }
 
     public removeOrder(orderId: number): void {
-        for (const i in this.currentOrders) {
+        for (const i in this.getCurrentOrders()) {
             if (this.currentOrders[+i].orderId === orderId) {
                 this.logger.details('Order #' + this.currentOrders[+i].orderId + ' removed', this.currentOrders[+i]);
 
@@ -271,13 +290,16 @@ export default class OrderManager {
                 symbol: order.symbol,
                 orderId: order.orderId,
                 timestamp: Date.now()
-            }, (err, data: CancelOrderResponse) => {
-                if (err) { this.logger.log(err); }
-                if (data) {
-                    this.logger.details('Canceled order #' + data.orderId, data);
-                    this.removeOrder(data.orderId);
+            }, (err, orderCanceled: CancelOrderResponse) => {
+                if (err) {
+                    this.logger.log(err);
+                    reject(err);
                 }
-                resolve();
+                if (orderCanceled) {
+                    this.logger.details('Canceled order #' + orderCanceled.orderId, orderCanceled);
+                    this.removeOrder(orderCanceled.orderId);
+                    resolve(orderCanceled);
+                }
             });
         });
     }
@@ -403,34 +425,6 @@ export default class OrderManager {
         }
         this.logger.log('Didnt get symbol ' + symbol + ' ...');
         return null;
-    }
-
-    private getPrice(symbol, priceKind: TickerEnum = TickerEnum.BEST_ASK_PRICE): Promise<number> {
-        this.logger.log('Looking for the price of ' + symbol + ' in allTicker');
-
-        return new Promise((resolve, reject) => {
-            const allTickers = this.socketManager.getAllTickers();
-            for (const ticker of allTickers) {
-                if (symbol + SymbolToTrade.DEFAULT === ticker.symbol) {
-                    const price = Number((priceKind === TickerEnum.BEST_ASK_PRICE) ? ticker.bestAskPrice : ticker.bestBid);
-                    resolve(price);
-                    break;
-                }
-            }
-
-            this.logger.log('Price not found in allTicker, looking for the price of ' + symbol + ' from Binance');
-
-            this.binanceRest.tickerPrice(symbol, (err, tickerPrice: SymbolPriceTickerModel) => {
-                if (err) {
-                    this.logger.error('Error while getting last price known from Binance', err);
-                    reject(err);
-                }
-                if (tickerPrice) {
-                    this.logger.details('Get latest price known from Binance', tickerPrice);
-                    resolve(Number(tickerPrice.price));
-                }
-            });
-        });
     }
 
     private subscribeToEvents(): void {

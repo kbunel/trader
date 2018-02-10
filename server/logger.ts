@@ -8,7 +8,7 @@ export default class Logger {
   }
 
   public details(info: string, ...details: any[]) {
-    if (process.env.LOG_DETAILS_ACTIVE) {
+    if (process.env.LOG_DETAILS_ACTIVE === 'true') {
       let i: number = 0;
       for (const arg of details) {
         i++;
@@ -21,9 +21,21 @@ export default class Logger {
     console.log(info);
   }
 
-  public error(...args: any[]) {
+  public error(...args: any[]): void {
     for (const arg of args) {
       console.error(arg);
+    }
+  }
+
+  public logIf(log: boolean, ...args: any[]): void {
+    if (log || process.env.LOG_FORCE_IF === 'true') {
+      this.log(args);
+    }
+  }
+
+  public detailsIf(log: boolean, info: string, ...args: any[]) {
+      if (log || process.env.LOG_FORCE_IF === 'true') {
+      this.details(info, args);
     }
   }
 }

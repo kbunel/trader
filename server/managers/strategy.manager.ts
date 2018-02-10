@@ -17,7 +17,6 @@ export default class StrategyManager {
   public execute(strategy: string): Promise<void> {
     let currentStrategy: any;
 
-    // this.logger.log('strategie: ', strategy);
     switch (strategy) {
       case 'roadTrip':
         currentStrategy = new RoadTripStrategy(this.strategyConfig);
