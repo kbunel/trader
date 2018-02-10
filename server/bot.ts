@@ -34,6 +34,9 @@ export default class Bot {
   private socketManager: SocketManager;
   private trader: Trader;
 
+  private walletPriceTotalBTC: number;
+  private walletPriceTotalUSDT: number;
+
   constructor(server) {
     this.logger = new Logger();
     this.logger.log('Starting BOT');
@@ -54,14 +57,32 @@ export default class Bot {
     this.accountManager = new AccountManager(this.binanceRest, this.socketManager, this.trader);
     this.orderManager = new OrderManager(this.binanceRest, this.accountManager, this.socketManager, this.trader);
     this.strategyManager = new StrategyManager(this.initStrategyConfig());
+
+    this.subscribeEvents();
     this.execute();
   }
 
+  // public start(): void {
+  //   this.active = true;
+
+  //   this.front.startBotTime = Date.now();
+  //   this.front.stopBotTime = null;
+  // }
+
+  // public stop(): void {
+  //   this.active = false;
+
+  //   this.front.stopBotTime = Date.now();
+  //   this.front.startBotTime = null;
+  // }
+
   private execute(): void {
     console.log('\n\n\n\n\nExecuting');
-    // if (this.accountManager && this.accountManager.getAccount()) {
-    //   // this.logWalletPrice();
-    // }
+    if (this.accountManager && this.accountManager.getAccount()) {
+      this.accountManager.getWalletPriceTotal(SymbolToTrade.BTC);
+
+      this.logWalletInformations();
+    }
     if (process.env.LOOP_TIME <= 0) {
       this.logger.error('BAD LOOP_TIME');
       return;
@@ -92,23 +113,17 @@ export default class Bot {
     };
   }
 
-  public start(): void {
-    this.active = true;
-
-    this.front.startBotTime = Date.now();
-    this.front.stopBotTime = null;
+  private logWalletInformations(): void {
+    this.logger.log('Wallet value: ' + this.walletPriceTotalBTC + ' BTC, ' + this.walletPriceTotalUSDT + ' $');
   }
 
-  public stop(): void {
-    this.active = false;
-
-    this.front.stopBotTime = Date.now();
-    this.front.startBotTime = null;
-  }
-
-  private logWalletPrice(): void {
-    console.log(this.accountManager.getWalletPriceTotal(SymbolToTrade.BTC).toString() + ' BTC - '
-      + this.accountManager.getWalletPriceTotal(SymbolToTrade.ETH).toString() + ' ETH - '
-      + this.accountManager.getWalletPriceTotal(SymbolToTrade.USDT).toString() + ' USDT');
+  private subscribeEvents(): void {
+    this.accountManager.eventEmitter.on('walletPriceTotal' + SymbolToTrade.BTC + 'best', (walletPriceTotal) => {
+      this.walletPriceTotalBTC = walletPriceTotal;
+      this.trader.getPrice(SymbolToTrade.BTC, SymbolToTrade.USDT)
+      .then((price_BTCUSDT: number) => {
+        this.walletPriceTotalUSDT = this.walletPriceTotalBTC * price_BTCUSDT;
+      });
+    });
   }
 }

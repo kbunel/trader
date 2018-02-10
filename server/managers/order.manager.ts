@@ -73,7 +73,9 @@ export default class OrderManager {
 
             const promises: Promise<any>[] = [];
             for (const order of this.getCurrentOrders()) {
-                if (Number(order.time) + min * 60 * 1000 < Date.now()) {
+                const orderSentDate: Date = new Date(Number(order.time) * 1000);
+                this.logger.log('order sent at ' + orderSentDate);
+                if (true) {
 
                     this.logger.log('Order #' + order.orderId + 'for ' + order.symbol
                         + ' is pending since more than 5 minutes cancelling and putting it back to the market value');
@@ -115,7 +117,7 @@ export default class OrderManager {
                         resolve(this.ORDERS_FOUND_WITH_ERRORS);
                     });
             } else {
-                this.logger.log('No open orders found');
+                this.logger.log('No order to reset');
                 resolve(this.NO_ORDERS_FOUND);
             }
         });
@@ -403,7 +405,7 @@ export default class OrderManager {
         this.logger.details('Creating new order from another order (' + order.symbol + ')', order);
 
         return new NewOrder({
-            symbol: order.symbol + SymbolToTrade.DEFAULT,
+            symbol: order.symbol,
             type: BinanceEnum.ORDER_TYPE_MARKET,
             side: order.side === BinanceEnum.SIDE_BUY ? BinanceEnum.SIDE_BUY : BinanceEnum.SIDE_SELL,
             quantity: Number(order.origQty) - Number(order.executedQty),

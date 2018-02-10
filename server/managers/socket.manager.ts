@@ -73,11 +73,10 @@ export default class SocketManager {
     public resetCombinedSocket(): void {
         this.logger.log('Resetting activateCombinedSockets');
 
-        if (this.binanceWS) {
-            console.log('Terminating binanceWS');
-            this.combinedWebSocket.terminate()
-            .then((data) => { console.log('data', data); })
-            .catch(console.error);
+        if (this.combinedWebSocket) {
+            console.log('Terminating combinedWebSocket');
+
+            this.combinedWebSocket.terminate();
         }
         this.activateCombinedSockets();
     }

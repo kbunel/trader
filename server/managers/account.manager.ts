@@ -9,10 +9,13 @@ import SocketManager from './socket.manager';
 import { SymbolPriceTickerModel } from '../models/symbolPriceTicker.model';
 import { OutboundBalances } from '../models/outboundAccountInfo.model';
 import Trader from '../tools/trader.service';
+import { EventEmitter } from 'events';
 
 export default class AccountManager {
     private account: AccountModel;
     private logger: Logger;
+
+    public eventEmitter = new EventEmitter();
 
     constructor(private binanceRest: BinanceRest,
                 private socketManager: SocketManager,
@@ -108,17 +111,32 @@ export default class AccountManager {
       });
     }
 
-    public getWalletPriceTotal(ref: SymbolToTrade, price: string = 'best'): number {
-      return 1;
-      // let walletPriceTotal: number = 0;
-      // const promises: Promise<number>[] = [];
-      // for (const w of this.getWallet()) {
+    public getWalletPriceTotal(ref: SymbolToTrade, price: string = 'best'): void {
+      let walletPriceTotal: number = 0;
+      const promises: Promise<number>[] = [];
 
+      for (const w of this.getWallet()) {
+          promises.push(new Promise((resolve, reject) => {
+            this.trader.getPrice(w.asset, ref)
+            .then((cryptoPrice: number) => {
+              resolve(Number(w.free) * cryptoPrice);
+            })
+            .catch((error) => {
+              this.logger.error(error);
+            });
+          }));
+      }
 
-      //   walletPriceTotal += this.trader.getPrice(w.asset, ref);
-      // }
-
-      // return walletPriceTotal;
+      Promise.all(promises)
+      .then((results: number[]) => {
+        for (const r of results) {
+          walletPriceTotal += r;
+        }
+        this.eventEmitter.emit('walletPriceTotal' + ref + price, walletPriceTotal);
+      })
+      .catch((error) => {
+        this.logger.error(error);
+      });
     }
 
     private subscribeToEvents(): void {

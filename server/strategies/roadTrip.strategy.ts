@@ -50,7 +50,7 @@ export default class RoadTripStrategy extends Strategy {
               this.orderManager.resetOrdersIfTooLong(5);
             } else if (wallet.asset !== SymbolToTrade.DEFAULT && this.orderManager.getCurrentOrders(SymbolToTrade.DEFAULT).length) {
 
-              this.logger.log('Orders with symbol to trade found, let\'s check if it s still available');
+              this.logger.log('Orders with symbol to trade found, let\'s check if it s still available or reset it with market price if taking too long in profit_limit');
               this.orderManager.resetOrdersIfTooLong(5);
             } else if (this.orderManager.getCurrentOrders().length) {
               this.logger.log('Crypto ' + best1HrPercent.symbol + ' not in wallet and not in current orders'
@@ -95,12 +95,12 @@ export default class RoadTripStrategy extends Strategy {
   }
 
   private getBest(key: string): Promise<CoinMarketCapModel> {
-    console.log('wewergwergwerg');
     this.logger.log('Looking for the best Crypto with highest ' + key);
+
     return new Promise((resolve, reject) => {
       this.getAvailablesCoins()
       .then((selection: CoinMarketCapModel[]) => {
-        this.logger.details('Retrieved selection done from Binance & CoinMArketCap', selection);
+        this.logger.detailsIf(false, 'Retrieved selection done from Binance & CoinMArketCap', selection);
 
         const best: CoinMarketCapModel = selection.sort((a: CoinMarketCapModel, b: CoinMarketCapModel) => {
           return Number(b[key]) - Number(a[key]);
@@ -125,7 +125,7 @@ export default class RoadTripStrategy extends Strategy {
 
       this.getCoinMarketCapDatas()
       .then((coinMakerCapDatas: CoinMarketCapModel[]) => {
-        this.logger.details('Get datas from coinmarketCap', coinMakerCapDatas);
+        this.logger.detailsIf(false, 'Get datas from coinmarketCap', coinMakerCapDatas);
 
         for (const c of coinMakerCapDatas) {
           for (const t of this.socketManager.getAllTickers()) {
