@@ -21,9 +21,21 @@ export default class Logger {
     console.log(info);
   }
 
-  public error(...args: any[]) {
+  public error(...args: any[]): void {
     for (const arg of args) {
       console.error(arg);
+    }
+  }
+
+  public logIf(log: boolean, ...args: any[]): void {
+    if (log || process.env.LOG_FORCE_IF === 'true') {
+      this.log(args);
+    }
+  }
+
+  public detailsIf(log: boolean, info: string, ...args: any[]) {
+      if (log || process.env.LOG_FORCE_IF === 'true') {
+      this.details(info, args);
     }
   }
 }

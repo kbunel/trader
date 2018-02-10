@@ -117,7 +117,7 @@ export default class SocketManager {
     }
 
     private addTickers(tickers: TickerModel[]): void {
-        this.logger.details('Retrieved allTickers from Binances', tickers);
+        this.logger.detailsIf(false, 'Retrieved allTickers from Binances', tickers);
 
         let updated: boolean;
         for (const ticker of tickers) {

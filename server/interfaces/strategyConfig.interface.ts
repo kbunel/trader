@@ -7,8 +7,10 @@ import AccountManager from '../managers/account.manager';
 import { Order } from '../models/order.model';
 import OrderManager from '../managers/order.manager';
 import SocketManager from '../managers/socket.manager';
+import Trader from '../tools/trader.service';
 
 export interface StrategyConfig {
+  trader: Trader;
   transactions: Transactions;
   front: FrontModel;
   indicators: Indicators;

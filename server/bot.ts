@@ -15,6 +15,8 @@ import { BinanceEnum } from './enums/binance.enum';
 import OrderManager from './managers/order.manager';
 import { setTimeout } from 'timers';
 import SocketManager from './managers/socket.manager';
+import { SymbolToTrade } from './enums/symbolToTrade.enum';
+import Trader from './tools/trader.service';
 
 export default class Bot {
 
@@ -30,11 +32,8 @@ export default class Bot {
   private accountManager: AccountManager;
   private orderManager: OrderManager;
   private socketManager: SocketManager;
+  private trader: Trader;
 
-  /**
-   *
-   * @param server
-   */
   constructor(server) {
     this.logger = new Logger();
     this.logger.log('Starting BOT');
@@ -46,23 +45,29 @@ export default class Bot {
       secret: String(process.env.APISECRET),
       recvWindow: 10000
     });
-    this.front = new FrontModel();
-    this.indicators = new Indicators(this.front);
-    this.transactions = new Transactions(server, this.front, this.binanceRest);
-    this.coinMarketCapTools = new CoinMarketCapTools(this.transactions);
     this.socketManager = new SocketManager(this.binanceRest);
-    this.accountManager = new AccountManager(this.binanceRest, this.socketManager);
-    this.orderManager = new OrderManager(this.binanceRest, this.accountManager, this.socketManager);
+    this.orderManager = new OrderManager(this.binanceRest, this.accountManager, this.socketManager, this.trader);
+    this.trader = new Trader(this.logger, this.socketManager, this.binanceRest);
+    this.accountManager = new AccountManager(this.binanceRest, this.socketManager, this.trader);
     this.strategyManager = new StrategyManager(this.initStrategyConfig());
 
+    // @TODO Put CoinMarketCapTools in a model or something else or remove it
+    this.coinMarketCapTools = new CoinMarketCapTools();
+
+    // useless one for BOT
+    this.front = new FrontModel();
+    this.indicators = new Indicators(this.front);
+
+    // Should be passed away
+    this.transactions = new Transactions(server, this.front, this.binanceRest);
     this.execute();
   }
 
-  /**
-   *
-   */
   private execute(): void {
-    console.log('Executing');
+    console.log('\n\n\n\n\nExecuting');
+    // if (this.accountManager && this.accountManager.getAccount()) {
+    //   // this.logWalletPrice();
+    // }
     if (process.env.LOOP_TIME <= 0) {
       this.logger.error('BAD LOOP_TIME');
       return;
@@ -71,23 +76,17 @@ export default class Bot {
     // this.front.executeBotTime = Date.now();
     // this.transactions.sendDataFront();
 
-    if (!this.active) {
-      return this.execute();
-    }
-
     this.strategyManager.execute(process.env.STRATEGY)
-    .then(() => (process.env.LOOP_ACTIVE === 'true') ?
-      setTimeout(() => this.execute(), process.env.LOOP_TIME) : null )
+    .then(() => {
+      setTimeout(() => this.execute(), process.env.LOOP_TIME);
+    })
     .catch(() => (process.env.LOOP_ACTIVE === 'true') ?
       setTimeout(() => this.execute(), process.env.LOOP_TIME) : null );
   }
 
-  /**
-   *
-   * @returns {StrategyConfig}
-   */
   private initStrategyConfig(): StrategyConfig {
     return {
+      trader: this.trader,
       transactions: this.transactions,
       front: this.front,
       indicators: this.indicators,
@@ -99,9 +98,6 @@ export default class Bot {
     };
   }
 
-  /**
-   *
-   */
   public start(): void {
     this.active = true;
 
@@ -109,13 +105,16 @@ export default class Bot {
     this.front.stopBotTime = null;
   }
 
-  /**
-   *
-   */
   public stop(): void {
     this.active = false;
 
     this.front.stopBotTime = Date.now();
     this.front.startBotTime = null;
+  }
+
+  private logWalletPrice(): void {
+    console.log(this.accountManager.getWalletPriceTotal(SymbolToTrade.BTC).toString() + ' BTC - '
+      + this.accountManager.getWalletPriceTotal(SymbolToTrade.ETH).toString() + ' ETH - '
+      + this.accountManager.getWalletPriceTotal(SymbolToTrade.USDT).toString() + ' USDT');
   }
 }
