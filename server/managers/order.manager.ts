@@ -76,7 +76,7 @@ export default class OrderManager {
             for (const order of this.getCurrentOrders()) {
 
                 const trTime = moment.unix(Math.floor(((order.time) ? order.time : order.transactTime) / 1000));
-                this.logger.log('Order sent at ' + trTime.format('LLLL'));
+                this.logger.log('Order sent to ' + order.side + ' ' + order.symbol + ' at ' + trTime.format('LLLL'));
                 if (moment().isAfter(trTime.add(5, 'm'))) {
 
                     this.logger.log('Order #' + order.orderId + 'for ' + order.symbol

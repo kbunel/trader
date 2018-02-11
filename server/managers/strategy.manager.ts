@@ -30,7 +30,7 @@ export default class StrategyManager {
       this.currentStrategy = new FlickFlackStrategy(this.strategyConfig);
       break;
       default:
-      this.logger.log('Ivalid strategy');
+      this.logger.log('Invalid strategy');
       return null;
     }
   }
