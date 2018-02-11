@@ -49,7 +49,13 @@ export default class RoadTripStrategy extends Strategy {
             } else if (this.orderManager.getCurrentOrders(best.symbol).length) {
               this.logger.log('Best 1Hr Percent found in current order, let\'s check if it s still available');
 
-              this.orderManager.resetOrdersIfTooLong(5);
+              for (const order of this.orderManager.getCurrentOrders(best.symbol)) {
+                if (order.symbol === best.symbol + SymbolToTrade.DEFAULT && order.side === BinanceEnum.SIDE_SELL) {
+                  this.orderManager.cancelOrder(order);
+                } else {
+                  this.orderManager.resetOrdersIfTooLong(5);
+                }
+              }
             } else if (wallet.asset !== SymbolToTrade.DEFAULT && this.orderManager.getCurrentOrders(SymbolToTrade.DEFAULT).length) {
 
               this.logger.log('Orders with symbol to trade found, let\'s check if it s still available or reset it with market price if taking too long in profit_limit');
@@ -147,7 +153,7 @@ export default class RoadTripStrategy extends Strategy {
     for (const t of this.socketManager.getAllTickers()) {
       if (!best && t.symbol.match('BTC') && t.symbol !== 'ETHBTC') {
         best = t;
-      } else if (best && t.priceChangePercent > best.priceChangePercent && t.symbol.match('BTC')) {
+      } else if (best && Number(t.priceChangePercent) > Number(best.priceChangePercent) && t.symbol.match('BTC')) {
         best = t;
       }
     }

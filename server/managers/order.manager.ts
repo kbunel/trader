@@ -286,7 +286,7 @@ export default class OrderManager {
         });
     }
 
-    private cancelOrder(order: Order): Promise<any> {
+    public cancelOrder(order: Order): Promise<any> {
         this.logger.details('Cancelling order', order);
 
         return new Promise((resolve, reject): any => {
