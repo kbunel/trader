@@ -14,6 +14,11 @@ export class Order {
     public side: string;
     public stopPrice: string;
     public icebergQty: string;
-    public time: string;
+    public time: number;
     public isWorking: string;
+
+    // From execution report
+    public quantity: string;
+    public executionType: string;
+
 }

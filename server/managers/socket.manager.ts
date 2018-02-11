@@ -70,6 +70,17 @@ export default class SocketManager {
         return this.allTickers;
     }
 
+    public getTicker(symbol: string, ref: string = SymbolToTrade.DEFAULT): TickerModel {
+        this.logger.log('Looking for ' + symbol + ref + ' in Tickers');
+        for (const t of this.getAllTickers()) {
+            if (t.symbol === symbol + ref) {
+                return t;
+            }
+        }
+        this.logger.detailsIf('Ticker not found in all tickers', this.getAllTickers());
+        return null;
+    }
+
     public resetCombinedSocket(): void {
         this.logger.log('Resetting activateCombinedSockets');
 

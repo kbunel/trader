@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import { Promise } from 'es6-promise';
 import { Wallet } from '../models/wallet.model';
 import { NewOrder } from '../models/newOrder.model';
@@ -73,9 +74,10 @@ export default class OrderManager {
 
             const promises: Promise<any>[] = [];
             for (const order of this.getCurrentOrders()) {
-                const orderSentDate: Date = new Date(Number(order.time) * 1000);
-                this.logger.log('order sent at ' + orderSentDate);
-                if (true) {
+                // const orderSentDate: Date = new Date(Number(order.time) * 1000);
+                const trTime = moment.unix(Math.floor((order.time) ? order.time : order.transactTime / 1000));
+                this.logger.log('order sent at ' + trTime.format('LLLL'));
+                if (moment().isAfter(trTime.add(5, 'm'))) {
 
                     this.logger.log('Order #' + order.orderId + 'for ' + order.symbol
                         + ' is pending since more than 5 minutes cancelling and putting it back to the market value');
@@ -295,6 +297,7 @@ export default class OrderManager {
             }, (err, orderCanceled: CancelOrderResponse) => {
                 if (err) {
                     this.logger.log(err);
+                    this.getCurrentOrdersFromBinance();
                     reject(err);
                 }
                 if (orderCanceled) {
@@ -317,7 +320,7 @@ export default class OrderManager {
                 }
                 if (orders) {
                     this.logger.log(orders.length + ' orders retrieved from Binance', orders);
-                    this.addOrders(orders);
+                    this.setCurrentOrders(orders);
                     resolve(orders);
                 }
             });
@@ -438,7 +441,7 @@ export default class OrderManager {
     }
 
     private updateOrders(executionReport: ExecutionReport): void {
-        this.logger.log('Updatating current orders');
+        this.logger.log('Updatating current order #' + executionReport.orderStatus);
 
         switch (executionReport.orderStatus) {
             case BinanceEnum.ORDER_STATUS_FILLED
@@ -446,11 +449,31 @@ export default class OrderManager {
                 || BinanceEnum.ORDER_STATUS_CANCELED
                 || BinanceEnum.ORDER_STATUS_REJECTED:
 
-            this.logger.log('executionReport.orderStatus = ' + executionReport.orderStatus);
-
             this.removeOrder(executionReport.orderId);
 
             break;
+            case BinanceEnum.ORDER_STATUS_NEW
+                || BinanceEnum.ORDER_STATUS_PARTIALLY_FILLED
+                || BinanceEnum.ORDER_STATUS_PENDING_CANCEL:
+
+            this.updateOrderFromReport(executionReport);
         }
+    }
+
+    private updateOrderFromReport(executionReport: ExecutionReport): void {
+        for (const i in this.currentOrders) {
+            if (this.currentOrders[+i].orderId === executionReport.orderId) {
+                this.currentOrders[+i].clientOrderId = executionReport.newClientOrderId;
+                this.currentOrders[+i].side = executionReport.side;
+                this.currentOrders[+i].type = executionReport.orderType;
+                this.currentOrders[+i].quantity = executionReport.quantity;
+                this.currentOrders[+i].price = executionReport.price;
+                this.currentOrders[+i].stopPrice = executionReport.stopPrice;
+                this.currentOrders[+i].executionType = executionReport.executionType;
+
+                return;
+            }
+        }
+        this.logger.log('Order #' + executionReport.orderId + ' not found in current orders');
     }
 }

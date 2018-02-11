@@ -16,7 +16,7 @@ export default class Trader {
                 }
 
     public getPrice(symbol: string, ref: string = SymbolToTrade.DEFAULT, priceKind: TickerEnum = TickerEnum.BEST_ASK_PRICE): Promise<number> {
-        this.logger.log('Looking for the price of ' + symbol + ' in allTicker');
+        this.logger.logIf(false, 'Looking for the price of ' + symbol + ' in allTicker');
 
         return new Promise((resolve, reject) => {
             if (symbol === ref) {
