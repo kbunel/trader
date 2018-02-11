@@ -100,7 +100,7 @@ export default class RoadTripStrategy extends Strategy {
     return new Promise((resolve, reject) => {
       if (from === CoinSource.binance) {
         const best: TickerModel = this.getBestFromBinance();
-        resolve(new BestCoin(best.symbol, Number(best.priceChangePercent)));
+        resolve(new BestCoin(best.symbol.replace(SymbolToTrade.DEFAULT, ''), Number(best.priceChangePercent)));
       } else if ( from === CoinSource.coinmarketcap) {
         this.getBestFromCoinMarketCap(this.coinMarketCapTools.P_1H)
         .then((coin: CoinMarketCapModel) => {
@@ -143,13 +143,15 @@ export default class RoadTripStrategy extends Strategy {
   private getBestFromBinance(): TickerModel {
     this.logger.log('Looking for the best Crypto with highest priceChangePercent from Binance');
 
-    let best: TickerModel = this.socketManager.getAllTickers()[0];
+    let best: TickerModel;
     for (const t of this.socketManager.getAllTickers()) {
-      if (t.priceChangePercent > best.priceChangePercent) {
+      if (!best && t.symbol.match('BTC') && t.symbol !== 'ETHBTC') {
+        best = t;
+      } else if (best && t.priceChangePercent > best.priceChangePercent && t.symbol.match('BTC')) {
         best = t;
       }
     }
-    this.logger.details('Best from Binance is ' + best.symbol);
+    this.logger.details('Best from Binance is ' + best.symbol + ' (' + best.priceChangePercent + '%)');
     return best;
   }
 
