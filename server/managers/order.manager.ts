@@ -441,8 +441,6 @@ export default class OrderManager {
     }
 
     private updateOrders(executionReport: ExecutionReport): void {
-        this.logger.log('Updating current order #' + executionReport.orderId + ' (' + executionReport.orderStatus + ')');
-
         switch (executionReport.orderStatus) {
             case BinanceEnum.ORDER_STATUS_FILLED
                 || BinanceEnum.ORDER_STATUS_EXPIRED
@@ -457,12 +455,18 @@ export default class OrderManager {
                 || BinanceEnum.ORDER_STATUS_PENDING_CANCEL:
 
             this.updateOrderFromReport(executionReport);
+            break;
+            default:
+                this.logger.log('Received an execution report but didnt get anything to to with', executionReport);
         }
     }
 
     private updateOrderFromReport(executionReport: ExecutionReport): void {
+        this.logger.log('Updating current order #' + executionReport.orderId + ' (' + executionReport.orderStatus + ')');
         for (const i in this.currentOrders) {
             if (this.currentOrders[+i].orderId === executionReport.orderId) {
+                this.logger.log('Found order #' + executionReport.orderId + ' in currentOrders, updating');
+
                 this.currentOrders[+i].clientOrderId = executionReport.newClientOrderId;
                 this.currentOrders[+i].side = executionReport.side;
                 this.currentOrders[+i].type = executionReport.orderType;
@@ -474,6 +478,6 @@ export default class OrderManager {
                 return;
             }
         }
-        this.logger.log('Order #' + executionReport.orderId + ' not found in current orders');
+        this.logger.log('Order #' + executionReport.orderId + ' not found in current orders...');
     }
 }
