@@ -49,7 +49,7 @@ export default class RoadTripStrategy extends Strategy {
               this.logger.log('We got ' + wallet.asset + ', let\'s hold for now');
               this.getBestFromCoinMarketCap(this.coinMarketCapTools.P_1H);
             } else if (this.orderManager.getCurrentOrders(best.symbol).length) {
-              this.logger.log('Best 1Hr Percent found in current order, let\'s check if it s still available');
+              this.logger.log('Best ticker found in current order, let\'s check if it s still available');
 
               for (const order of this.orderManager.getCurrentOrders(best.symbol)) {
                 if (order.symbol === best.symbol + SymbolToTrade.DEFAULT && order.side === BinanceEnum.SIDE_SELL) {
