@@ -74,9 +74,9 @@ export default class OrderManager {
 
             const promises: Promise<any>[] = [];
             for (const order of this.getCurrentOrders()) {
-                // const orderSentDate: Date = new Date(Number(order.time) * 1000);
-                const trTime = moment.unix(Math.floor((order.time) ? order.time : order.transactTime / 1000));
-                this.logger.log('order sent at ' + trTime.format('LLLL'));
+
+                const trTime = moment.unix(Math.floor(((order.time) ? order.time : order.transactTime) / 1000));
+                this.logger.log('Order sent at ' + trTime.format('LLLL'));
                 if (moment().isAfter(trTime.add(5, 'm'))) {
 
                     this.logger.log('Order #' + order.orderId + 'for ' + order.symbol
@@ -441,7 +441,7 @@ export default class OrderManager {
     }
 
     private updateOrders(executionReport: ExecutionReport): void {
-        this.logger.log('Updatating current order #' + executionReport.orderStatus);
+        this.logger.log('Updating current order #' + executionReport.orderId + ' (' + executionReport.orderStatus + ')');
 
         switch (executionReport.orderStatus) {
             case BinanceEnum.ORDER_STATUS_FILLED

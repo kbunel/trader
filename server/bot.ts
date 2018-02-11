@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import 'dotenv/config';
 import * as api from 'binance';
 import { Promise } from 'es6-promise';

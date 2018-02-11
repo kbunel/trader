@@ -5,7 +5,7 @@ export default class Logger {
 
   public log(...args: any[]): void {
     for (const arg of args) {
-      console.log('[' + moment().format() + ']\x1b[33m%s\x1b[0m: ', arg);
+      console.log('[' + moment().format() + ']\x1b[33m%s\x1b[0m', arg);
     }
   }
 
