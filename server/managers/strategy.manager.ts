@@ -3,32 +3,35 @@ import Strategie from '../strategies/strategy';
 import RoadTripStrategy from '../strategies/roadTrip.strategy';
 import FlickFlackStrategy from '../strategies/flickFlack.strategy';
 import Logger from '../Logger';
+import Strategy from '../strategies/strategy';
 
 export default class StrategyManager {
 
   private strategyConfig: StrategyConfig;
   private logger: Logger;
+  private currentStrategy: Strategy;
 
-  constructor(strategyConfig: StrategyConfig) {
+  constructor(strategyConfig: StrategyConfig, strategy: string) {
     this.strategyConfig = strategyConfig;
     this.logger = strategyConfig.logger;
+    this.initStrategy(strategy);
   }
 
-  public execute(strategy: string): Promise<void> {
-    let currentStrategy: any;
+  public execute(): Promise<void> {
+    return this.currentStrategy.launch();
+  }
 
+  private initStrategy(strategy): void {
     switch (strategy) {
       case 'roadTrip':
-        currentStrategy = new RoadTripStrategy(this.strategyConfig);
-        break;
+      this.currentStrategy = new RoadTripStrategy(this.strategyConfig);
+      break;
       case 'flickFlack':
-        currentStrategy = new FlickFlackStrategy(this.strategyConfig);
-        break;
+      this.currentStrategy = new FlickFlackStrategy(this.strategyConfig);
+      break;
       default:
-        this.logger.log('Ivalid strategy');
-        return null;
+      this.logger.log('Ivalid strategy');
+      return null;
     }
-    return currentStrategy.launch();
   }
-
 }

@@ -15,6 +15,7 @@ export default class RoadTripStrategy extends Strategy {
 
   public strategyName = 'Road Trip Strategy';
   private bestInWallet: Wallet;
+  private best: BestCoin;
 
   public launch(): any {
     this.logger.log('Launching RoadTrip Strategy');
@@ -28,6 +29,7 @@ export default class RoadTripStrategy extends Strategy {
 
       this.getBest()
       .then((best: BestCoin) => {
+        this.checkBestVariation(best);
 
         if (this.socketManager.getSymbolToWatch() !== best.symbol + SymbolToTrade.DEFAULT) {
           this.logger.log('Transactions not watching the good crypto, Let\'s watch it');
@@ -45,7 +47,7 @@ export default class RoadTripStrategy extends Strategy {
             if (wallet.asset === best.symbol
               || !this.isWorthyToSwitch(best)) {
               this.logger.log('We got ' + wallet.asset + ', let\'s hold for now');
-
+              this.getBestFromCoinMarketCap(this.coinMarketCapTools.P_1H);
             } else if (this.orderManager.getCurrentOrders(best.symbol).length) {
               this.logger.log('Best 1Hr Percent found in current order, let\'s check if it s still available');
 
@@ -106,11 +108,15 @@ export default class RoadTripStrategy extends Strategy {
     return new Promise((resolve, reject) => {
       if (from === CoinSource.binance) {
         const best: TickerModel = this.getBestFromBinance();
-        resolve(new BestCoin(best.symbol.replace(SymbolToTrade.DEFAULT, ''), Number(best.priceChangePercent)));
+        const bestC: BestCoin = new BestCoin(best.symbol.replace(SymbolToTrade.DEFAULT, ''), Number(best.priceChangePercent));
+        bestC.price = Number(best.bestAskPrice);
+        resolve(bestC);
       } else if ( from === CoinSource.coinmarketcap) {
         this.getBestFromCoinMarketCap(this.coinMarketCapTools.P_1H)
         .then((coin: CoinMarketCapModel) => {
-          resolve(new BestCoin(coin.symbol, Number(coin.percent_change_1h)));
+          const bestC: BestCoin = new BestCoin(coin.symbol, Number(coin.percent_change_1h));
+          bestC.price = Number(coin.price_btc);
+          resolve(bestC);
         })
         .catch((error) => {
           reject(error);
@@ -157,7 +163,7 @@ export default class RoadTripStrategy extends Strategy {
         best = t;
       }
     }
-    this.logger.details('Best from Binance is ' + best.symbol + ' (' + best.priceChangePercent + '%)');
+    this.logger.details('Best from Binance is ' + best.symbol + ' (' + best.priceChangePercent + '%)', best);
     return best;
   }
 
@@ -251,12 +257,11 @@ export default class RoadTripStrategy extends Strategy {
   }
 
   private getBestPercentInWallet(from: string): BestCoin {
-    console.log('ccc', this.bestInWallet.asset, this.bestInWallet.asset === SymbolToTrade.DEFAULT);
     let bestInWallet: BestCoin;
 
     if  (from === CoinSource.coinmarketcap || this.bestInWallet.asset === SymbolToTrade.DEFAULT) {
         const bestInCP: CoinMarketCapModel = this.getCoinMarketCapValueFor(this.bestInWallet.asset);
-        bestInWallet = new BestCoin(bestInCP.symbol, Number(bestInCP.percent_change_1h));
+        bestInWallet = new BestCoin(bestInCP.symbol, Number(bestInCP.percent_change_1h), Number(bestInCP.price_btc));
     } else if (from === CoinSource.binance) {
         const bestInPercentFromBinance: TickerModel = this.socketManager.getTicker(this.bestInWallet.asset);
         bestInWallet = new BestCoin(bestInPercentFromBinance.symbol, Number(bestInPercentFromBinance.priceChangePercent));
@@ -265,5 +270,19 @@ export default class RoadTripStrategy extends Strategy {
     }
 
     return bestInWallet;
+  }
+
+  private checkBestVariation(currentBest: BestCoin) {
+    if (!this.best) {
+      this.best = currentBest;
+      this.best.variation = 0;
+    } else if (currentBest.symbol === this.best.symbol) {
+      if (this.best.price > currentBest.price) {
+        this.best.variation--;
+      } else if (this.best.price < currentBest.price) {
+        this.best.variation++;
+      }
+    }
+    this.logger.log(this.best.symbol + ' variation: ' + this.best.variation);
   }
 }

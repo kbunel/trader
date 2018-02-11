@@ -57,7 +57,7 @@ export default class Bot {
     this.trader = new Trader(this.logger, this.socketManager, this.binanceRest);
     this.accountManager = new AccountManager(this.binanceRest, this.socketManager, this.trader);
     this.orderManager = new OrderManager(this.binanceRest, this.accountManager, this.socketManager, this.trader);
-    this.strategyManager = new StrategyManager(this.initStrategyConfig());
+    this.strategyManager = new StrategyManager(this.initStrategyConfig(), process.env.STRATEGY);
 
     this.subscribeEvents();
     this.execute();
@@ -92,7 +92,7 @@ export default class Bot {
     // this.front.executeBotTime = Date.now();
     // this.transactions.sendDataFront();
 
-    this.strategyManager.execute(process.env.STRATEGY)
+    this.strategyManager.execute()
     .then(() => {
       setTimeout(() => this.execute(), process.env.LOOP_TIME);
     })
