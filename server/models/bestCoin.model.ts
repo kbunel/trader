@@ -8,6 +8,7 @@ export class BestCoin {
         this.symbol = symbol;
         this.percent_change = percent_change;
         this.price = price;
+        this.variation = 0;
     }
 }
 
