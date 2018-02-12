@@ -12,3 +12,43 @@ Error: connect ETIMEDOUT 104.17.140.178:443
     at Object.exports._errnoException (util.js:1026:11)
     at exports._exceptionWithHostPort (util.js:1049:20)
     at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1085:14)
+
+
+-------------------------
+
+
+
+
+***************** Wallet value: 0.006197353085073998 BTC, 53.95372214393827 $ *****************
+[2018-02-12T17:59:45+01:00] Launching RoadTrip Strategy
+[2018-02-12T17:59:45+01:00] Checking informations
+[2018-02-12T17:59:45+01:00] Looking for the best Crypto with highest percent_change_1h
+[2018-02-12T17:59:45+01:00] Getting datas from CoinMarketCap
+[2018-02-12T17:59:45+01:00] Best from CoinmarkerCap after selected Binance ones in common is ICN - 0.00000255 BTC - 0.0222697 $ - 18.77% / 1h
+-------------------------------
+[2018-02-12T17:59:45+01:00] ICN variation: 0
+[2018-02-12T17:59:45+01:00] Looking for the highest crypto in the wallet
+[2018-02-12T17:59:46+01:00] Best crypto in the wallet is ICN
+-------------------------------
+[2018-02-12T17:59:46+01:00] We got ICN, let's hold for now
+[2018-02-12T17:59:46+01:00] Looking for the best Crypto with highest percent_change_1h
+[2018-02-12T17:59:46+01:00] Getting datas from CoinMarketCap
+[2018-02-12T17:59:46+01:00] Looking for the best Crypto with highest priceChangePercent from Binance
+[2018-02-12T17:59:46+01:00] Best from Binance is OAXBTC (44.580% / 24h)
+-------------------------------
+[2018-02-12T17:59:46+01:00] Best from CoinmarkerCap after selected Binance ones in common is ICN - 0.00000255 BTC - 0.0222697 $ - 18.77% / 1h
+-------------------------------
+undefined:1
+{"stream":"!ticker@arr","data":[{"e":"24hrTicker","E":1518454745674,"s":"ETHBTC","p":"-0.00175600","P":"-1.746","w":"0.09968321","x":"0.10058200","c":"0.09882500","Q":"1.68800000","b":"0.09879500","B":"0.59200000","a":"0.09882400","A":"0.59200000","o":"0.10058100","h":"0.10085000","l":"0.09797000","v":"116237.87200000","q":"11586.96413594","O":1518368345669,"C":1518454745669,"F":32576990,"L":32957385,"n":380396},{"e":"24hrTicker","E":1518454744998,"s":"LTCBTC","p":"-0.00017300","P":"-0.946","w":"0.01833436","x":"0.01829500","c":"0.01812200","Q":"0.74000000","b":"0.01812200","B":"3.85000000","a":"0.01814900","A":"0.20000000","o":"0.01829500","h":"0.01880000","l":"0.01804000","v":"72487.78000000","q":"1329.01719175","O":1518368344994,"C":1518454744994,"F":6724648,"L":6775227,"n":50580},{"e":"24hrTicker","E":1518454745033,"s":"BNBBTC","p":"-0.00002830","P":"-2.597","w":"0.00107491","x":"0.00108990","c":"0.00106160","Q":"10.00000000","b":"0.00106120","B":"142.00000000","a":"0.00106220","A":"17.10000
+
+SyntaxError: Unexpected token L in JSON at position 15714
+    at Object.parse (native)
+    at WebSocket.ws.on (/Users/donkeycode/Documents/trader/node_modules/binance/lib/ws.js:32:33)
+    at emitOne (events.js:96:13)
+    at WebSocket.emit (events.js:188:7)
+    at Receiver._receiver.onmessage (/Users/donkeycode/Documents/trader/node_modules/ws/lib/WebSocket.js:141:47)
+    at Receiver.dataMessage (/Users/donkeycode/Documents/trader/node_modules/ws/lib/Receiver.js:389:14)
+    at Receiver.getData (/Users/donkeycode/Documents/trader/node_modules/ws/lib/Receiver.js:330:12)
+    at Receiver.startLoop (/Users/donkeycode/Documents/trader/node_modules/ws/lib/Receiver.js:165:16)
+    at Receiver.add (/Users/donkeycode/Documents/trader/node_modules/ws/lib/Receiver.js:139:10)
+    at TLSSocket._ultron.on (/Users/donkeycode/Documents/trader/node_modules/ws/lib/WebSocket.js:138:22)
