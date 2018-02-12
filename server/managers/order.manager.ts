@@ -77,8 +77,7 @@ export default class OrderManager {
 
                 const trTime = moment.unix(Math.floor(((order.time) ? order.time : order.transactTime) / 1000));
                 this.logger.log('Order sent to ' + order.side + ' ' + order.symbol + ' at ' + trTime.format('MMMM Do YYYY, h:mm:ss a'));
-                // if (moment().isAfter(trTime.add(5, 'm'))) {
-                if (true) {
+                if (moment().isAfter(trTime.add(5, 'm'))) {
                     this.logger.log('Order #' + order.orderId + 'for ' + order.symbol
                         + ' is pending since more than 5 minutes cancelling and putting it back to the market value');
 
@@ -125,7 +124,7 @@ export default class OrderManager {
         });
     }
 
-    public createNewBuyOrder(symbolToBuy: string, type: BinanceEnum = BinanceEnum.ORDER_TYPE_LIMIT): Promise<NewOrder> {
+    public createNewBuyOrder(symbolToBuy: string, type: BinanceEnum = BinanceEnum.ORDER_TYPE_MARKET): Promise<NewOrder> {
         this.logger.log('Creating new buy order (' + symbolToBuy + SymbolToTrade.DEFAULT + ')');
 
         return new Promise((resolve, reject) => {
@@ -145,7 +144,7 @@ export default class OrderManager {
         });
     }
 
-    public createNewSellOrder(symbolToSell: string, type: BinanceEnum = BinanceEnum.ORDER_TYPE_LIMIT): Promise<NewOrder> {
+    public createNewSellOrder(symbolToSell: string, type: BinanceEnum = BinanceEnum.ORDER_TYPE_MARKET): Promise<NewOrder> {
         this.logger.log('Creating new sell order (' + symbolToSell + SymbolToTrade.DEFAULT + ')');
 
         return new Promise((resolve, reject) => {
@@ -335,17 +334,18 @@ export default class OrderManager {
     }
 
     private createNewOrder(tradeSymbol: string, side: BinanceEnum, price: number, quantity: number, type: BinanceEnum): NewOrder {
-        const orderSide: BinanceEnum = (process.env.FORCE_PRICE_MARKET === 'true') ? BinanceEnum.ORDER_TYPE_MARKET : side;
         const newOrder = new NewOrder({
             symbol: tradeSymbol,
             type: type,
-            side: orderSide,
+            side: side,
             quantity: quantity,
             timestamp: Date.now()
         });
 
-        newOrder.timeInForce = BinanceEnum.TIME_IN_FORCE_GTC;
-        newOrder.price = price;
+        if (type !== BinanceEnum.ORDER_TYPE_MARKET) {
+            newOrder.timeInForce = BinanceEnum.TIME_IN_FORCE_GTC;
+            newOrder.price = price;
+        }
         return newOrder;
     }
 

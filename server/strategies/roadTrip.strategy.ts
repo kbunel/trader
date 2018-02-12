@@ -10,12 +10,21 @@ import { SymbolToTrade } from '../enums/symbolToTrade.enum';
 import { Client } from 'node-rest-client';
 import { TickerModel } from '../models/ticker.model';
 import { BestCoin, CoinSource } from '../models/bestCoin.model';
+import { setTimeout } from 'timers';
+import { StrategyConfig } from '../interfaces/strategyConfig.interface';
 
 export default class RoadTripStrategy extends Strategy {
 
   public strategyName = 'Road Trip Strategy';
   private bestInWallet: Wallet;
   private best: BestCoin;
+  private coinMarketCapDatas: CoinMarketCapModel[] = [];
+
+  constructor(strategyConfig: StrategyConfig) {
+    super(strategyConfig);
+
+    this.updateCoinMarketCapDatas();
+  }
 
   public launch(): any {
     this.logger.log('Launching RoadTrip Strategy');
@@ -27,26 +36,26 @@ export default class RoadTripStrategy extends Strategy {
         return;
       }
 
-      this.getBest()
-      .then((best: BestCoin) => {
-        this.checkBestVariation(best);
+      const best: BestCoin = this.getBest();
+      this.checkBestVariation(best);
 
-        if (this.socketManager.getSymbolToWatch() !== best.symbol + SymbolToTrade.DEFAULT) {
-          this.logger.log('Transactions not watching the good crypto, Let\'s watch it');
+      if (this.socketManager.getSymbolToWatch() !== best.symbol + SymbolToTrade.DEFAULT) {
+        this.logger.log('Transactions not watching the good crypto, Let\'s watch it');
 
-          this.socketManager.setSymbolToWatch(best.symbol);
-          this.socketManager.resetCombinedSocket();
+        this.socketManager.setSymbolToWatch(best.symbol);
+        this.socketManager.resetCombinedSocket();
 
-          resolve();
-          return;
-        }  else {
-          this.accountManager.getHigherValueInWallet()
+        resolve();
+        return;
+      } else {
+        this.accountManager.getHigherValueInWallet()
           .then((wallet: Wallet) => {
             this.bestInWallet = wallet;
 
             if (wallet.asset === best.symbol
               || !this.isWorthyToSwitch(best)) {
               this.logger.log('We got ' + wallet.asset + ', let\'s hold for now');
+
               this.getBestFromCoinMarketCap(this.coinMarketCapTools.P_1H);
               this.getBestFromBinance();
             } else if (this.orderManager.getCurrentOrders(best.symbol).length) {
@@ -65,92 +74,76 @@ export default class RoadTripStrategy extends Strategy {
               this.orderManager.resetOrdersIfTooLong(5);
             } else if (this.orderManager.getCurrentOrders().length) {
               this.logger.log('Crypto ' + best.symbol + ' not in wallet and not in current orders'
-              + ' but orders found, let\'s cancel them all to buy the good crypto');
+                + ' but orders found, let\'s cancel them all to buy the good crypto');
 
               this.orderManager.cancelAllOrders(wallet.asset + SymbolToTrade.DEFAULT);
             } else if (wallet.asset !== SymbolToTrade.DEFAULT) {
               this.logger.log('Crypto ' + best.symbol + ' not in wallet and not in current orders,'
-              + ' let\' s get some ' + SymbolToTrade.DEFAULT + ' to buy it');
+                + ' let\' s get some ' + SymbolToTrade.DEFAULT + ' to buy it');
 
               this.orderManager.sellEverything(best.symbol);
             } else {
               this.logger.log('Let\'s buy some ' + best.symbol);
 
               this.orderManager.createNewBuyOrder(best.symbol)
-              .then((newBuyOrder: NewOrder) => {
-                this.orderManager.sendNewOrder(newBuyOrder)
-                .then((order: Order) => {
-                  this.logger.details('New buy order for ' + order.symbol + ' sent', order);
-                  resolve(order);
+                .then((newBuyOrder: NewOrder) => {
+                  this.orderManager.sendNewOrder(newBuyOrder)
+                    .then((order: Order) => {
+                      this.logger.details('New buy order for ' + order.symbol + ' sent', order);
+                      resolve(order);
+                    })
+                    .catch((error) => {
+                      this.logger.error('Error trying to send an order in RoadTrip strategy', error);
+                    });
                 })
                 .catch((error) => {
-                  this.logger.error('Error trying to send an order', error);
+                  this.logger.error('Error trying create a newBuyOrder', error);
+                  reject(error);
                 });
-              })
-              .catch((error) => {
-                this.logger.error('Error trying create a newBuyOrder', error);
-                reject(error);
-              });
             }
             resolve();
             return;
           })
           .catch((error) => this.logger.error(error));
-        }
-      })
-      .catch((error) => {
-        this.logger.error(error);
-        reject(error);
-      });
-    });
-  }
-
-  private getBest(from: string = process.env.TAKE_BEST_FROM): Promise<BestCoin> {
-    return new Promise((resolve, reject) => {
-      if (from === CoinSource.binance) {
-        const best: TickerModel = this.getBestFromBinance();
-        const bestC: BestCoin = new BestCoin(best.symbol.replace(SymbolToTrade.DEFAULT, ''), Number(best.priceChangePercent));
-        bestC.price = Number(best.bestAskPrice);
-        resolve(bestC);
-      } else if ( from === CoinSource.coinmarketcap) {
-        this.getBestFromCoinMarketCap(this.coinMarketCapTools.P_1H)
-        .then((coin: CoinMarketCapModel) => {
-          const bestC: BestCoin = new BestCoin(coin.symbol, Number(coin.percent_change_1h));
-          bestC.price = Number(coin.price_btc);
-          resolve(bestC);
-        })
-        .catch((error) => {
-          reject(error);
-        });
-      } else {
-        reject('No source for getting best coin...');
       }
     });
   }
 
-  private getBestFromCoinMarketCap(key: string): Promise<CoinMarketCapModel> {
+  private getBest(from: string = process.env.TAKE_BEST_FROM): BestCoin {
+    if (from === CoinSource.binance) {
+      const best: TickerModel = this.getBestFromBinance();
+      const bestC: BestCoin = new BestCoin(best.symbol.replace(SymbolToTrade.DEFAULT, ''), Number(best.priceChangePercent));
+      bestC.price = Number(best.bestAskPrice);
+
+      return bestC;
+    } else if (from === CoinSource.coinmarketcap) {
+      const coin: CoinMarketCapModel = this.getBestFromCoinMarketCap(this.coinMarketCapTools.P_1H);
+      const bestC: BestCoin = new BestCoin(coin.symbol, Number(coin.percent_change_1h));
+      bestC.price = Number(coin.price_btc);
+
+      return bestC;
+    } else {
+      this.logger.error('No source for getting best coin...');
+    }
+  }
+
+  private getBestFromCoinMarketCap(key: string): CoinMarketCapModel {
     this.logger.log('Looking for the best Crypto with highest ' + key);
 
-    return new Promise((resolve, reject) => {
-      this.getAvailablesCoins()
-      .then((selection: CoinMarketCapModel[]) => {
-        this.logger.detailsIf(false, 'Retrieved selection done from Binance & CoinMArketCap', selection);
+    const selection: CoinMarketCapModel[] = this.getAvailablesCoins();
+    this.logger.detailsIf(false, 'Retrieved selection done from Binance & CoinMArketCap', selection);
 
-        const best: CoinMarketCapModel = selection.sort((a: CoinMarketCapModel, b: CoinMarketCapModel) => {
-          return Number(b[key]) - Number(a[key]);
-        })[0];
+    const best: CoinMarketCapModel = selection.sort((a: CoinMarketCapModel, b: CoinMarketCapModel) => {
+      return Number(b[key]) - Number(a[key]);
+    })[0];
 
-        this.logger.details('Best from CoinmarkerCap after selected Binance ones in common is ' + best.symbol
-        + ' - ' + best.price_btc + ' BTC - '
-        + best.price_usd + ' $ - '
-        + best.percent_change_1h + '% / 1h',
-         best);
-        resolve(best);
-      })
-      .catch((error) => {
-        reject(error);
-      });
-    });
+    this.logger.details('Best from CoinmarkerCap after selected Binance ones in common is ' + best.symbol
+      + ' - ' + best.price_btc + ' BTC - '
+      + best.price_usd + ' $ - '
+      + best.percent_change_1h + '% / 1h',
+      best);
+
+    return best;
   }
 
   private getBestFromBinance(): TickerModel {
@@ -168,39 +161,26 @@ export default class RoadTripStrategy extends Strategy {
     return best;
   }
 
-  private getAvailablesCoins(): Promise<CoinMarketCapModel[]> {
-    return new Promise((resolve, reject) => {
-      const selected: CoinMarketCapModel[] = [];
+  private getAvailablesCoins(): CoinMarketCapModel[] {
+    const selected: CoinMarketCapModel[] = [];
 
-      this.getCoinMarketCapDatas()
-      .then((coinMakerCapDatas: CoinMarketCapModel[]) => {
-        this.logger.detailsIf(false, 'Get datas from coinmarketCap', coinMakerCapDatas);
+    const coinMakerCapDatas: CoinMarketCapModel[] = this.getCoinMarketCapDatas();
+    this.logger.detailsIf(false, 'Get datas from coinmarketCap', coinMakerCapDatas);
 
-        for (const c of coinMakerCapDatas) {
-          for (const t of this.socketManager.getAllTickers()) {
-            if (c.symbol + 'BTC' === t.symbol || c.symbol + 'ETH' === t.symbol) {
-              selected.push(c);
-              break;
-            }
-          }
+    for (const c of coinMakerCapDatas) {
+      for (const t of this.socketManager.getAllTickers()) {
+        if (c.symbol + 'BTC' === t.symbol || c.symbol + 'ETH' === t.symbol) {
+          selected.push(c);
+          break;
         }
-        resolve(selected);
-      })
-      .catch((error) => {
-        reject(error);
-      });
-    });
+      }
+    }
+
+    return selected;
   }
 
-  private getCoinMarketCapDatas(): Promise<CoinMarketCapModel[]> {
-    return new Promise((resolve, reject) => {
-      this.logger.log('Getting datas from CoinMarketCap');
-      const request = new Client();
-
-      request.get(process.env.API_COINMARKETCAP, (data, response) => {
-        (data) ? resolve(data) : reject('No data get from CoinMarketCap');
-      });
-    });
+  private getCoinMarketCapDatas(): CoinMarketCapModel[] {
+    return this.coinMarketCapDatas;
   }
 
   private informationsRequired(): boolean {
@@ -218,6 +198,11 @@ export default class RoadTripStrategy extends Strategy {
 
     if (!this.orderManager.getExchangeInfo()) {
       this.logger.log('ExchangeInfo missing');
+      return false;
+    }
+
+    if (!this.coinMarketCapDatas) {
+      this.logger.log('CoinmarketCap datas missing');
       return false;
     }
 
@@ -244,15 +229,19 @@ export default class RoadTripStrategy extends Strategy {
 
     if (symbolToSwitchFor.percent_change > currentCrypto.percent_change + 1) {
       this.logger.log('It is worthy to change: current: ' + currentCrypto.symbol + '(' + currentCrypto.percent_change
-      + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change + ')');
+        + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change + ')');
       return true;
     } else if (symbolToSwitchFor.percent_change > 0 && currentCrypto.percent_change < 0) {
       this.logger.log('It is worthy to change: current: ' + currentCrypto.symbol + '(' + currentCrypto.percent_change
-      + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change + ')');
+        + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change + ')');
       return true;
+    } else if (symbolToSwitchFor.symbol + SymbolToTrade.DEFAULT === this.getBestFromBinance().symbol) {
+      this.logger.log('It is worthy to change, symbol is best everywhere: current: ' + currentCrypto.symbol + '(' + currentCrypto.percent_change
+        + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change + ')');
+        return true;
     } else {
       this.logger.log('Not worthy to change: current: ' + currentCrypto.symbol + '(' + currentCrypto.percent_change
-      + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change + ')');
+        + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change + ')');
       return false;
     }
   }
@@ -260,12 +249,12 @@ export default class RoadTripStrategy extends Strategy {
   private getBestPercentInWallet(from: string): BestCoin {
     let bestInWallet: BestCoin;
 
-    if  (from === CoinSource.coinmarketcap || this.bestInWallet.asset === SymbolToTrade.DEFAULT) {
-        const bestInCP: CoinMarketCapModel = this.getCoinMarketCapValueFor(this.bestInWallet.asset);
-        bestInWallet = new BestCoin(bestInCP.symbol, Number(bestInCP.percent_change_1h), Number(bestInCP.price_btc));
+    if (from === CoinSource.coinmarketcap || this.bestInWallet.asset === SymbolToTrade.DEFAULT) {
+      const bestInCP: CoinMarketCapModel = this.getCoinMarketCapValueFor(this.bestInWallet.asset);
+      bestInWallet = new BestCoin(bestInCP.symbol, Number(bestInCP.percent_change_1h), Number(bestInCP.price_btc));
     } else if (from === CoinSource.binance) {
-        const bestInPercentFromBinance: TickerModel = this.socketManager.getTicker(this.bestInWallet.asset);
-        bestInWallet = new BestCoin(bestInPercentFromBinance.symbol, Number(bestInPercentFromBinance.priceChangePercent));
+      const bestInPercentFromBinance: TickerModel = this.socketManager.getTicker(this.bestInWallet.asset);
+      bestInWallet = new BestCoin(bestInPercentFromBinance.symbol, Number(bestInPercentFromBinance.priceChangePercent));
     } else {
       this.logger.log('Didnt get bestPercent in wallet, from is not valid...');
     }
@@ -289,5 +278,19 @@ export default class RoadTripStrategy extends Strategy {
       this.best = currentBest;
     }
     this.logger.log(this.best.symbol + ' variation: ' + this.best.variation);
+  }
+
+  private updateCoinMarketCapDatas(): void {
+    this.logger.log('Updating CoinMarketCapDatas');
+    const request = new Client();
+
+    request.get(process.env.API_COINMARKETCAP, (data, response) => {
+      if (data) {
+        this.coinMarketCapDatas = data;
+      } else {
+        this.logger.error('No data get from CoinMarketCap');
+      }
+    });
+    setTimeout(() => this.updateCoinMarketCapDatas(), 10000);
   }
 }
