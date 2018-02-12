@@ -99,9 +99,8 @@ export default class Bot {
   }
 
   private logWalletInformations(): void {
-    this.logger.log('\x1b[30m\x1b[47m***************** '
-    + 'Wallet value: ' + this.walletPriceTotalBTC + ' BTC, ' + this.walletPriceTotalUSDT + ' $'
-    + ' ***************** ');
+    this.logger.log('\x1b[30m\x1b[47mWallet value: ' + this.walletPriceTotalBTC + ' BTC');
+    this.logger.log('\x1b[30m\x1b[47mWallet value: ' + this.walletPriceTotalUSDT + ' $');
   }
 
   private subscribeEvents(): void {

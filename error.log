@@ -52,3 +52,186 @@ SyntaxError: Unexpected token L in JSON at position 15714
     at Receiver.startLoop (/Users/donkeycode/Documents/trader/node_modules/ws/lib/Receiver.js:165:16)
     at Receiver.add (/Users/donkeycode/Documents/trader/node_modules/ws/lib/Receiver.js:139:10)
     at TLSSocket._ultron.on (/Users/donkeycode/Documents/trader/node_modules/ws/lib/WebSocket.js:138:22)
+
+
+
+
+---------------------------------
+
+
+Executing
+[2018-02-12T20:23:50+01:00] ***************** Wallet value: 0.0059774768742420015 BTC, 52.15348572776146 $ *****************
+[2018-02-12T20:23:50+01:00] Launching RoadTrip Strategy
+[2018-02-12T20:23:50+01:00] Checking informations
+[2018-02-12T20:23:50+01:00] Looking for the best Crypto with highest percent_change_1h
+[2018-02-12T20:23:50+01:00] Getting datas from CoinMarketCap
+[2018-02-12T20:23:52+01:00] Best from CoinmarkerCap after selected Binance ones in common is DLT - 0.00004964 BTC - 0.430335 $ - 5.72% / 1h
+-------------------------------
+[2018-02-12T20:23:52+01:00] DLT variation: 0
+[2018-02-12T20:23:52+01:00] Looking for the highest crypto in the wallet
+[2018-02-12T20:23:52+01:00] Best crypto in the wallet is ICN
+-------------------------------
+[2018-02-12T20:23:52+01:00] Checking if it is worthy to switch crypto place
+[2018-02-12T20:23:52+01:00] Looking for coinMarketCap value informations for ICN
+[2018-02-12T20:23:52+01:00] It is worthy to change: current: ICN(-1.2) VS DLT(5.72)
+[2018-02-12T20:23:52+01:00] Getting current orders for DLT
+[2018-02-12T20:23:52+01:00] Retrieved 0 orders from current orders for DLT
+-------------------------------
+[2018-02-12T20:23:52+01:00] Getting current orders for BTC
+[2018-02-12T20:23:52+01:00] Retrieved 0 orders from current orders for BTC
+-------------------------------
+[2018-02-12T20:23:52+01:00] Getting current orders
+[2018-02-12T20:23:52+01:00] Retrieved 0 orders from current orders
+-------------------------------
+[2018-02-12T20:23:52+01:00] Crypto DLT not in wallet and not in current orders, let' s get some BTC to buy it
+[2018-02-12T20:23:52+01:00] Going to sell everything in wallet except BTC
+[2018-02-12T20:23:52+01:00] [object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [ETHBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [NEOBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [BNBBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [QTUMBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [SNTBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [GASBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [BCCBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [OAXBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [ICNBTC].
+[2018-02-12T20:23:52+01:00] Getting current orders for ICN
+[2018-02-12T20:23:52+01:00] Retrieved 0 orders from current orders for ICN
+-------------------------------
+[2018-02-12T20:23:52+01:00] Creating new sell order (ICNBTC)
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [ZRXBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [WTCBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [TRXBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [TNTBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [CTRBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [ETCBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [ENGBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [ZECBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [ASTBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [DGDBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [BATBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [DASHBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [POWRBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [BTGBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [XMRBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [XRPBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [KMDBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [RCNBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [PPTBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [GXSBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [AMBBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [CNDBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [GVTBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [POEBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [XZCBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [ADABTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [CMTBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [GTOBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [ICXBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [ELFBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [AIONBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [NEBLBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [NAVBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [PIVXBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [STEEMBTC].
+[2018-02-12T20:23:52+01:00] Getting min qty traddable
+[2018-02-12T20:23:52+01:00] Getting symbol [BLZBTC].
+[2018-02-12T20:23:52+01:00] 1 orders have been sent
+[2018-02-12T20:23:52+01:00] Getting symbol [ICNBTC].
+[2018-02-12T20:23:52+01:00] Sending order:
+-------------------------------
+Error: Response code 400
+    at Request.e [as _callback] (/Users/donkeycode/Documents/trader/node_modules/binance/lib/rest.js:64:37)
+    at Request.self.callback (/Users/donkeycode/Documents/trader/node_modules/request/request.js:186:22)
+    at emitTwo (events.js:106:13)
+    at Request.emit (events.js:191:7)
+    at Request.<anonymous> (/Users/donkeycode/Documents/trader/node_modules/request/request.js:1163:10)
+    at emitOne (events.js:96:13)
+    at Request.emit (events.js:188:7)
+    at IncomingMessage.<anonymous> (/Users/donkeycode/Documents/trader/node_modules/request/request.js:1085:12)
+    at IncomingMessage.g (events.js:291:16)
+    at emitNone (events.js:91:20)
+    at IncomingMessage.emit (events.js:185:7)
+[2018-02-12T20:23:53+01:00]  Error trying to send an order
+[2018-02-12T20:23:53+01:00] New order sent
+
+
+
+
+
+
+
+
+
+--------------------------------
+
+
+
+
+
+Executing
+[2018-02-12T22:45:54+01:00] Wallet value: 0.0058758685201500006 BTC
+[2018-02-12T22:45:54+01:00] Wallet value: 51.93092598108571 $
+[2018-02-12T22:45:54+01:00] Launching RoadTrip Strategy
+[2018-02-12T22:45:54+01:00] Checking informations
+[2018-02-12T22:45:54+01:00] Looking for the best Crypto with highest percent_change_1h
+[2018-02-12T22:45:54+01:00] Getting datas from CoinMarketCap
+[2018-02-12T22:45:54+01:00] Best from CoinmarkerCap after selected Binance ones in common is RPX - 0.00003106 BTC - 0.27428 $ - 8.6% / 1h
+-------------------------------
+[2018-02-12T22:45:54+01:00] RPX variation: 0
+[2018-02-12T22:45:54+01:00] Looking for the highest crypto in the wallet
+events.js:160
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: connect ENETDOWN 104.17.140.178:443 - Local (10.9.110.23:49896)
+    at Object.exports._errnoException (util.js:1026:11)
+    at exports._exceptionWithHostPort (util.js:1049:20)
+    at connect (net.js:879:16)
+    at net.js:1008:7
+    at GetAddrInfoReqWrap.asyncCallback [as callback] (dns.js:62:16)
+    at GetAddrInfoReqWrap.onlookup [as oncomplete] (dns.js:81:10)

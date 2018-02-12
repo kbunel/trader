@@ -77,8 +77,8 @@ export default class OrderManager {
 
                 const trTime = moment.unix(Math.floor(((order.time) ? order.time : order.transactTime) / 1000));
                 this.logger.log('Order sent to ' + order.side + ' ' + order.symbol + ' at ' + trTime.format('MMMM Do YYYY, h:mm:ss a'));
-                if (moment().isAfter(trTime.add(5, 'm'))) {
-
+                // if (moment().isAfter(trTime.add(5, 'm'))) {
+                if (true) {
                     this.logger.log('Order #' + order.orderId + 'for ' + order.symbol
                         + ' is pending since more than 5 minutes cancelling and putting it back to the market value');
 
