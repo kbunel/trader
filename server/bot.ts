@@ -40,25 +40,9 @@ export default class Bot {
 
   constructor(server) {
     this.logger = new Logger();
-    this.logger.log('Starting BOT');
+    this.logger.log('Starting Dabe');
 
-    console.log(this.active);
-
-    this.binanceRest = new api.BinanceRest({
-      key: String(process.env.APIKEY),
-      secret: String(process.env.APISECRET),
-      recvWindow: 10000
-    });
-    this.front = new FrontModel();
-    this.indicators = new Indicators(this.front);
-    this.transactions = new Transactions(server, this.front, this.binanceRest);
-    this.coinMarketCapTools = new CoinMarketCapTools();
-    this.socketManager = new SocketManager(this.binanceRest);
-    this.trader = new Trader(this.logger, this.socketManager, this.binanceRest);
-    this.accountManager = new AccountManager(this.binanceRest, this.socketManager, this.trader);
-    this.orderManager = new OrderManager(this.binanceRest, this.accountManager, this.socketManager, this.trader);
-    this.strategyManager = new StrategyManager(this.initStrategyConfig(), process.env.STRATEGY);
-
+    this.init(server);
     this.subscribeEvents();
     this.execute();
   }
@@ -128,5 +112,22 @@ export default class Bot {
         this.walletPriceTotalUSDT = this.walletPriceTotalBTC * price_BTCUSDT;
       });
     });
+  }
+
+  private init(server: any): void {
+    this.binanceRest = new api.BinanceRest({
+      key: String(process.env.APIKEY),
+      secret: String(process.env.APISECRET),
+      recvWindow: 10000
+    });
+    this.front = new FrontModel();
+    this.indicators = new Indicators(this.front);
+    this.transactions = new Transactions(server, this.front, this.binanceRest);
+    this.coinMarketCapTools = new CoinMarketCapTools();
+    this.socketManager = new SocketManager(this.binanceRest);
+    this.trader = new Trader(this.logger, this.socketManager, this.binanceRest);
+    this.accountManager = new AccountManager(this.binanceRest, this.socketManager, this.trader);
+    this.orderManager = new OrderManager(this.binanceRest, this.accountManager, this.socketManager, this.trader);
+    this.strategyManager = new StrategyManager(this.initStrategyConfig(), process.env.STRATEGY);
   }
 }

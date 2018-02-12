@@ -5,7 +5,7 @@ export default class Logger {
 
   public log(...args: any[]): void {
     for (const arg of args) {
-      console.log('[' + moment().format() + ']\x1b[33m%s\x1b[0m', arg);
+      console.log('[' + moment().format() + '] \x1b[33m%s\x1b[0m', arg);
     }
   }
 
@@ -21,7 +21,7 @@ export default class Logger {
         console.log(arg);
       }
     }
-    console.log('[' + moment().format() + ']\x1b[36m%s\x1b[0m', info);
+    console.log('[' + moment().format() + '] \x1b[36m%s\x1b[0m', info);
     this.logSeparator();
   }
 
@@ -29,7 +29,7 @@ export default class Logger {
     for (const arg of args) {
       console.error(arg);
     }
-    console.error('[' + moment().format() + ']', error);
+    console.error('[' + moment().format() + '] ', error);
   }
 
   public logIf(log: boolean, ...args: any[]): void {

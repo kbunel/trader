@@ -48,6 +48,7 @@ export default class RoadTripStrategy extends Strategy {
               || !this.isWorthyToSwitch(best)) {
               this.logger.log('We got ' + wallet.asset + ', let\'s hold for now');
               this.getBestFromCoinMarketCap(this.coinMarketCapTools.P_1H);
+              this.getBestFromBinance();
             } else if (this.orderManager.getCurrentOrders(best.symbol).length) {
               this.logger.log('Best ticker found in current order, let\'s check if it s still available');
 
@@ -142,7 +143,7 @@ export default class RoadTripStrategy extends Strategy {
         this.logger.details('Best from CoinmarkerCap after selected Binance ones in common is ' + best.symbol
         + ' - ' + best.price_btc + ' BTC - '
         + best.price_usd + ' $ - '
-        + best.percent_change_1h + ' %',
+        + best.percent_change_1h + '% / 1h',
          best);
         resolve(best);
       })
@@ -163,7 +164,7 @@ export default class RoadTripStrategy extends Strategy {
         best = t;
       }
     }
-    this.logger.details('Best from Binance is ' + best.symbol + ' (' + best.priceChangePercent + '%)', best);
+    this.logger.details('Best from Binance is ' + best.symbol + ' (' + best.priceChangePercent + '% / 24h)', best);
     return best;
   }
 
@@ -279,9 +280,13 @@ export default class RoadTripStrategy extends Strategy {
     } else if (currentBest.symbol === this.best.symbol) {
       if (this.best.price > currentBest.price) {
         this.best.variation--;
+        this.best.price = currentBest.price;
       } else if (this.best.price < currentBest.price) {
         this.best.variation++;
+        this.best.price = currentBest.price;
       }
+    } else if (currentBest.symbol !== this.best.symbol) {
+      this.best = currentBest;
     }
     this.logger.log(this.best.symbol + ' variation: ' + this.best.variation);
   }

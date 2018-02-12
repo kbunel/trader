@@ -85,8 +85,6 @@ export default class SocketManager {
         this.logger.log('Resetting activateCombinedSockets');
 
         if (this.combinedWebSocket) {
-            console.log('Terminating combinedWebSocket');
-
             this.combinedWebSocket.terminate();
         }
         this.activateCombinedSockets();
