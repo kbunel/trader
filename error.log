@@ -1,0 +1,14 @@
+Executing
+[2018-02-12T17:09:55+01:00] ***************** Wallet value: 0.006422309730076002 BTC, 55.86125003220106 $ *****************
+[2018-02-12T17:09:55+01:00] Launching RoadTrip Strategy
+[2018-02-12T17:09:55+01:00] Checking informations
+[2018-02-12T17:09:55+01:00] Looking for the best Crypto with highest percent_change_1h
+[2018-02-12T17:09:55+01:00] Getting datas from CoinMarketCap
+events.js:160
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: connect ETIMEDOUT 104.17.140.178:443
+    at Object.exports._errnoException (util.js:1026:11)
+    at exports._exceptionWithHostPort (util.js:1049:20)
+    at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1085:14)
