@@ -235,3 +235,20 @@ Error: connect ENETDOWN 104.17.140.178:443 - Local (10.9.110.23:49896)
     at net.js:1008:7
     at GetAddrInfoReqWrap.asyncCallback [as callback] (dns.js:62:16)
     at GetAddrInfoReqWrap.onlookup [as oncomplete] (dns.js:81:10)
+
+
+
+------------------------
+
+
+
+-------------------------------
+[2018-02-13T18:54:14+01:00] LINK variation: 1
+[2018-02-13T18:54:14+01:00] Looking for the highest crypto in the wallet
+events.js:160
+      throw er; // Unhandled 'error' event
+            ^
+
+            Error: read ECONNRESET
+                at exports._errnoException (util.js:1026:11)
+                    at TLSWrap.onread (net.js:569:26)
