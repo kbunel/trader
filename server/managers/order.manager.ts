@@ -124,7 +124,7 @@ export default class OrderManager {
         });
     }
 
-    public createNewBuyOrder(symbolToBuy: string, type: BinanceEnum = BinanceEnum.ORDER_TYPE_MARKET): Promise<NewOrder> {
+    public createNewBuyOrder(symbolToBuy: string, type: BinanceEnum = BinanceEnum.ORDER_TYPE_LIMIT): Promise<NewOrder> {
         this.logger.log('Creating new buy order (' + symbolToBuy + SymbolToTrade.DEFAULT + ')');
 
         return new Promise((resolve, reject) => {
@@ -144,7 +144,7 @@ export default class OrderManager {
         });
     }
 
-    public createNewSellOrder(symbolToSell: string, type: BinanceEnum = BinanceEnum.ORDER_TYPE_MARKET): Promise<NewOrder> {
+    public createNewSellOrder(symbolToSell: string, type: BinanceEnum = BinanceEnum.ORDER_TYPE_LIMIT): Promise<NewOrder> {
         this.logger.log('Creating new sell order (' + symbolToSell + SymbolToTrade.DEFAULT + ')');
 
         return new Promise((resolve, reject) => {
