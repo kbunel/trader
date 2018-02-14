@@ -252,3 +252,128 @@ events.js:160
             Error: read ECONNRESET
                 at exports._errnoException (util.js:1026:11)
                     at TLSWrap.onread (net.js:569:26)
+
+
+
+-------------------------- (2)
+ Error: read ECONNRESET
+    at exports._errnoException (util.js:1026:11)
+    at TLSWrap.onread (net.js:569:26) code: 'ECONNRESET', errno: 'ECONNRESET', syscall: 'read' }
+[2018-02-14T16:48:15+01:00]  Error while getting symbols tickers prices
+[2018-02-14T16:48:15+01:00]  { Error: read ECONNRESET
+    at exports._errnoException (util.js:1026:11)
+    at TLSWrap.onread (net.js:569:26) code: 'ECONNRESET', errno: 'ECONNRESET', syscall: 'read' }
+undefined:1
+{"stream":"!ticker@arr","data":[{"e":"24hrTicker","E":1518622622775,"s":"ETHBTC","p":"-0.00175400","P":"-1.781","w":"0.09774779","x":"0.09845700","c":"0.09672600","Q":"0.10500000","b":"0.09672700","B":"0.34800000","a":"0.09675100","A":"0.27200000","o":"0.09848000","h":"0.09875200","l":"0.09600000","v":"121211.11500000","q":"11848.11830845","O":1518536222773,"C":1518622622773,"F":33275170,"L":33682854,"n":407685},{"e":"24hrTicker","E":1518622622807,"s":"LTCBTC","p":"0.00431100","P":"23.527","w":"0.02130398","x":"0.01832400","c":"0.02263500","Q":"2.91000000","b":"0.02260100","B":"8.22000000","a":"0.02263000","A":"2.05000000","o":"0.01832400","h":"0.02369800","l":"0.01826700","v":"668567.10000000","q":"14243.14278371","O":1518536222804,"C":1518622622804,"F":6812738,"L":7085633,"n":272896},{"e":"24hrTicker","E":1518622622073,"s":"BNBBTC","p":"-0.00001200","P":"-1.131","w":"0.00104332","x":"0.00106140","c":"0.00104940","Q":"8.51000000","b":"0.00104860","B":"7.10000000","a":"0.00104940","A":"63.850000
+
+SyntaxError: Unexpected string in JSON at position 21413
+    at Object.parse (native)
+    at WebSocket.ws.on (/Users/donkeycode/Documents/trader/node_modules/binance/lib/ws.js:32:33)
+    at emitOne (events.js:96:13)
+    at WebSocket.emit (events.js:188:7)
+    at Receiver._receiver.onmessage (/Users/donkeycode/Documents/trader/node_modules/ws/lib/WebSocket.js:141:47)
+    at Receiver.dataMessage (/Users/donkeycode/Documents/trader/node_modules/ws/lib/Receiver.js:389:14)
+    at Receiver.getData (/Users/donkeycode/Documents/trader/node_modules/ws/lib/Receiver.js:330:12)
+    at Receiver.startLoop (/Users/donkeycode/Documents/trader/node_modules/ws/lib/Receiver.js:165:16)
+    at Receiver.add (/Users/donkeycode/Documents/trader/node_modules/ws/lib/Receiver.js:139:10)
+    at TLSSocket._ultron.on (/Users/donkeycode/Documents/trader/node_modules/ws/lib/WebSocket.js:138:22)
+
+
+--------------------------------
+
+
+
+
+
+Executing
+[2018-02-14T17:28:54+01:00] Wallet value: 0.0033310843365499995 BTC
+[2018-02-14T17:28:54+01:00] Wallet value: 30.99570644075438 $
+[2018-02-14T17:28:54+01:00] Launching RoadTrip Strategy
+[2018-02-14T17:28:54+01:00] Checking informations
+[2018-02-14T17:28:54+01:00] Looking for the best Crypto with highest percent_change_1h
+[2018-02-14T17:28:54+01:00] Best from CoinmarkerCap after selected Binance ones in common is ICN - 0.00000186 BTC - 0.0173133 $ - 18.01% / 1h
+-------------------------------
+[2018-02-14T17:28:54+01:00] ICN variation: 0
+[2018-02-14T17:28:54+01:00] Looking for the highest crypto in the wallet
+[2018-02-14T17:28:53+01:00] Updating CoinMarketCapDatas
+[2018-02-14T17:28:56+01:00] Best crypto in the wallet is ENG
+-------------------------------
+[2018-02-14T17:28:56+01:00] Getting current orders for ICN
+[2018-02-14T17:28:56+01:00] Retrieved 1 orders from current orders for ICN
+-------------------------------
+[2018-02-14T17:28:56+01:00] Getting current orders for ICN
+[2018-02-14T17:28:56+01:00] Retrieved 1 orders from current orders for ICN
+-------------------------------
+[2018-02-14T17:28:56+01:00] Best ticker found in current order, let's check if it s still available
+[2018-02-14T17:28:56+01:00] Getting current orders for ICN
+[2018-02-14T17:28:56+01:00] Retrieved 1 orders from current orders for ICN
+-------------------------------
+[2018-02-14T17:28:56+01:00] Checking orders
+[2018-02-14T17:28:56+01:00] Getting current orders
+[2018-02-14T17:28:56+01:00] Retrieved 1 orders from current orders
+-------------------------------
+[2018-02-14T17:28:56+01:00] Order sent to BUY ICNBTC at February 14th 2018, 5:16:46 pm
+[2018-02-14T17:28:56+01:00] Order #4613146for ICNBTC is pending since more than 5 minutes cancelling and putting it back to the market value
+[2018-02-14T17:28:56+01:00] Cancelling order
+-------------------------------
+[2018-02-14T17:28:57+01:00] userData
+-------------------------------
+[2018-02-14T17:28:57+01:00] Received execution report from Binance in orderManager
+-------------------------------
+[2018-02-14T17:28:57+01:00] Received an execution report but didnt get anything to to with
+[2018-02-14T17:28:57+01:00] [object Object]
+[2018-02-14T17:28:57+01:00] Canceled order #4613146
+-------------------------------
+[2018-02-14T17:28:57+01:00] Getting current orders
+[2018-02-14T17:28:57+01:00] Retrieved 1 orders from current orders
+-------------------------------
+[2018-02-14T17:28:57+01:00] Order #4613146 removed
+-------------------------------
+[2018-02-14T17:28:57+01:00] Creating new order from another order (ICNBTC)
+-------------------------------
+[2018-02-14T17:28:57+01:00] Sending order:
+-------------------------------
+[2018-02-14T17:28:57+01:00] All orders have been reset
+-------------------------------
+[2018-02-14T17:28:57+01:00] Getting current orders from Binance
+[2018-02-14T17:28:57+01:00] userData
+-------------------------------
+[2018-02-14T17:28:57+01:00] userData
+-------------------------------
+[2018-02-14T17:28:57+01:00] Received balances from socket
+-------------------------------
+[2018-02-14T17:28:57+01:00] Updating account balances with new balances
+-------------------------------
+[2018-02-14T17:28:57+01:00] Account balances updated
+-------------------------------
+[2018-02-14T17:28:57+01:00] userData
+-------------------------------
+Error: Response code 400
+    at Request.e [as _callback] (/Users/donkeycode/Documents/trader/node_modules/binance/lib/rest.js:64:37)
+    at Request.self.callback (/Users/donkeycode/Documents/trader/node_modules/request/request.js:186:22)
+    at emitTwo (events.js:106:13)
+    at Request.emit (events.js:191:7)
+    at Request.<anonymous> (/Users/donkeycode/Documents/trader/node_modules/request/request.js:1163:10)
+    at emitOne (events.js:96:13)
+    at Request.emit (events.js:188:7)
+    at IncomingMessage.<anonymous> (/Users/donkeycode/Documents/trader/node_modules/request/request.js:1085:12)
+    at IncomingMessage.g (events.js:291:16)
+    at emitNone (events.js:91:20)
+    at IncomingMessage.emit (events.js:185:7)
+[2018-02-14T17:28:58+01:00]  Error trying to send an order
+[2018-02-14T17:28:58+01:00] New order sent
+-------------------------------
+[2018-02-14T17:28:58+01:00] userData
+-------------------------------
+[2018-02-14T17:28:58+01:00] Received execution report from Binance in orderManager
+-------------------------------
+[2018-02-14T17:28:58+01:00] Received an execution report but didnt get anything to to with
+[2018-02-14T17:28:58+01:00] [object Object]
+[2018-02-14T17:28:58+01:00] userData
+-------------------------------
+[2018-02-14T17:28:58+01:00] 0 orders retrieved from Binance
+[2018-02-14T17:28:58+01:00]
+undefined:1
+{"stream":"!ticker@arr","data":[{"e":"24hrTicker","E":1518625061792,"s":"ETHBTC","p":"-0.00130700","P":"-1.327","w":"0.09770091","x":"0.09846200","c":"0.09715200","Q":"0.35900000","b":"0.09714300","B":"0.05100000","a":"0.09722300","A":"0.17000000","o":"0.09845900","h":"0.09875200","l":"0.09600000","v":"122695.34400000","q":"11987.44657465","O":1518538661787,"C":1518625061787,"F":33284064,"L":33697202,"n":413139},{"e":"24hrTicker","E":1518625061435,"s":"LTCBTC","p":"0.00422500","P":"23.012","w":"0.02134631","x":"0.01836000","c":"0.02258500","Q":"0.49000000","b":"0.02258100","B":"0.13000000","a":"0.02258500","A":"59.51000000","o":"0.01836000","h":"0.02369800","l":"0.01826700","v":"683320.53000000","q":"14586.36991355","O":1518538661431,"C":1518625061431,"F":6814112,"L":7092863,"n":278752},{"e":"24hrTicker","E":1518625061682,"s":"BNBBTC","p":"0.00000010","P":"0.009","w":"0.00104338","x":"0.00105960","c":"0.00105970","Q":"6.42000000","b":"0.00105970","B":"85.11000000","a":"0.00106020","A":"14.950000
+
+SyntaxError: Unexpected token
