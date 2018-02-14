@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import * as express from 'express';
 
 export default class Routes {
 
@@ -19,6 +20,15 @@ export default class Routes {
    */
   public list(): any[] {
     return [
+      {
+        method: 'GET',
+        path: '/',
+        handlers: [
+          (req, res) => {
+            res.sendFile(__dirname + '/views/index.html');
+          }
+        ]
+      },
       {
         method: 'GET',
         path: '/server/:startOrStop',

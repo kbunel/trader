@@ -65,7 +65,7 @@ export default class Transactions {
     this.front.symbol = this.symbol;
     this.front.interval = this.interval;
 
-    // this.socket();
+    this.socket();
     this.dataGlobal();
   }
 
@@ -81,7 +81,7 @@ export default class Transactions {
       this.interval = this.front.interval = value.interval.trim().toLowerCase();
     }
 
-    // this.socket();
+    this.socket();
   }
 
   /**
@@ -121,61 +121,61 @@ export default class Transactions {
       });
   }
 
-  // /**
-  //  *
-  //  */
-  // public socket(): void {
-  //   if (this.binanceWS) {
-  //     this.binanceWS.terminate();
-  //   }
+  /**
+   *
+   */
+  public socket(): void {
+    if (this.binanceWS) {
+      this.binanceWS.terminate();
+    }
 
-  //   const binanceWS = new api.BinanceWS(true);
+    const binanceWS = new api.BinanceWS(true);
 
-  //   binanceWS.onUserData(this.binanceRest, (data) => {
-  //     this.logger.details('userData', data);
-  //   }, 60000) // Optional, how often the keep alive should be sent in milliseconds
-  //   .then((ws) => {
-  //     // websocket instance available here
-  //   });
+    binanceWS.onUserData(this.binanceRest, (data) => {
+      this.logger.details('userData', data);
+    }, 60000) // Optional, how often the keep alive should be sent in milliseconds
+    .then((ws) => {
+      // websocket instance available here
+    });
 
-  //   this.binanceWS = binanceWS.onCombinedStream(
-  //     [
-  //       binanceWS.streams.depth(this.symbol),
-  //       binanceWS.streams.depthLevel(this.symbol, 5),
-  //       binanceWS.streams.kline(this.symbol, '5m'),
-  //       binanceWS.streams.aggTrade(this.symbol),
-  //       binanceWS.streams.trade(this.symbol),
-  //       binanceWS.streams.ticker(this.symbol),
-  //       binanceWS.streams.allTickers()
-  //     ],
-  //     (streamEvent) => {
-  //       // console.log('allTickers from transaction', this.allTickers);
-  //       switch (streamEvent.stream) {
-  //         case binanceWS.streams.depth(this.symbol):
-  //         this.io.sockets.emit('depth', this.depth = streamEvent.data);
-  //         break;
-  //         case binanceWS.streams.depthLevel(this.symbol, 5):
-  //         this.io.sockets.emit('depthLevel', this.depthLevel = streamEvent.data);
-  //         break;
-  //         case binanceWS.streams.kline(this.symbol, this.interval):
-  //         this.io.sockets.emit('kline', this.kline = streamEvent.data);
-  //         break;
-  //         case binanceWS.streams.aggTrade(this.symbol):
-  //         this.io.sockets.emit('aggTrade', this.aggTrade = streamEvent.data);
-  //         break;
-  //         case binanceWS.streams.trade(this.symbol):
-  //         this.io.sockets.emit('trade', this.trade = streamEvent.data);
-  //         break;
-  //         case binanceWS.streams.ticker(this.symbol):
-  //         this.io.sockets.emit('ticker', this.ticker = streamEvent.data);
-  //         break;
-  //         case binanceWS.streams.allTickers():
-  //         this.io.sockets.emit('allTickers', this.allTickers = streamEvent.data);
-  //         break;
-  //       }
-  //     }
-  //   );
-  // }
+    this.binanceWS = binanceWS.onCombinedStream(
+      [
+        binanceWS.streams.depth(this.symbol),
+        binanceWS.streams.depthLevel(this.symbol, 5),
+        binanceWS.streams.kline(this.symbol, '5m'),
+        binanceWS.streams.aggTrade(this.symbol),
+        binanceWS.streams.trade(this.symbol),
+        binanceWS.streams.ticker(this.symbol),
+        binanceWS.streams.allTickers()
+      ],
+      (streamEvent) => {
+        // console.log('allTickers from transaction', this.allTickers);
+        switch (streamEvent.stream) {
+          case binanceWS.streams.depth(this.symbol):
+          this.io.sockets.emit('depth', this.depth = streamEvent.data);
+          break;
+          case binanceWS.streams.depthLevel(this.symbol, 5):
+          this.io.sockets.emit('depthLevel', this.depthLevel = streamEvent.data);
+          break;
+          case binanceWS.streams.kline(this.symbol, this.interval):
+          this.io.sockets.emit('kline', this.kline = streamEvent.data);
+          break;
+          case binanceWS.streams.aggTrade(this.symbol):
+          this.io.sockets.emit('aggTrade', this.aggTrade = streamEvent.data);
+          break;
+          case binanceWS.streams.trade(this.symbol):
+          this.io.sockets.emit('trade', this.trade = streamEvent.data);
+          break;
+          case binanceWS.streams.ticker(this.symbol):
+          this.io.sockets.emit('ticker', this.ticker = streamEvent.data);
+          break;
+          case binanceWS.streams.allTickers():
+          this.io.sockets.emit('allTickers', this.allTickers = streamEvent.data);
+          break;
+        }
+      }
+    );
+  }
 
   private dataGlobal(): void {
     this.request.get(process.env.API_COINMARKETCAP, (data) => {

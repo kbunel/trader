@@ -52,8 +52,8 @@ export default class RoadTripStrategy extends Strategy {
           .then((wallet: Wallet) => {
             this.bestInWallet = wallet;
 
-            if (wallet.asset === best.symbol
-              || !this.isWorthyToSwitch(best)) {
+            if (!this.orderManager.getCurrentOrders(best.symbol).length && (wallet.asset === best.symbol
+              || !this.isWorthyToSwitch(best))) {
               this.logger.log('We got ' + wallet.asset + ', let\'s hold for now');
 
               this.getBestFromCoinMarketCap(this.coinMarketCapTools.P_1H);
@@ -227,7 +227,7 @@ export default class RoadTripStrategy extends Strategy {
 
     const currentCrypto: BestCoin = this.getBestPercentInWallet(process.env.TAKE_BEST_FROM);
 
-    if (symbolToSwitchFor.percent_change > currentCrypto.percent_change + 1) {
+    if (symbolToSwitchFor.percent_change > currentCrypto.percent_change) {
       this.logger.log('It is worthy to change: current: ' + currentCrypto.symbol + '(' + currentCrypto.percent_change
         + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change + ')');
       return true;

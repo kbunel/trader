@@ -77,7 +77,7 @@ export default class OrderManager {
 
                 const trTime = moment.unix(Math.floor(((order.time) ? order.time : order.transactTime) / 1000));
                 this.logger.log('Order sent to ' + order.side + ' ' + order.symbol + ' at ' + trTime.format('MMMM Do YYYY, h:mm:ss a'));
-                if (moment().isAfter(trTime.add(5, 'm'))) {
+                if (moment().isAfter(trTime.add(2, 'm'))) {
                     this.logger.log('Order #' + order.orderId + 'for ' + order.symbol
                         + ' is pending since more than 5 minutes cancelling and putting it back to the market value');
 
@@ -128,7 +128,7 @@ export default class OrderManager {
         this.logger.log('Creating new buy order (' + symbolToBuy + SymbolToTrade.DEFAULT + ')');
 
         return new Promise((resolve, reject) => {
-            this.trader.getPrice(symbolToBuy)
+            this.trader.getPrice(symbolToBuy, SymbolToTrade.DEFAULT, TickerEnum.BEST_BID)
                 .then((price: number) => {
                     const absoluteQty = Number(this.accountManager.getInWallet(SymbolToTrade.DEFAULT).free) / price;
                     const quantity: number = this.getValidQuantity(symbolToBuy, absoluteQty);
@@ -148,7 +148,7 @@ export default class OrderManager {
         this.logger.log('Creating new sell order (' + symbolToSell + SymbolToTrade.DEFAULT + ')');
 
         return new Promise((resolve, reject) => {
-            this.trader.getPrice(symbolToSell)
+            this.trader.getPrice(symbolToSell, SymbolToTrade.DEFAULT, TickerEnum.BEST_ASK_PRICE)
                 .then((price: number) => {
                     const quantity: number = this.getValidQuantityFromWallet(this.accountManager.getInWallet(symbolToSell));
                     const symbol: string = symbolToSell + SymbolToTrade.DEFAULT;
