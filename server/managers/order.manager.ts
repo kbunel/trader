@@ -46,7 +46,7 @@ export default class OrderManager {
 
     public sellEverything(except: string = null): void {
         const wallet = this.accountManager.getWallet();
-        this.logger.log('Going to sell everything in wallet except ' + SymbolToTrade.DEFAULT, wallet);
+        this.logger.details('Going to sell everything in wallet except ' + SymbolToTrade.DEFAULT, wallet);
 
         let ordersSent: number = 0;
         for (const w of wallet) {
@@ -189,7 +189,7 @@ export default class OrderManager {
                         orders.push(order);
                     }
                 } catch (error) {
-                    this.logger.log('Error with', order, error);
+                    this.logger.details('Error with', order, error);
                 }
             }
         }
@@ -458,7 +458,7 @@ export default class OrderManager {
             this.updateOrderFromReport(executionReport);
             break;
             default:
-                this.logger.log('Received an execution report but didnt get anything to to with', executionReport);
+                this.logger.details('Received an execution report but didnt get anything to to with', executionReport);
         }
     }
 
