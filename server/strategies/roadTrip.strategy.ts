@@ -227,7 +227,7 @@ export default class RoadTripStrategy extends Strategy {
 
     const currentCrypto: BestCoin = this.getBestPercentInWallet(process.env.TAKE_BEST_FROM);
 
-    if (symbolToSwitchFor.percent_change > currentCrypto.percent_change) {
+    if (symbolToSwitchFor.percent_change > currentCrypto.percent_change + 1) {
       this.logger.log('It is worthy to change: current: ' + currentCrypto.symbol + '(' + currentCrypto.percent_change
         + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change + ')');
       return true;
