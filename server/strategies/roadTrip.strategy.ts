@@ -71,7 +71,7 @@ export default class RoadTripStrategy extends Strategy {
             } else if (wallet.asset !== SymbolToTrade.DEFAULT && this.orderManager.getCurrentOrders(SymbolToTrade.DEFAULT).length) {
 
               this.logger.log('Orders with symbol to trade found, let\'s check if it s still available or reset it with market price if taking too long in profit_limit');
-              this.orderManager.resetOrdersIfTooLong(2);
+              this.orderManager.resetOrdersIfTooLong(10);
             } else if (this.orderManager.getCurrentOrders().length) {
               this.logger.log('Crypto ' + best.symbol + ' not in wallet and not in current orders'
                 + ' but orders found, let\'s cancel them all to buy the good crypto');
