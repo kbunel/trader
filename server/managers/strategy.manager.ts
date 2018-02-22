@@ -21,7 +21,7 @@ export default class StrategyManager {
     return this.currentStrategy.launch();
   }
 
-  private initStrategy(strategy): void {
+  private initStrategy(strategy: string): void {
     switch (strategy) {
       case 'roadTrip':
       this.currentStrategy = new RoadTripStrategy(this.strategyConfig);

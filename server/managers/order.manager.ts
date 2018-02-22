@@ -77,9 +77,9 @@ export default class OrderManager {
 
                 const trTime = moment.unix(Math.floor(((order.time) ? order.time : order.transactTime) / 1000));
                 this.logger.log('Order sent to ' + order.side + ' ' + order.symbol + ' at ' + trTime.format('MMMM Do YYYY, h:mm:ss a'));
-                if (moment().isAfter(trTime.add(2, 'm'))) {
+                if (moment().isAfter(trTime.add(min, 'm'))) {
                     this.logger.log('Order #' + order.orderId + 'for ' + order.symbol
-                        + ' is pending since more than 5 minutes cancelling and putting it back to the market value');
+                        + ' is pending since more than 2 minutes cancelling and putting it back to the market value');
 
 
                     promises.push(this.cancelOrder(order)
@@ -256,7 +256,7 @@ export default class OrderManager {
 
             Promise.all(promises)
                 .then((results) => {
-                    for (const r of results) { }
+                    // for (const r of results) { }
                     this.logger.details('Successfully canceled all orders', results);
 
                     resolve(results);

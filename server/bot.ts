@@ -40,7 +40,7 @@ export default class Bot {
 
   constructor(server) {
     this.logger = new Logger();
-    this.logger.log('Starting Dabe');
+    this.logger.log('Starting Trader');
 
     this.init(server);
     this.subscribeEvents();
