@@ -165,10 +165,12 @@ export default class RoadTripStrategy extends Strategy {
     const selected: CoinMarketCapModel[] = [];
 
     const coinMakerCapDatas: CoinMarketCapModel[] = this.getCoinMarketCapDatas();
+    const allTickers: TickerModel[] = this.socketManager.getAllTickers();
     this.logger.detailsIf(false, 'Get datas from coinmarketCap', coinMakerCapDatas);
+    this.logger.detailsIf(false, 'Get datas from tickers', allTickers);
 
     for (const c of coinMakerCapDatas) {
-      for (const t of this.socketManager.getAllTickers()) {
+      for (const t of allTickers) {
         if (c.symbol + 'BTC' === t.symbol || c.symbol + 'ETH' === t.symbol) {
           selected.push(c);
           break;
