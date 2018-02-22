@@ -1,7 +1,7 @@
 import { Promise } from 'es6-promise';
 import { AccountModel } from '../models/account.model';
 import BinanceRest from 'binance';
-import Logger from '../Logger';
+import Logger from '../logger';
 import { Wallet } from '../models/wallet.model';
 import { SymbolToTrade } from '../enums/symbolToTrade.enum';
 import { CoinMarketCapModel } from '../models/coinmarketcap.model';

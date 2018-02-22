@@ -2,7 +2,7 @@ import { StrategyConfig } from './../interfaces/strategyConfig.interface';
 import Strategie from '../strategies/strategy';
 import RoadTripStrategy from '../strategies/roadTrip.strategy';
 import FlickFlackStrategy from '../strategies/flickFlack.strategy';
-import Logger from '../Logger';
+import Logger from '../logger';
 import Strategy from '../strategies/strategy';
 
 export default class StrategyManager {

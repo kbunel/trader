@@ -1,7 +1,7 @@
 import Transactions from '../transactions';
 import { FrontModel } from '../models/front.model';
 import Indicators from '../indicators';
-import Logger from '../Logger';
+import Logger from '../logger';
 import CoinMarketCapTools from '../tools/coinMarketCap.tools';
 import AccountManager from '../managers/account.manager';
 import { Order } from '../models/order.model';

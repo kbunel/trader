@@ -5,7 +5,7 @@ import { FrontModel } from '../models/front.model';
 import { Order } from '../models/order.model';
 import Transactions from '../transactions';
 import Indicators from '../indicators';
-import Logger from '../Logger';
+import Logger from '../logger';
 import OrderManager from '../managers/order.manager';
 import AccountManager from '../managers/account.manager';
 import SocketManager from '../managers/socket.manager';
