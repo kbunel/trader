@@ -240,7 +240,7 @@ export default class RoadTripStrategy extends Strategy {
     } else if (symbolToSwitchFor.symbol + SymbolToTrade.DEFAULT === this.getBestFromBinance().symbol) {
       this.logger.log('It is worthy to change, symbol is best everywhere: current: ' + currentCrypto.symbol + '(' + currentCrypto.percent_change
         + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change + ')');
-        return true;
+      return true;
     } else {
       this.logger.log('Not worthy to change: current: ' + currentCrypto.symbol + '(' + currentCrypto.percent_change
         + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change + ')');
@@ -286,13 +286,17 @@ export default class RoadTripStrategy extends Strategy {
     this.logger.log('Updating CoinMarketCapDatas');
     const request = new Client();
 
-    request.get(process.env.API_COINMARKETCAP, (data, response) => {
-      if (data) {
-        this.coinMarketCapDatas = data;
-      } else {
-        this.logger.error('No data get from CoinMarketCap');
-      }
-    });
+    try {
+      request.get(process.env.API_COINMARKETCAP, (data, response) => {
+        if (data) {
+          this.coinMarketCapDatas = data;
+        } else {
+          this.logger.error('No data get from CoinMarketCap');
+        }
+      });
+    } catch (error) {
+      this.logger.error(error);
+    }
     setTimeout(() => this.updateCoinMarketCapDatas(), 10000);
   }
 }
