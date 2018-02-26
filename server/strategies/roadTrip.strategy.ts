@@ -59,7 +59,7 @@ export default class RoadTripStrategy extends Strategy {
               this.getBestFromCoinMarketCap(this.coinMarketCapTools.P_1H);
               this.getBestFromBinance();
               this.orderManager.sellEverything(best.symbol);
-              this.orderManager.buyIfPossible(best);
+              this.orderManager.buyIfPossible(best.symbol);
             } else if (this.orderManager.getCurrentOrders(best.symbol).length) {
               this.logger.log('Best ticker found in current order, let\'s check if it s still available');
 
