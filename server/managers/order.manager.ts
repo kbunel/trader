@@ -342,6 +342,9 @@ export default class OrderManager {
     }
 
     private createNewOrder(tradeSymbol: string, side: BinanceEnum, price: number, quantity: number, type: BinanceEnum): NewOrder {
+        if (process.env.FORCE_PRICE_MARKET === 'true') {
+            type = BinanceEnum.ORDER_TYPE_MARKET;
+        }
         const newOrder = new NewOrder({
             symbol: tradeSymbol,
             type: type,
