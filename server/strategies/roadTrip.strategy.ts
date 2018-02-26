@@ -237,10 +237,6 @@ export default class RoadTripStrategy extends Strategy {
       this.logger.log('It is worthy to change: current: ' + currentCrypto.symbol + '(' + currentCrypto.percent_change
         + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change + ')');
       return true;
-    } else if (symbolToSwitchFor.symbol + SymbolToTrade.DEFAULT === this.getBestFromBinance().symbol) {
-      this.logger.log('It is worthy to change, symbol is best everywhere: current: ' + currentCrypto.symbol + '(' + currentCrypto.percent_change
-        + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change + ')');
-      return true;
     } else {
       this.logger.log('Not worthy to change: current: ' + currentCrypto.symbol + '(' + currentCrypto.percent_change
         + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change + ')');
