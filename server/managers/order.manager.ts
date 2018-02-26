@@ -433,7 +433,7 @@ export default class OrderManager {
     }
 
     private getSymbolFromExchangeInfo(symbol: string): ExSymbol {
-        this.logger.log('Getting symbol [' + symbol + SymbolToTrade.DEFAULT + '].');
+        this.logger.logIf(false, 'Getting symbol [' + symbol + SymbolToTrade.DEFAULT + '].');
 
         for (const s of this.getExchangeInfo().symbols) {
             if (s.symbol === symbol + SymbolToTrade.DEFAULT) {
