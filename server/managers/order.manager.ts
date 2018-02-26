@@ -46,7 +46,7 @@ export default class OrderManager {
 
     public buyIfPossible(symbolToBuy: string): void {
         const symboleToTrade: Wallet = this.accountManager.getInWallet(SymbolToTrade.DEFAULT);
-        if (Number(symboleToTrade.free) >= this.getMinQtyTradable(symboleToTrade.asset)) {
+        if (Number(symboleToTrade.free) >= 0.001) {
             this.logger.log(SymbolToTrade.DEFAULT + ' still available in the wallet, let\'s buy some ' + symbolToBuy);
             this.createNewBuyOrder(symbolToBuy);
         }
