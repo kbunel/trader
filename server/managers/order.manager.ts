@@ -44,6 +44,14 @@ export default class OrderManager {
         this.getExchangeInfosFromBinance();
     }
 
+    public buyIfPossible(symbolToBuy: string): void {
+        const symboleToTrade: Wallet = this.accountManager.getInWallet(SymbolToTrade.DEFAULT);
+        if (Number(symboleToTrade.free) >= this.getMinQtyTradable(symboleToTrade.asset)) {
+            this.logger.log(SymbolToTrade.DEFAULT + ' still available in the wallet, let\'s buy some ' + symbolToBuy);
+            this.createNewBuyOrder(symbolToBuy);
+        }
+    }
+
     public sellEverything(except: string = null): void {
         const wallet = this.accountManager.getWallet();
         this.logger.details('Going to sell everything in wallet except ' + SymbolToTrade.DEFAULT, wallet);
