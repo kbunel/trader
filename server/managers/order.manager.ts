@@ -54,7 +54,7 @@ export default class OrderManager {
 
     public sellEverything(except: string = null): void {
         const wallet = this.accountManager.getWallet();
-        this.logger.details('Going to sell everything in wallet except ' + SymbolToTrade.DEFAULT, wallet);
+        this.logger.details('Going to sell everything in wallet except ' + except + ' and ' + SymbolToTrade.DEFAULT, wallet);
 
         let ordersSent: number = 0;
         for (const w of wallet) {
@@ -335,7 +335,7 @@ export default class OrderManager {
     }
 
     public getMinQtyTradable(symbol: string): number {
-        this.logger.log('Getting min qty traddable');
+        this.logger.logIf(false, 'Getting min qty traddable');
 
         const exLotSizeFilter: ExLotSizeFilter = this.getLotSizeFilter(this.getSymbolFromExchangeInfo(symbol));
         return Number(exLotSizeFilter.minQty);
