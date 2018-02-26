@@ -15,6 +15,8 @@ import { SymbolPriceTickerModel } from '../models/symbolPriceTicker.model';
 import { CancelOrderResponse } from '../models/cancelOrderReponse.model';
 import { ExecutionReport } from '../models/executionReport.model';
 import Trader from '../tools/trader.service';
+import { BestCoin } from '../models/bestCoin.model';
+import { TickerModel } from '../models/ticker.model';
 
 export default class OrderManager {
 
@@ -76,7 +78,7 @@ export default class OrderManager {
         this.logger.log(ordersSent + ' orders have been sent');
     }
 
-    public resetOrdersIfTooLong(min: number): Promise<any> {
+    public resetOrdersIfTooLong(min: number, best: BestCoin): Promise<any> {
         return new Promise((resolve, reject) => {
             this.logger.log('Checking orders');
 
@@ -85,9 +87,13 @@ export default class OrderManager {
 
                 const trTime = moment.unix(Math.floor(((order.time) ? order.time : order.transactTime) / 1000));
                 this.logger.log('Order sent to ' + order.side + ' ' + order.symbol + ' at ' + trTime.format('MMMM Do YYYY, h:mm:ss a'));
-                if (moment().isAfter(trTime.add(min, 'm'))) {
+                const orderTicker: TickerModel = this.socketManager.getTicker(order.symbol);
+                const maxDiffAllowed: number = process.env.FORCE_MARKET_PRICE_PERCENT_MORE;
+                if (moment().isAfter(trTime.add(min, 'm'))
+                || best.percent_change > Number(orderTicker.priceChangePercent) + maxDiffAllowed) {
                     this.logger.log('Order #' + order.orderId + 'for ' + order.symbol
-                        + ' is pending since more than 2 minutes cancelling and putting it back to the market value');
+                        + ' (' + Number(orderTicker.priceChangePercent) + ') '
+                        + ' is going to be reset to the market price');
 
 
                     promises.push(this.cancelOrder(order)
