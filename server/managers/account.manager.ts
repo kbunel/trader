@@ -30,6 +30,9 @@ export default class AccountManager {
 
     public setAccount(account: AccountModel) {
         this.account = account;
+        if (process.env.REMOVE_FROM_WALLET) {
+          this.removeFromWallet(process.env.REMOVE_FROM_WALLET);
+        }
     }
 
     public getAccount(): AccountModel {
@@ -162,5 +165,15 @@ export default class AccountManager {
       }
 
       this.logger.details('Account balances updated', this.account.balances);
+    }
+
+    private removeFromWallet(symbol: string): void {
+      for (const i in this.account.balances) {
+        if (this.account.balances[+i].asset === symbol) {
+            this.logger.details(this.account.balances[+i].asset + ' removed from wallet');
+
+            this.account.balances.splice(+i, 1);
+        }
+      }
     }
 }

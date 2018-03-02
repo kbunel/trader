@@ -87,10 +87,10 @@ export default class OrderManager {
 
                 const trTime = moment.unix(Math.floor(((order.time) ? order.time : order.transactTime) / 1000));
                 this.logger.log('Order sent to ' + order.side + ' ' + order.symbol + ' at ' + trTime.format('MMMM Do YYYY, h:mm:ss a'));
-                const orderTicker: TickerModel = this.socketManager.getTicker(order.symbol);
+                const orderTicker: TickerModel = this.socketManager.getTicker(order.symbol, '');
                 const maxDiffAllowed: number = process.env.FORCE_MARKET_PRICE_PERCENT_MORE;
                 if (moment().isAfter(trTime.add(min, 'm'))
-                || best.percent_change > Number(orderTicker.priceChangePercent) + maxDiffAllowed) {
+                || (orderTicker && best.percent_change > Number(orderTicker.priceChangePercent) + maxDiffAllowed)) {
                     this.logger.log('Order #' + order.orderId + 'for ' + order.symbol
                         + ' (' + Number(orderTicker.priceChangePercent) + ') '
                         + ' is going to be reset to the market price');

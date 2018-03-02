@@ -39,6 +39,7 @@ export default class Trader {
                 if (err) {
                     this.logger.error('Error while getting last price known from Binance for ' + symbol + ref, err);
                     reject(err);
+                    return;
                 }
                 if (tickerPrice) {
                     this.logger.details('Get latest price known from Binance', tickerPrice);
