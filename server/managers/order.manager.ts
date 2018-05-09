@@ -390,11 +390,36 @@ export default class OrderManager {
         this.binanceRest.exchangeInfo()
             .then((exchangeInfo: ExchangeInfo) => {
                 this.setExchangeInfo(exchangeInfo);
+                this.checkSymbolsAvailability();
                 this.logger.details('Retrieved Exchange Info from Binance', this.getExchangeInfo());
             })
             .catch((error) => {
                 this.logger.error('Error while retriving Exchange Info from Binance', error);
             });
+    }
+
+    private checkSymbolsAvailability() {
+        let checked: boolean = false;
+        for (const w of this.accountManager.getWallet()) {
+            checked = false;
+            if (w.asset === SymbolToTrade.DEFAULT) {
+                continue;
+            }
+            for (const s of this.getExchangeInfo().symbols) {
+                if (w.asset + SymbolToTrade.DEFAULT === s.symbol) {
+                    if (s.status !== 'TRADING') {
+                        this.accountManager.removeFromWallet(w.asset);
+                    }
+
+                    checked = true;
+                    break;
+                }
+            }
+
+            if (!checked) {
+                this.accountManager.removeFromWallet(w.asset);
+            }
+        }
     }
 
     private getTypeFromOrder(type: string): BinanceEnum {

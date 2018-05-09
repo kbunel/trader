@@ -78,6 +78,22 @@ export default class AccountManager {
       return null;
     }
 
+    public removeFromWallet(symbol: string): void {
+      this.logger.log('Trying to remove ' + symbol + ' from wallet');
+      for (const i in this.account.balances) {
+        if (this.account.balances[+i].asset === symbol) {
+            this.logger.details(this.account.balances[+i].asset + ' removed from wallet');
+
+            this.logger.log(symbol + ' found and removed');
+            this.account.balances.splice(+i, 1);
+
+            return;
+        }
+      }
+
+      this.logger.log(symbol + ' not found in wallet so not removed');
+    }
+
     public getHigherValueInWallet(): Promise<Wallet> {
       this.logger.log('Looking for the highest crypto in the wallet');
 
@@ -165,15 +181,5 @@ export default class AccountManager {
       }
 
       this.logger.details('Account balances updated', this.account.balances);
-    }
-
-    private removeFromWallet(symbol: string): void {
-      for (const i in this.account.balances) {
-        if (this.account.balances[+i].asset === symbol) {
-            this.logger.details(this.account.balances[+i].asset + ' removed from wallet');
-
-            this.account.balances.splice(+i, 1);
-        }
-      }
     }
 }
