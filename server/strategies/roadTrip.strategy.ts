@@ -56,10 +56,10 @@ export default class RoadTripStrategy extends Strategy {
               || !this.isWorthyToSwitch(best))) {
               this.logger.log('We got ' + wallet.asset + ', let\'s hold for now');
 
-              this.getBestFromCoinMarketCap(this.coinMarketCapTools.P_1H);
-              this.getBestFromBinance();
-              this.orderManager.sellEverything(best.symbol);
-              this.orderManager.buyIfPossible(best.symbol);
+              // this.getBestFromCoinMarketCap(this.coinMarketCapTools.P_1H);
+              // this.getBestFromBinance();
+              // this.orderManager.sellEverything(best.symbol);
+              // this.orderManager.buyIfPossible(best.symbol);
             } else if (this.orderManager.getCurrentOrders(best.symbol).length) {
               this.logger.log('Best ticker found in current order, let\'s check if it s still available');
 
@@ -160,6 +160,7 @@ export default class RoadTripStrategy extends Strategy {
       }
     }
     this.logger.details('Best from Binance is ' + best.symbol + ' (' + best.priceChangePercent + '% / 24h)', best);
+
     return best;
   }
 
@@ -231,7 +232,7 @@ export default class RoadTripStrategy extends Strategy {
 
     const currentCrypto: BestCoin = this.getBestPercentInWallet(process.env.TAKE_BEST_FROM);
 
-    if (symbolToSwitchFor.percent_change > currentCrypto.percent_change + 1) {
+    if (symbolToSwitchFor.percent_change > currentCrypto.percent_change + 2) {
       this.logger.log('It is worthy to change: current: ' + currentCrypto.symbol + '(' + currentCrypto.percent_change
         + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change + ')');
       return true;

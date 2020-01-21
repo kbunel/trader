@@ -60,20 +60,27 @@ export default class OrderManager {
 
         let ordersSent: number = 0;
         for (const w of wallet) {
-            if (w.asset !== SymbolToTrade.DEFAULT
-                && !(except !== null && w.asset === except)
-                && Number(w.free) >= this.getMinQtyTradable(w.asset)
-                && this.getCurrentOrders(w.asset).length === 0) {
 
-                ordersSent++;
-                this.createNewSellOrder(w.asset)
-                    .then((newSellOrder: NewOrder) => {
-                        this.sendNewOrder(newSellOrder);
-                    })
-                    .catch((error) => {
-                        this.logger.error('Error while creating a new sell order, trying to sell everything...', error);
-                    });
-            }
+          this.logger.log(w.asset+': nb free: '+w.free);
+          if (w.asset !== SymbolToTrade.DEFAULT) {
+            this.logger.log('Min qty tradable: '+this.getMinQtyTradable(w.asset));
+          }
+          this.logger.log('Nb current orders: '+this.getCurrentOrders(w.asset).length+'.');
+
+          if (w.asset !== SymbolToTrade.DEFAULT
+              && !(except !== null && w.asset === except)
+              && Number(w.free) >= this.getMinQtyTradable(w.asset)
+              && this.getCurrentOrders(w.asset).length === 0) {
+
+              ordersSent++;
+              this.createNewSellOrder(w.asset)
+                  .then((newSellOrder: NewOrder) => {
+                      this.sendNewOrder(newSellOrder);
+                  })
+                  .catch((error) => {
+                      this.logger.error('Error while creating a new sell order, trying to sell everything...', error);
+                  });
+          }
         }
         this.logger.log(ordersSent + ' orders have been sent');
     }
@@ -460,7 +467,12 @@ export default class OrderManager {
     }
 
     private getLotSizeFilter(symbol: ExSymbol): ExLotSizeFilter {
-        return symbol.filters[1];
+
+        for (const filter of symbol.filters) {
+          if (filter.filterType == ExLotSizeFilter.filterType) {
+            return filter;
+          }
+        }
     }
 
     private getSymbolFromExchangeInfo(symbol: string): ExSymbol {

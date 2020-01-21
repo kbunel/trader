@@ -23,24 +23,48 @@ export class ExSymbol {
     public quotePrecision: number;
     public orderTypes: string[];
     public icebergAllowed: boolean;
-    public filters: [ExPriceFilter, ExLotSizeFilter, ExMinNotionalFilter];
+    public filters; // cf ci-dessous for a list of filter, can evolve with time
 }
 
 export class ExPriceFilter {
-    public filterType: string;
+    public static filterType: string = 'PRICE_FILTER';
     public minPrice: string;
     public maxPrice: string;
     public tickSize: string;
 }
 
+export class ExPercentPriceFilter {
+  public static filterType: string = 'PERCENT_PRICE';
+  public multiplierUp: string;
+  public multiplierDown: string;
+  public avgPriceMins: number;
+}
+
 export class ExLotSizeFilter {
-    public filterTypestring;
+    public static filterType = 'LOT_SIZE';
     public minQty: string;
     public maxQty: string;
     public stepSize: string;
 }
 
 export class ExMinNotionalFilter {
-    public filterType: string;
+    public static filterType: string = 'MIN_NOTIONAL';
     public minNotional: string;
+}
+
+export class ExIcebergPartFilter {
+  public static filterType: string = 'ICEBERG_PARTS';
+  public limit: number;
+}
+
+export class ExMarketLotSize {
+  public static filterType: string = 'MARKET_LOT_SIZE';
+  public minQty: string;
+  public maxQty: string;
+  public stepSize: string;
+}
+
+export class ExMaxNumAlgoOrders {
+  public readonly filterType: string = 'MAX_NUM_ALGO_ORDERS';
+  public maxNumAlgoOrders: number;
 }
