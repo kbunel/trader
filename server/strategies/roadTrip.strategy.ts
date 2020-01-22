@@ -19,6 +19,8 @@ export default class RoadTripStrategy extends Strategy {
   private bestInWallet: Wallet;
   private best: BestCoin;
   private coinMarketCapDatas: CoinMarketCapModel[] = [];
+  private currentCrypto: BestCoin;
+  private symbolToSwitchFor: BestCoin;
 
   constructor(strategyConfig: StrategyConfig) {
     super(strategyConfig);
@@ -230,18 +232,48 @@ export default class RoadTripStrategy extends Strategy {
   private isWorthyToSwitch(symbolToSwitchFor: BestCoin): boolean {
     this.logger.log('Checking if it is worthy to switch crypto place');
 
-    const currentCrypto: BestCoin = this.getBestPercentInWallet(process.env.TAKE_BEST_FROM);
+    const currentCryptoInWallet: BestCoin = this.getBestPercentInWallet(process.env.TAKE_BEST_FROM);
 
-    if (symbolToSwitchFor.percent_change > currentCrypto.percent_change + 2) {
-      this.logger.log('It is worthy to change: current: ' + currentCrypto.symbol + '(' + currentCrypto.percent_change
+    // All below should be done with all crypto
+
+    // checking current crypto evolution
+    if (this.currentCrypto.symbol != currentCryptoInWallet.symbol) {
+      this.currentCrypto = currentCryptoInWallet;
+      this.currentCrypto.initialPrice = currentCryptoInWallet.price; // @todo Should be change by price paid for this money
+      this.currentCrypto.initialPriceTimestamp = Date.now();
+    }
+    this.currentCrypto.priceVariation = currentCryptoInWallet.price - this.currentCrypto.initialPrice;
+    this.logger.log('Currernt cypto (' + this.currentCrypto.symbol + ') price variation: ' + this.currentCrypto.priceVariation);
+
+    // checking symbolToSwitchFor evolution
+    if (this.symbolToSwitchFor.symbol != symbolToSwitchFor.symbol) {
+      this.symbolToSwitchFor = symbolToSwitchFor;
+      this.symbolToSwitchFor.initialPrice = symbolToSwitchFor.price;
+      this.symbolToSwitchFor.initialPriceTimestamp = Date.now();
+    }
+
+    // Resetting initial price after 10 minutes
+    if (this.symbolToSwitchFor.initialPriceTimestamp > Date.now() + 60 * 10 * 1000) {
+      this.symbolToSwitchFor.initialPrice = symbolToSwitchFor.price;
+      this.symbolToSwitchFor.initialPriceTimestamp = Date.now();
+      this.logger.log('Reset price variation for ' + this.symbolToSwitchFor.symbol);
+    }
+    this.symbolToSwitchFor.priceVariation = symbolToSwitchFor.price - this.symbolToSwitchFor.initialPrice;
+    this.logger.log('Symbol to switch for (' + this.symbolToSwitchFor.symbol + ') price variation: ' + this.symbolToSwitchFor.priceVariation);
+
+    if (symbolToSwitchFor.percent_change > this.currentCrypto.percent_change + 2) {
+      this.logger.log('It is worthy to change: current: ' + this.currentCrypto.symbol + '(' + this.currentCrypto.percent_change
         + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change + ')');
       return true;
-    } else if (symbolToSwitchFor.percent_change > 0 && currentCrypto.percent_change < 0) {
-      this.logger.log('It is worthy to change: current: ' + currentCrypto.symbol + '(' + currentCrypto.percent_change
+    } else if (this.currentCrypto.priceVariation <= 0 && this.symbolToSwitchFor.priceVariation > 0) {
+      this.logger.log('It is worthy to change due to price variation better than current');
+      return true;
+    } else if (symbolToSwitchFor.percent_change > 0 && this.currentCrypto.percent_change < 0) {
+      this.logger.log('It is worthy to change: current: ' + this.currentCrypto.symbol + '(' + this.currentCrypto.percent_change
         + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change + ')');
       return true;
     } else {
-      this.logger.log('Not worthy to change: current: ' + currentCrypto.symbol + '(' + currentCrypto.percent_change
+      this.logger.log('Not worthy to change: current: ' + this.currentCrypto.symbol + '(' + this.currentCrypto.percent_change
         + ') VS ' + symbolToSwitchFor.symbol + '(' + symbolToSwitchFor.percent_change + ')');
       return false;
     }
