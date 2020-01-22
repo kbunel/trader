@@ -49,6 +49,7 @@ export class NewOrder implements NewOrderInterface {
                 params[attribute.toString()] = this[attribute];
             }
         }
+
         return params;
     }
 }

@@ -149,7 +149,6 @@ export default class Transactions {
         binanceWS.streams.allTickers()
       ],
       (streamEvent) => {
-        // console.log('allTickers from transaction', this.allTickers);
         switch (streamEvent.stream) {
           case binanceWS.streams.depth(this.symbol):
           this.io.sockets.emit('depth', this.depth = streamEvent.data);

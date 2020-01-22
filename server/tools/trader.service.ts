@@ -15,7 +15,7 @@ export default class Trader {
                     this.logger.log('Activating Trader');
                 }
 
-    public getPrice(symbol: string, ref: string = SymbolToTrade.DEFAULT, priceKind: TickerEnum = TickerEnum.BEST_ASK_PRICE): Promise<number> {
+    public getPrice(symbol: string, ref: string = SymbolToTrade.DEFAULT, priceKind: TickerEnum = TickerEnum.BEST_ASK_PRICE, forceFromBinance: boolean = false): Promise<number> {
         this.logger.logIf(false, 'Looking for the price of ' + symbol + ' in allTicker');
 
         return new Promise((resolve, reject) => {
@@ -23,17 +23,22 @@ export default class Trader {
                 resolve(1);
                 return;
             }
-            const allTickers = this.socketManager.getAllTickers();
-            for (const ticker of allTickers) {
-                if (symbol + ref === ticker.symbol) {
-                    const price = Number((priceKind === TickerEnum.BEST_ASK_PRICE) ? ticker.bestAskPrice : ticker.bestBid);
 
-                    resolve(price);
-                    return;
-                }
+            // Just getting this price for information but not good if used to buy
+            if (!forceFromBinance) {
+              const allTickers = this.socketManager.getAllTickers();
+              for (const ticker of allTickers) {
+                  if (symbol + ref === ticker.symbol) {
+                      const price = Number((priceKind === TickerEnum.BEST_ASK_PRICE) ? ticker.bestAskPrice : ticker.bestBid);
+
+                      resolve(price);
+                      return;
+                  }
+              }
+              this.logger.log('Price not found in allTicker, looking for the price of ' + symbol + ref  + ' from Binance');
+            } else {
+              this.logger.log('Looking for the price of ' + symbol + ref  + ' from Binance');
             }
-
-            this.logger.log('Price not found in allTicker, looking for the price of ' + symbol + ref  + ' from Binance');
 
             this.binanceRest.tickerPrice(symbol + ref, (err, tickerPrice: SymbolPriceTickerModel) => {
                 if (err) {

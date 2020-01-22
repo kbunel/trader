@@ -149,7 +149,7 @@ export default class OrderManager {
         this.logger.log('Creating new buy order (' + symbolToBuy + SymbolToTrade.DEFAULT + ')');
 
         return new Promise((resolve, reject) => {
-            this.trader.getPrice(symbolToBuy, SymbolToTrade.DEFAULT, TickerEnum.BEST_BID)
+            this.trader.getPrice(symbolToBuy, SymbolToTrade.DEFAULT, TickerEnum.BEST_BID, true)
                 .then((price: number) => {
                     const absoluteQty = Number(this.accountManager.getInWallet(SymbolToTrade.DEFAULT).free) / price;
                     const quantity: number = this.getValidQuantity(symbolToBuy, absoluteQty);
@@ -169,7 +169,7 @@ export default class OrderManager {
         this.logger.log('Creating new sell order (' + symbolToSell + SymbolToTrade.DEFAULT + ')');
 
         return new Promise((resolve, reject) => {
-            this.trader.getPrice(symbolToSell, SymbolToTrade.DEFAULT, TickerEnum.BEST_ASK_PRICE)
+            this.trader.getPrice(symbolToSell, SymbolToTrade.DEFAULT, TickerEnum.BEST_ASK_PRICE, true)
                 .then((price: number) => {
                     const quantity: number = this.getValidQuantityFromWallet(this.accountManager.getInWallet(symbolToSell));
                     const symbol: string = symbolToSell + SymbolToTrade.DEFAULT;
