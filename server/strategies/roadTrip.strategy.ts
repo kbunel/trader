@@ -237,7 +237,7 @@ export default class RoadTripStrategy extends Strategy {
     // All below should be done with all crypto
 
     // checking current crypto evolution
-    if (this.currentCrypto.symbol != currentCryptoInWallet.symbol) {
+    if (!this.currentCrypto.symbol || this.currentCrypto.symbol != currentCryptoInWallet.symbol) {
       this.currentCrypto = currentCryptoInWallet;
       this.currentCrypto.initialPrice = currentCryptoInWallet.price; // @todo Should be change by price paid for this money
       this.currentCrypto.initialPriceTimestamp = Date.now();
@@ -246,7 +246,7 @@ export default class RoadTripStrategy extends Strategy {
     this.logger.log('Currernt cypto (' + this.currentCrypto.symbol + ') price variation: ' + this.currentCrypto.priceVariation);
 
     // checking symbolToSwitchFor evolution
-    if (this.symbolToSwitchFor.symbol != symbolToSwitchFor.symbol) {
+    if (!this.symbolToSwitchFor.symbol || this.symbolToSwitchFor.symbol != symbolToSwitchFor.symbol) {
       this.symbolToSwitchFor = symbolToSwitchFor;
       this.symbolToSwitchFor.initialPrice = symbolToSwitchFor.price;
       this.symbolToSwitchFor.initialPriceTimestamp = Date.now();
